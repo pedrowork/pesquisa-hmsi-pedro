@@ -1,0 +1,80 @@
+TABELA;COLUNA;TIPO;TAMANHO;NULLABLE;CHAVE_PRIMARIA;TABELA_REFERENCIA;COLUNA_REFERENCIA
+CADASTRO                       ;ID                             ;8;4;NÂO;SIM;;
+CADASTRO                       ;NOME                           ;37;170;NÂO;NÂO;;
+CADASTRO                       ;SENHA                          ;37;90;NÂO;NÂO;;
+CADASTRO                       ;EMAIL                          ;37;100;NÂO;NÂO;;
+CADASTRO                       ;STATUS                         ;8;4;NÂO;NÂO;;
+DADOS_DO_PACIENTE              ;ID                             ;8;4;NÂO;SIM;;
+DADOS_DO_PACIENTE              ;NOME                           ;37;255;NÂO;NÂO;;
+DADOS_DO_PACIENTE              ;TELEFONE                       ;37;20;NÂO;NÂO;;
+DADOS_DO_PACIENTE              ;EMAIL                          ;37;255;NÂO;NÂO;;
+DADOS_DO_PACIENTE              ;SEXO                           ;37;10;NÂO;NÂO;;
+DADOS_DO_PACIENTE              ;TIPO_PACIENTE                  ;37;50;SIM;NÂO;;
+DADOS_DO_PACIENTE              ;IDADE                          ;8;4;NÂO;NÂO;;
+DADOS_DO_PACIENTE              ;LEITO                          ;37;20;SIM;NÂO;;
+DADOS_DO_PACIENTE              ;SETOR                          ;37;50;SIM;NÂO;;
+DADOS_DO_PACIENTE              ;RENDA                          ;37;100;SIM;NÂO;;
+DADOS_DO_PACIENTE              ;TP_COD_CONVENIO                ;8;4;SIM;NÂO;TIPOCONVENIO                   ;COD                            
+LEITO                          ;COD                            ;8;4;NÂO;SIM;;
+LEITO                          ;DESCRICAO                      ;37;255;NÂO;NÂO;;
+LEITO                          ;COD_SETOR                      ;8;4;SIM;NÂO;SETOR                          ;COD                            
+PERGUNTAS_DESCRICAO            ;COD                            ;8;4;NÂO;SIM;;
+PERGUNTAS_DESCRICAO            ;DESCRICAO                      ;37;255;NÂO;NÂO;;
+PERGUNTAS_DESCRICAO            ;COD_SETOR_PESQUIS              ;8;4;SIM;NÂO;;
+PERGUNTAS_DESCRICAO            ;COD_TIPO_PERGUNTA              ;8;4;SIM;NÂO;;
+QUESTIONARIO                   ;ID                             ;8;4;NÂO;SIM;;
+QUESTIONARIO                   ;COD_PERGUNTA                   ;8;4;NÂO;NÂO;PERGUNTAS_DESCRICAO            ;COD                            
+QUESTIONARIO                   ;RESPOSTA                       ;8;4;NÂO;NÂO;SATISFACAO                     ;COD                            
+QUESTIONARIO                   ;COD_PACIENTE                   ;8;4;NÂO;NÂO;DADOS_DO_PACIENTE              ;ID                             
+QUESTIONARIO                   ;COD_USUARIO                    ;8;4;NÂO;NÂO;CADASTRO                       ;ID                             
+QUESTIONARIO                   ;DATA_QUESTIONARIO              ;12;4;SIM;NÂO;;
+QUESTIONARIO                   ;DATA_ISRETROATIVA              ;8;4;SIM;NÂO;;
+QUESTIONARIO                   ;DATA_RETROATIVA                ;12;4;SIM;NÂO;;
+QUESTIONARIO                   ;DESC_METRICA_INDICACAO         ;37;255;SIM;NÂO;;
+QUESTIONARIO                   ;VL_METRICA_INDICACAO           ;8;4;SIM;NÂO;;
+QUESTIONARIO                   ;COD_SETOR_PESQUIS              ;8;4;SIM;NÂO;;
+QUESTIONARIO                   ;OBSERVACAO                     ;37;1000;SIM;NÂO;;
+QUESTIONARIO                   ;COLUMN13                       ;37;50;SIM;NÂO;;
+SATISFACAO                     ;COD                            ;8;4;NÂO;SIM;;
+SATISFACAO                     ;DESCRICAO                      ;37;255;NÂO;NÂO;;
+SATISFACAO                     ;COD_TIPO_PERGUNTA              ;8;4;SIM;NÂO;;
+SETOR                          ;COD                            ;8;4;NÂO;SIM;;
+SETOR                          ;DESCRICAO                      ;37;255;NÂO;NÂO;;
+SETOR_PESQUIS                  ;COD                            ;8;4;NÂO;SIM;;
+SETOR_PESQUIS                  ;DESCRICAO                      ;37;128;NÂO;NÂO;;
+TIPOCONVENIO                   ;TIPO_DESCRICAO                 ;37;100;SIM;NÂO;;
+TIPOCONVENIO                   ;COD                            ;8;4;NÂO;SIM;;
+V_PESQUISA                     ;SETOR_DESCRICAO                ;37;255;SIM;NÂO;;
+V_PESQUISA                     ;SATISFACAO_DESCRICAO           ;37;255;SIM;NÂO;;
+V_PESQUISA                     ;CONVENIO                       ;37;100;SIM;NÂO;;
+V_PESQUISA                     ;SETOR_PESQUIS                  ;37;128;SIM;NÂO;;
+V_PESQUISA                     ;OBSERVACAO                     ;37;1000;SIM;NÂO;;
+V_PESQUISA                     ;COD_SETOR_PESQUIS              ;8;4;SIM;NÂO;;
+V_PESQUISA                     ;COD_PACIENTE                   ;8;4;SIM;NÂO;;
+V_PESQUISA                     ;COD_RESPOSTA                   ;8;4;SIM;NÂO;;
+V_PESQUISA                     ;COD_PERGUNTA                   ;8;4;SIM;NÂO;;
+V_PESQUISA                     ;DATA_QUESTIONARIO              ;12;4;SIM;NÂO;;
+V_PESQUISA                     ;ID                             ;8;4;SIM;NÂO;;
+V_PESQUISA                     ;NOME                           ;37;255;SIM;NÂO;;
+V_PESQUISA                     ;TELEFONE                       ;37;20;SIM;NÂO;;
+V_PESQUISA                     ;EMAIL                          ;37;255;SIM;NÂO;;
+V_PESQUISA                     ;COD_SEXO                       ;37;10;SIM;NÂO;;
+V_PESQUISA                     ;COD_TP_PACIENTE                ;37;50;SIM;NÂO;;
+V_PESQUISA                     ;IDADE                          ;8;4;SIM;NÂO;;
+V_PESQUISA                     ;COD_LEITO                      ;37;20;SIM;NÂO;;
+V_PESQUISA                     ;COD_SETOR                      ;37;50;SIM;NÂO;;
+V_PESQUISA                     ;COD_RENDA                      ;37;100;SIM;NÂO;;
+V_PESQUISA                     ;TP_COD_CONVENIO                ;8;4;SIM;NÂO;;
+V_RELATORIO_SETOR              ;DATA                           ;12;4;SIM;NÂO;;
+V_RELATORIO_SETOR              ;SEXO                           ;14;48;SIM;NÂO;;
+V_RELATORIO_SETOR              ;TIPO_PACIENTE                  ;14;48;SIM;NÂO;;
+V_RELATORIO_SETOR              ;CONVENIO                       ;14;48;SIM;NÂO;;
+V_RELATORIO_SETOR              ;SETOR                          ;37;255;SIM;NÂO;;
+V_RELATORIO_SETOR              ;PERGUNTA                       ;37;255;SIM;NÂO;;
+V_RELATORIO_SETOR              ;SATISFACAO                     ;37;255;SIM;NÂO;;
+V_SATISFACAO_INTEGER           ;COD                            ;8;4;SIM;NÂO;;
+V_SATISFACAO_INTEGER           ;DESCRICAO                      ;37;255;SIM;NÂO;;
+V_SATISFACAO_INTEGER           ;COD_TIPO_PERGUNTA              ;8;4;SIM;NÂO;;
+V_SATISFACAO_STRING            ;COD                            ;8;4;SIM;NÂO;;
+V_SATISFACAO_STRING            ;DESCRICAO                      ;37;255;SIM;NÂO;;
+V_SATISFACAO_STRING            ;COD_TIPO_PERGUNTA              ;8;4;SIM;NÂO;;
