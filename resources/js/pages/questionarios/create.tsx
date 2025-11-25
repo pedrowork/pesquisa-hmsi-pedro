@@ -107,7 +107,6 @@ export default function QuestionariosCreate({
         data_questionario: new Date().toISOString().split('T')[0],
         data_isretroativa: false,
         data_retroativa: '',
-        cod_setor_pesquis: '',
         observacao: '',
         respostas: [] as Array<{ cod_pergunta: number; resposta: number }>,
     });
@@ -120,28 +119,7 @@ export default function QuestionariosCreate({
         return leitos.filter((leito) => leito.cod_setor === Number(data.cod_setor));
     }, [data.cod_setor, leitos]);
 
-    // Auto-preencher setor de pesquisa baseado nas perguntas selecionadas
-    useEffect(() => {
-        const perguntasSelecionadas = Object.keys(respostas).map(Number);
-        if (perguntasSelecionadas.length > 0) {
-            // Buscar setores de pesquisa das perguntas selecionadas
-            const setoresDasPerguntas = perguntas
-                .filter((p) => perguntasSelecionadas.includes(p.cod))
-                .map((p) => p.cod_setor_pesquis)
-                .filter((s): s is number => s !== null);
-
-            if (setoresDasPerguntas.length > 0) {
-                // Se todas as perguntas têm o mesmo setor de pesquisa, auto-preencher
-                const setorUnico = new Set(setoresDasPerguntas);
-                if (setorUnico.size === 1) {
-                    const setorCod = Array.from(setorUnico)[0];
-                    if (data.cod_setor_pesquis !== setorCod.toString()) {
-                        setData('cod_setor_pesquis', setorCod.toString());
-                    }
-                }
-            }
-        }
-    }, [respostas, perguntas, data.cod_setor_pesquis, setData]);
+    // O setor de pesquisa será vinculado automaticamente no backend baseado no cadastro de cada pergunta
 
     const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const maskedValue = applyPhoneMask(e.target.value);
@@ -172,17 +150,40 @@ export default function QuestionariosCreate({
         // Remover máscara do telefone antes de enviar
         const telefoneSemMascara = data.telefone.replace(/\D/g, '');
 
-        post('/questionarios', {
-            data: {
-                ...data,
-                telefone: telefoneSemMascara,
-                idade: Number(data.idade),
-                cod_setor: Number(data.cod_setor),
-                leito: data.leito ? Number(data.leito) : null,
-                cod_setor_pesquis: data.cod_setor_pesquis ? Number(data.cod_setor_pesquis) : null,
-                respostas: respostasArray,
-            },
+        // Preparar dados para envio
+        const dadosParaEnviar = {
+            nome: data.nome,
+            telefone: telefoneSemMascara,
+            email: data.email,
+            sexo: data.sexo,
+            tipo_paciente: data.tipo_paciente || null,
+            idade: Number(data.idade),
+            cod_setor: Number(data.cod_setor),
+            leito: data.leito ? Number(data.leito) : null,
+            renda: data.renda || null,
+            tp_cod_convenio: data.tp_cod_convenio ? Number(data.tp_cod_convenio) : null,
+            data_questionario: data.data_questionario || null,
+            data_isretroativa: data.data_isretroativa || false,
+            data_retroativa: data.data_retroativa || null,
+            observacao: data.observacao || null,
+            respostas: respostasArray,
+        };
+
+        console.log('Dados sendo enviados:', dadosParaEnviar);
+
+        // Usar router.post diretamente para garantir que os dados sejam enviados corretamente
+        router.post('/questionarios', dadosParaEnviar, {
             preserveScroll: true,
+            onError: (errors) => {
+                console.error('Erros de validação:', errors);
+                console.error('Detalhes dos erros:', JSON.stringify(errors, null, 2));
+            },
+            onSuccess: (page) => {
+                console.log('Questionário salvo com sucesso!', page);
+            },
+            onFinish: () => {
+                console.log('Requisição finalizada');
+            },
         });
     };
 
@@ -213,6 +214,13 @@ export default function QuestionariosCreate({
                         </p>
                     </div>
                 </div>
+
+                {/* Exibir erro geral se houver */}
+                {errors.error && (
+                    <div className="rounded-md bg-destructive/15 p-4 text-sm text-destructive">
+                        {errors.error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Dados do Paciente */}
@@ -501,21 +509,12 @@ export default function QuestionariosCreate({
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="cod_setor_pesquis">Setor de Pesquisa</Label>
-                                    <select
-                                        id="cod_setor_pesquis"
-                                        name="cod_setor_pesquis"
-                                        value={data.cod_setor_pesquis}
-                                        onChange={(e) => setData('cod_setor_pesquis', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                    >
-                                        <option value="">Selecione ou será preenchido automaticamente</option>
-                                        {setoresPesquisa.map((setor) => (
-                                            <option key={setor.cod} value={setor.cod}>
-                                                {setor.descricao}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <InputError message={errors.cod_setor_pesquis} />
+                                    <div className="flex h-9 w-full items-center rounded-md border border-input bg-muted px-3 py-1 text-sm text-muted-foreground">
+                                        Será vinculado automaticamente conforme o cadastro de cada pergunta
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Cada pergunta já possui seu setor de pesquisa cadastrado. O vínculo será feito automaticamente ao salvar.
+                                    </p>
                                 </div>
                             </div>
 

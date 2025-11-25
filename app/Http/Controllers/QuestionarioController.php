@@ -126,41 +126,51 @@ class QuestionarioController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            // Dados do paciente
-            'nome' => ['required', 'string', 'max:255'],
-            'telefone' => ['required', 'string', 'max:20'],
-            'email' => ['required', 'email', 'max:255'],
-            'sexo' => ['required', 'string', 'max:10'],
-            'tipo_paciente' => ['nullable', 'string', 'max:50'],
-            'idade' => ['required', 'integer', 'min:0'],
-            'leito' => ['nullable', 'integer', 'exists:leito,cod'],
-            'cod_setor' => ['required', 'integer', 'exists:setor,cod'],
-            'renda' => ['nullable', 'string', 'max:100'],
-            'tp_cod_convenio' => ['nullable', 'integer', 'exists:tipoconvenio,cod'],
-            
-            // Dados do questionário
-            'data_questionario' => ['nullable', 'date'],
-            'data_isretroativa' => ['nullable', 'boolean'],
-            'data_retroativa' => ['nullable', 'date'],
-            'cod_setor_pesquis' => ['nullable', 'integer', 'exists:setor_pesquis,cod'],
-            'observacao' => ['nullable', 'string', 'max:1000'],
-            
-            // Respostas (array de perguntas e respostas)
-            'respostas' => ['required', 'array'],
-            'respostas.*.cod_pergunta' => ['required', 'exists:perguntas_descricao,cod'],
-            'respostas.*.resposta' => ['required', 'exists:satisfacao,cod'],
-        ]);
+        try {
+            $validated = $request->validate([
+                // Dados do paciente
+                'nome' => ['required', 'string', 'max:255'],
+                'telefone' => ['required', 'string', 'max:20'],
+                'email' => ['required', 'email', 'max:255'],
+                'sexo' => ['required', 'string', 'max:10'],
+                'tipo_paciente' => ['nullable', 'string', 'max:50'],
+                'idade' => ['required', 'integer', 'min:0'],
+                'leito' => ['nullable', 'integer', 'exists:leito,cod'],
+                'cod_setor' => ['required', 'integer', 'exists:setor,cod'],
+                'renda' => ['nullable', 'string', 'max:100'],
+                'tp_cod_convenio' => ['nullable', 'integer', 'exists:tipoconvenio,cod'],
+
+                // Dados do questionário
+                'data_questionario' => ['nullable', 'date'],
+                'data_isretroativa' => ['nullable', 'boolean'],
+                'data_retroativa' => ['nullable', 'date'],
+                'observacao' => ['nullable', 'string', 'max:1000'],
+
+                // Respostas (array de perguntas e respostas)
+                'respostas' => ['required', 'array', 'min:1'],
+                'respostas.*.cod_pergunta' => ['required', 'integer', 'exists:perguntas_descricao,cod'],
+                'respostas.*.resposta' => ['required', 'integer', 'exists:satisfacao,cod'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Erro de validação ao criar questionário: ' . json_encode($e->errors()));
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        }
+
+        // Usar transação para garantir que tudo seja salvo ou nada seja salvo
+        DB::beginTransaction();
 
         try {
-            // Usar transação para garantir que tudo seja salvo ou nada seja salvo
-            DB::beginTransaction();
-
             // Buscar descrições
             $setorDescricao = DB::table('setor')
                 ->where('cod', $validated['cod_setor'])
                 ->value('descricao');
-            
+
+            if (!$setorDescricao) {
+                throw new \Exception("Setor com código {$validated['cod_setor']} não encontrado");
+            }
+
             $leitoDescricao = null;
             if (!empty($validated['leito'])) {
                 $leitoDescricao = DB::table('leito')
@@ -169,7 +179,7 @@ class QuestionarioController extends Controller
             }
 
             // 1. Criar paciente na tabela 'dados_do_paciente'
-            $pacienteId = DB::table('dados_do_paciente')->insertGetId([
+            $pacienteData = [
                 'nome' => $validated['nome'],
                 'telefone' => $validated['telefone'],
                 'email' => $validated['email'],
@@ -180,7 +190,9 @@ class QuestionarioController extends Controller
                 'setor' => $setorDescricao,
                 'renda' => $validated['renda'] ?? null,
                 'tp_cod_convenio' => $validated['tp_cod_convenio'] ? (int) $validated['tp_cod_convenio'] : null,
-            ]);
+            ];
+
+            $pacienteId = DB::table('dados_do_paciente')->insertGetId($pacienteData);
 
             // 2. Criar registros do questionário na tabela 'questionario' para cada resposta
             $usuarioId = auth()->id();
@@ -193,18 +205,39 @@ class QuestionarioController extends Controller
 
             $dataQuestionario = $validated['data_questionario'] ?? now()->format('Y-m-d');
 
-            foreach ($validated['respostas'] as $resposta) {
-                DB::table('questionario')->insert([
-                    'cod_pergunta' => (int) $resposta['cod_pergunta'],
+            // Buscar todas as perguntas para obter seus cod_setor_pesquis
+            $perguntasIds = array_map(function ($resposta) {
+                return (int) $resposta['cod_pergunta'];
+            }, $validated['respostas']);
+
+            $perguntasData = DB::table('perguntas_descricao')
+                ->whereIn('cod', $perguntasIds)
+                ->pluck('cod_setor_pesquis', 'cod');
+
+            foreach ($validated['respostas'] as $index => $resposta) {
+                $codPergunta = (int) $resposta['cod_pergunta'];
+
+                // Usar o cod_setor_pesquis da pergunta cadastrada (vinculação automática)
+                $codSetorPesquis = $perguntasData[$codPergunta] ?? null;
+                if ($codSetorPesquis) {
+                    $codSetorPesquis = (int) $codSetorPesquis;
+                } else {
+                    $codSetorPesquis = null;
+                }
+
+                $questionarioData = [
+                    'cod_pergunta' => $codPergunta,
                     'resposta' => (int) $resposta['resposta'],
                     'cod_paciente' => (int) $pacienteId,
                     'cod_usuario' => (int) $usuarioId,
                     'data_questionario' => $dataQuestionario,
                     'data_isretroativa' => $validated['data_isretroativa'] ?? false,
                     'data_retroativa' => $validated['data_retroativa'] ?? null,
-                    'cod_setor_pesquis' => $validated['cod_setor_pesquis'] ? (int) $validated['cod_setor_pesquis'] : null,
+                    'cod_setor_pesquis' => $codSetorPesquis, // Vinculado automaticamente da pergunta
                     'observacao' => $validated['observacao'] ?? null,
-                ]);
+                ];
+
+                DB::table('questionario')->insert($questionarioData);
             }
 
             // Confirmar transação
@@ -216,9 +249,11 @@ class QuestionarioController extends Controller
             // Reverter transação em caso de erro
             DB::rollBack();
             Log::error('Erro ao criar questionário: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Dados recebidos: ' . json_encode($request->all()));
 
             return redirect()->back()
-                ->withErrors(['error' => 'Erro ao salvar questionário. Por favor, tente novamente.'])
+                ->withErrors(['error' => 'Erro ao salvar questionário: ' . $e->getMessage()])
                 ->withInput();
         }
     }
