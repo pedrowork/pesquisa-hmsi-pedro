@@ -13,17 +13,17 @@ interface CanProps {
 
 /**
  * Componente para renderização condicional baseada em permissões
- * 
+ *
  * @example
  * <Can permission="users.create">
  *   <Button>Criar Usuário</Button>
  * </Can>
- * 
+ *
  * @example
  * <Can permissions={['users.edit', 'users.create']} fallback={<p>Sem permissão</p>}>
  *   <Button>Ações</Button>
  * </Can>
- * 
+ *
  * @example
  * <Can role="admin">
  *   <Button>Apenas Admin</Button>

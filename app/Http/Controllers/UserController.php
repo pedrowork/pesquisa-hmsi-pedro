@@ -149,8 +149,8 @@ class UserController extends Controller
                 // Organizar por categoria baseado no slug
                 if (str_starts_with($permission->slug, 'dashboard.')) {
                     return 'Dashboard';
-                } elseif (str_starts_with($permission->slug, 'users.') || 
-                          str_starts_with($permission->slug, 'roles.') || 
+                } elseif (str_starts_with($permission->slug, 'users.') ||
+                          str_starts_with($permission->slug, 'roles.') ||
                           str_starts_with($permission->slug, 'permissions.')) {
                     return 'Gerenciamento';
                 } else {

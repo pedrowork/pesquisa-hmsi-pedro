@@ -14,11 +14,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', function () {
         $user = auth()->user();
-        
+
         if (!$user) {
             return redirect()->route('login');
         }
-        
+
         $isAdmin = $user->isAdmin();
         $stats = [];
         $researchStats = [];

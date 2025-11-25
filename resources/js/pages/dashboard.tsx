@@ -293,7 +293,7 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                         <h2 className="text-xl font-semibold mb-4">
                             Métricas de Pesquisa
                         </h2>
-                        
+
                         {/* Cards principais de métricas */}
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
                             <Card>

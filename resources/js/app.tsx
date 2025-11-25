@@ -31,7 +31,7 @@ function AppWithErrorHandling({ Component, props }: any) {
         const originalVisit = router.visit;
         router.visit = function (url: string, options: any = {}) {
             const originalOnError = options.onError;
-            
+
             return originalVisit.call(this, url, {
                 ...options,
                 onError: (errors: any) => {
@@ -44,7 +44,7 @@ function AppWithErrorHandling({ Component, props }: any) {
                         });
                         return;
                     }
-                    
+
                     if (originalOnError) {
                         originalOnError(errors);
                     }

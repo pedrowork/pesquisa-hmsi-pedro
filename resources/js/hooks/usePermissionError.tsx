@@ -15,10 +15,10 @@ export function usePermissionError() {
     useEffect(() => {
         // Interceptar erros 403 nas requisições do Inertia
         const originalVisit = router.visit;
-        
+
         router.visit = function (url: string, options: any = {}) {
             const originalOnError = options.onError;
-            
+
             return originalVisit.call(this, url, {
                 ...options,
                 onError: (errors: any) => {
@@ -31,7 +31,7 @@ export function usePermissionError() {
                         });
                         return;
                     }
-                    
+
                     if (originalOnError) {
                         originalOnError(errors);
                     }
