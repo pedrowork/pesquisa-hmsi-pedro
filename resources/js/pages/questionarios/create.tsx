@@ -1,0 +1,552 @@
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import InputError from '@/components/input-error';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { useState, useEffect, useMemo } from 'react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Questionários', href: '/questionarios' },
+    { title: 'Novo Questionário', href: '/questionarios/create' },
+];
+
+interface Pergunta {
+    cod: number;
+    descricao: string;
+    cod_setor_pesquis: number | null;
+    cod_tipo_pergunta: number | null;
+}
+
+interface Satisfacao {
+    cod: number;
+    descricao: string;
+    cod_tipo_pergunta: number | null;
+}
+
+interface TipoConvenio {
+    cod: number;
+    tipo_descricao: string | null;
+}
+
+interface Setor {
+    cod: number;
+    descricao: string;
+}
+
+interface Leito {
+    cod: number;
+    descricao: string;
+    cod_setor: number | null;
+}
+
+interface SetorPesquisa {
+    cod: number;
+    descricao: string;
+}
+
+interface QuestionariosCreateProps {
+    perguntas: Pergunta[];
+    satisfacoes: Satisfacao[];
+    tiposConvenio: TipoConvenio[];
+    setores: Setor[];
+    leitos: Leito[];
+    setoresPesquisa: SetorPesquisa[];
+}
+
+// Função para aplicar máscara de telefone
+const applyPhoneMask = (value: string): string => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, '');
+    
+    // Aplica máscara: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
+    if (numbers.length <= 10) {
+        return numbers
+            .replace(/(\d{2})(\d)/, '($1) $2')
+            .replace(/(\d{4})(\d)/, '$1-$2');
+    } else {
+        return numbers
+            .replace(/(\d{2})(\d)/, '($1) $2')
+            .replace(/(\d{5})(\d)/, '$1-$2');
+    }
+};
+
+export default function QuestionariosCreate({
+    perguntas,
+    satisfacoes,
+    tiposConvenio,
+    setores,
+    leitos,
+    setoresPesquisa,
+}: QuestionariosCreateProps) {
+    const [respostas, setRespostas] = useState<Record<number, number>>({});
+
+    const { data, setData, post, processing, errors } = useForm({
+        // Dados do paciente
+        nome: '',
+        telefone: '',
+        email: '',
+        sexo: '',
+        tipo_paciente: '',
+        idade: '',
+        leito: '',
+        cod_setor: '',
+        renda: '',
+        tp_cod_convenio: '',
+        // Dados do questionário
+        data_questionario: new Date().toISOString().split('T')[0],
+        data_isretroativa: false,
+        data_retroativa: '',
+        cod_setor_pesquis: '',
+        observacao: '',
+        respostas: [] as Array<{ cod_pergunta: number; resposta: number }>,
+    });
+
+    // Filtrar leitos por setor selecionado
+    const leitosFiltrados = useMemo(() => {
+        if (!data.cod_setor) {
+            return [];
+        }
+        return leitos.filter((leito) => leito.cod_setor === Number(data.cod_setor));
+    }, [data.cod_setor, leitos]);
+
+    // Auto-preencher setor de pesquisa baseado nas perguntas selecionadas
+    useEffect(() => {
+        const perguntasSelecionadas = Object.keys(respostas).map(Number);
+        if (perguntasSelecionadas.length > 0) {
+            // Buscar setores de pesquisa das perguntas selecionadas
+            const setoresDasPerguntas = perguntas
+                .filter((p) => perguntasSelecionadas.includes(p.cod))
+                .map((p) => p.cod_setor_pesquis)
+                .filter((s): s is number => s !== null);
+
+            if (setoresDasPerguntas.length > 0) {
+                // Se todas as perguntas têm o mesmo setor de pesquisa, auto-preencher
+                const setorUnico = new Set(setoresDasPerguntas);
+                if (setorUnico.size === 1) {
+                    const setorCod = Array.from(setorUnico)[0];
+                    if (data.cod_setor_pesquis !== setorCod.toString()) {
+                        setData('cod_setor_pesquis', setorCod.toString());
+                    }
+                }
+            }
+        }
+    }, [respostas, perguntas, data.cod_setor_pesquis, setData]);
+
+    const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const maskedValue = applyPhoneMask(e.target.value);
+        setData('telefone', maskedValue);
+    };
+
+    const handleRespostaChange = (perguntaCod: number, satisfacaoCod: number) => {
+        setRespostas((prev) => ({
+            ...prev,
+            [perguntaCod]: satisfacaoCod,
+        }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Converter respostas para array
+        const respostasArray = Object.entries(respostas).map(([perguntaCod, satisfacaoCod]) => ({
+            cod_pergunta: Number(perguntaCod),
+            resposta: Number(satisfacaoCod),
+        }));
+
+        if (respostasArray.length === 0) {
+            alert('Por favor, responda pelo menos uma pergunta.');
+            return;
+        }
+
+        // Remover máscara do telefone antes de enviar
+        const telefoneSemMascara = data.telefone.replace(/\D/g, '');
+
+        post('/questionarios', {
+            data: {
+                ...data,
+                telefone: telefoneSemMascara,
+                idade: Number(data.idade),
+                cod_setor: Number(data.cod_setor),
+                leito: data.leito ? Number(data.leito) : null,
+                cod_setor_pesquis: data.cod_setor_pesquis ? Number(data.cod_setor_pesquis) : null,
+                respostas: respostasArray,
+            },
+            preserveScroll: true,
+        });
+    };
+
+    const opcoesRenda = [
+        { value: '1 salário mínimo', label: '1 salário mínimo' },
+        { value: '2 salários mínimos', label: '2 salários mínimos' },
+        { value: '3 salários mínimos', label: '3 salários mínimos' },
+        { value: '4 salários mínimos', label: '4 salários mínimos' },
+        { value: '5 salários mínimos', label: '5 salários mínimos' },
+        { value: '6 salários mínimos', label: '6 salários mínimos' },
+    ];
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Novo Questionário" />
+            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
+                <div className="flex items-center gap-4">
+                    <Link href="/questionarios">
+                        <Button variant="outline" size="sm">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Voltar
+                        </Button>
+                    </Link>
+                    <div>
+                        <h1 className="text-3xl font-bold">Novo Questionário</h1>
+                        <p className="text-muted-foreground mt-1">
+                            Preencha os dados do paciente e responda as perguntas
+                        </p>
+                    </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Dados do Paciente */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Dados do Paciente</CardTitle>
+                            <CardDescription>
+                                Informe os dados do paciente
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="nome">
+                                        Nome <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="nome"
+                                        name="nome"
+                                        type="text"
+                                        required
+                                        value={data.nome}
+                                        onChange={(e) => setData('nome', e.target.value)}
+                                    />
+                                    <InputError message={errors.nome} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="email">
+                                        Email <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        required
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                    />
+                                    <InputError message={errors.email} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="telefone">
+                                        Telefone <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="telefone"
+                                        name="telefone"
+                                        type="text"
+                                        required
+                                        maxLength={15}
+                                        placeholder="(00) 00000-0000"
+                                        value={data.telefone}
+                                        onChange={handleTelefoneChange}
+                                    />
+                                    <InputError message={errors.telefone} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="sexo">
+                                        Sexo <span className="text-red-500">*</span>
+                                    </Label>
+                                    <select
+                                        id="sexo"
+                                        name="sexo"
+                                        required
+                                        value={data.sexo}
+                                        onChange={(e) => setData('sexo', e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <option value="">Selecione</option>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Feminino</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                    <InputError message={errors.sexo} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="idade">
+                                        Idade <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="idade"
+                                        name="idade"
+                                        type="number"
+                                        required
+                                        min="0"
+                                        value={data.idade}
+                                        onChange={(e) => setData('idade', e.target.value)}
+                                    />
+                                    <InputError message={errors.idade} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="tipo_paciente">Tipo de Paciente</Label>
+                                    <select
+                                        id="tipo_paciente"
+                                        name="tipo_paciente"
+                                        value={data.tipo_paciente}
+                                        onChange={(e) => setData('tipo_paciente', e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <option value="">Selecione</option>
+                                        <option value="Paciente">Paciente</option>
+                                        <option value="Acompanhante">Acompanhante</option>
+                                    </select>
+                                    <InputError message={errors.tipo_paciente} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="tp_cod_convenio">Tipo de Convênio</Label>
+                                    <select
+                                        id="tp_cod_convenio"
+                                        name="tp_cod_convenio"
+                                        value={data.tp_cod_convenio}
+                                        onChange={(e) => setData('tp_cod_convenio', e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <option value="">Selecione</option>
+                                        {tiposConvenio.map((tipo) => (
+                                            <option key={tipo.cod} value={tipo.cod}>
+                                                {tipo.tipo_descricao || `Convênio ${tipo.cod}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.tp_cod_convenio} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="cod_setor">
+                                        Setor <span className="text-red-500">*</span>
+                                    </Label>
+                                    <select
+                                        id="cod_setor"
+                                        name="cod_setor"
+                                        required
+                                        value={data.cod_setor}
+                                        onChange={(e) => {
+                                            setData('cod_setor', e.target.value);
+                                            // Limpar leito quando trocar setor
+                                            setData('leito', '');
+                                        }}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <option value="">Selecione um setor</option>
+                                        {setores.map((setor) => (
+                                            <option key={setor.cod} value={setor.cod}>
+                                                {setor.descricao}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.cod_setor} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="leito">Leito</Label>
+                                    <select
+                                        id="leito"
+                                        name="leito"
+                                        value={data.leito}
+                                        onChange={(e) => setData('leito', e.target.value)}
+                                        disabled={!data.cod_setor || leitosFiltrados.length === 0}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <option value="">
+                                            {!data.cod_setor
+                                                ? 'Selecione um setor primeiro'
+                                                : leitosFiltrados.length === 0
+                                                ? 'Nenhum leito disponível'
+                                                : 'Selecione um leito'}
+                                        </option>
+                                        {leitosFiltrados.map((leito) => (
+                                            <option key={leito.cod} value={leito.cod}>
+                                                {leito.descricao}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.leito} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="renda">Renda</Label>
+                                    <select
+                                        id="renda"
+                                        name="renda"
+                                        value={data.renda}
+                                        onChange={(e) => setData('renda', e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <option value="">Selecione</option>
+                                        {opcoesRenda.map((opcao) => (
+                                            <option key={opcao.value} value={opcao.value}>
+                                                {opcao.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.renda} />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Perguntas e Respostas */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Perguntas</CardTitle>
+                            <CardDescription>
+                                Responda as perguntas de pesquisa de satisfação
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {perguntas.length === 0 ? (
+                                <p className="text-muted-foreground text-center py-4">
+                                    Nenhuma pergunta cadastrada. Cadastre perguntas primeiro.
+                                </p>
+                            ) : (
+                                perguntas.map((pergunta) => {
+                                    // Filtrar satisfações baseado no cod_tipo_pergunta da pergunta
+                                    const satisfacoesFiltradas = satisfacoes.filter((satisfacao) => {
+                                        // Se a pergunta não tem tipo, mostrar todas as satisfações sem tipo
+                                        if (!pergunta.cod_tipo_pergunta) {
+                                            return !satisfacao.cod_tipo_pergunta;
+                                        }
+                                        // Se a pergunta tem tipo, mostrar apenas satisfações com o mesmo tipo
+                                        return satisfacao.cod_tipo_pergunta === pergunta.cod_tipo_pergunta;
+                                    });
+
+                                    return (
+                                        <div key={pergunta.cod} className="space-y-2">
+                                            <Label htmlFor={`pergunta-${pergunta.cod}`}>
+                                                {pergunta.descricao} <span className="text-red-500">*</span>
+                                            </Label>
+                                            <select
+                                                id={`pergunta-${pergunta.cod}`}
+                                                required
+                                                value={respostas[pergunta.cod] || ''}
+                                                onChange={(e) =>
+                                                    handleRespostaChange(
+                                                        pergunta.cod,
+                                                        Number(e.target.value)
+                                                    )
+                                                }
+                                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                <option value="">
+                                                    {satisfacoesFiltradas.length === 0
+                                                        ? 'Nenhuma opção disponível'
+                                                        : 'Selecione uma resposta'}
+                                                </option>
+                                                {satisfacoesFiltradas.map((satisfacao) => (
+                                                    <option key={satisfacao.cod} value={satisfacao.cod}>
+                                                        {satisfacao.descricao}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Informações Adicionais */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Informações Adicionais</CardTitle>
+                            <CardDescription>
+                                Dados complementares do questionário
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="data_questionario">Data do Questionário</Label>
+                                    <Input
+                                        id="data_questionario"
+                                        name="data_questionario"
+                                        type="date"
+                                        value={data.data_questionario}
+                                        onChange={(e) => setData('data_questionario', e.target.value)}
+                                    />
+                                    <InputError message={errors.data_questionario} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="cod_setor_pesquis">Setor de Pesquisa</Label>
+                                    <select
+                                        id="cod_setor_pesquis"
+                                        name="cod_setor_pesquis"
+                                        value={data.cod_setor_pesquis}
+                                        onChange={(e) => setData('cod_setor_pesquis', e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <option value="">Selecione ou será preenchido automaticamente</option>
+                                        {setoresPesquisa.map((setor) => (
+                                            <option key={setor.cod} value={setor.cod}>
+                                                {setor.descricao}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError message={errors.cod_setor_pesquis} />
+                                </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="observacao">Observações</Label>
+                                <textarea
+                                    id="observacao"
+                                    name="observacao"
+                                    rows={4}
+                                    value={data.observacao}
+                                    onChange={(e) => setData('observacao', e.target.value)}
+                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    maxLength={1000}
+                                />
+                                <InputError message={errors.observacao} />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div className="flex items-center gap-4">
+                        <Button type="submit" disabled={processing || perguntas.length === 0}>
+                            {processing ? 'Salvando...' : 'Salvar Questionário'}
+                        </Button>
+                        <Link href="/questionarios">
+                            <Button type="button" variant="outline">
+                                Cancelar
+                            </Button>
+                        </Link>
+                    </div>
+                </form>
+            </div>
+        </AppLayout>
+    );
+}

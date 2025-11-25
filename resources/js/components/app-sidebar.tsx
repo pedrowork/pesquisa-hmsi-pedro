@@ -1,6 +1,7 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavManagement } from '@/components/nav-management';
+import { NavResearch } from '@/components/nav-research';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
@@ -14,7 +15,22 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, Shield, Key } from 'lucide-react';
+import {
+    BookOpen,
+    Folder,
+    LayoutGrid,
+    Users,
+    Shield,
+    Key,
+    BedDouble,
+    Building,
+    CreditCard,
+    ClipboardList,
+    Heart,
+    BarChart3,
+    HelpCircle,
+    FileText,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -40,6 +56,49 @@ const managementNavItems: NavItem[] = [
         title: 'Permissões',
         href: '/permissions',
         icon: Key,
+    },
+];
+
+const researchNavItems: NavItem[] = [
+    {
+        title: 'Questionários',
+        href: '/questionarios',
+        icon: FileText,
+    },
+    {
+        title: 'Leitos',
+        href: '/leitos',
+        icon: BedDouble,
+    },
+    {
+        title: 'Setores',
+        href: '/setores',
+        icon: Building,
+    },
+    {
+        title: 'Tipo de Convênio',
+        href: '/tipos-convenio',
+        icon: CreditCard,
+    },
+    {
+        title: 'Setor de Pesquisa',
+        href: '/setores-pesquisa',
+        icon: ClipboardList,
+    },
+    {
+        title: 'Perguntas',
+        href: '/perguntas',
+        icon: HelpCircle,
+    },
+    {
+        title: 'Satisfação',
+        href: '/satisfacao',
+        icon: Heart,
+    },
+    {
+        title: 'Métricas',
+        href: '/metricas',
+        icon: BarChart3,
     },
 ];
 
@@ -74,6 +133,7 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain items={mainNavItems} />
                 <NavManagement items={managementNavItems} />
+                <NavResearch items={researchNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

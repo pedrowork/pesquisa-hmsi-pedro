@@ -32,6 +32,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gerenciamento de Permissões
     Route::resource('permissions', \App\Http\Controllers\PermissionController::class);
+
+    // Pesquisa de Satisfação
+    Route::resource('leitos', \App\Http\Controllers\LeitoController::class);
+    Route::resource('setores', \App\Http\Controllers\SetorController::class);
+    Route::resource('tipos-convenio', \App\Http\Controllers\TipoConvenioController::class);
+    Route::resource('setores-pesquisa', \App\Http\Controllers\SetorPesquisaController::class);
+    Route::resource('perguntas', \App\Http\Controllers\PerguntaController::class);
+    Route::resource('satisfacao', \App\Http\Controllers\SatisfacaoController::class);
+    Route::resource('questionarios', \App\Http\Controllers\QuestionarioController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('metricas', [\App\Http\Controllers\MetricaController::class, 'index'])->name('metricas.index');
 });
 
 require __DIR__.'/settings.php';
