@@ -13,6 +13,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Select } from '@/components/ui/select';
+import Can from '@/components/Can';
 import { useState, FormEvent } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -100,12 +101,14 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                             Cadastre e gerencie usuários do sistema
                         </p>
                     </div>
-                    <Link href="/users/create">
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Novo Usuário
-                        </Button>
-                    </Link>
+                    <Can permission="users.create">
+                        <Link href="/users/create">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Novo Usuário
+                            </Button>
+                        </Link>
+                    </Can>
                 </div>
 
                 {/* Filters */}
@@ -227,26 +230,30 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
-                                                        <Link
-                                                            href={`/users/${user.id}/edit`}
-                                                        >
+                                                        <Can permission="users.edit">
+                                                            <Link
+                                                                href={`/users/${user.id}/edit`}
+                                                            >
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        </Can>
+                                                        <Can permission="users.delete">
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
+                                                                onClick={() =>
+                                                                    handleDelete(user.id)
+                                                                }
+                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                             >
-                                                                <Edit className="h-4 w-4" />
+                                                                <Trash2 className="h-4 w-4" />
                                                             </Button>
-                                                        </Link>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                handleDelete(user.id)
-                                                            }
-                                                            className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        </Can>
                                                     </div>
                                                 </td>
                                             </tr>

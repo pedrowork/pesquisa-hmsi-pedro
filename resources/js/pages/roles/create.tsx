@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, Form } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useState } from 'react';
+import { useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -43,14 +43,30 @@ interface RolesCreateProps {
 }
 
 export default function RolesCreate({ permissions }: RolesCreateProps) {
-    const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+    const { data, setData, post, processing, errors } = useForm({
+        name: '',
+        slug: '',
+        description: '',
+        permissions: [] as number[],
+    });
 
     const handlePermissionToggle = (permissionId: number) => {
-        setSelectedPermissions((prev) =>
-            prev.includes(permissionId)
-                ? prev.filter((id) => id !== permissionId)
-                : [...prev, permissionId]
-        );
+        const currentPermissions = data.permissions || [];
+        if (currentPermissions.includes(permissionId)) {
+            setData(
+                'permissions',
+                currentPermissions.filter((id) => id !== permissionId)
+            );
+        } else {
+            setData('permissions', [...currentPermissions, permissionId]);
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/roles', {
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -80,123 +96,109 @@ export default function RolesCreate({ permissions }: RolesCreateProps) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Form
-                            method="post"
-                            action="/roles"
-                            className="space-y-6"
-                        >
-                            {({ processing, errors }) => (
-                                <>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="name">
-                                            Nome <span className="text-red-500">*</span>
-                                        </Label>
-                                        <Input
-                                            id="name"
-                                            name="name"
-                                            type="text"
-                                            required
-                                            placeholder="Ex: Administrador"
-                                        />
-                                        <InputError message={errors.name} />
-                                    </div>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">
+                                    Nome <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required
+                                    value={data.name}
+                                    onChange={(e) => setData('name', e.target.value)}
+                                    placeholder="Ex: Administrador"
+                                />
+                                <InputError message={errors.name} />
+                            </div>
 
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="slug">
-                                            Slug <span className="text-red-500">*</span>
-                                        </Label>
-                                        <Input
-                                            id="slug"
-                                            name="slug"
-                                            type="text"
-                                            required
-                                            placeholder="Ex: admin"
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            Identificador único (sem espaços, use hífens ou underscores)
+                            <div className="grid gap-2">
+                                <Label htmlFor="slug">
+                                    Slug <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="slug"
+                                    name="slug"
+                                    type="text"
+                                    required
+                                    value={data.slug}
+                                    onChange={(e) => setData('slug', e.target.value)}
+                                    placeholder="Ex: admin"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Identificador único (sem espaços, use hífens ou underscores)
+                                </p>
+                                <InputError message={errors.slug} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="description">
+                                    Descrição
+                                </Label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    rows={3}
+                                    value={data.description}
+                                    onChange={(e) => setData('description', e.target.value)}
+                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    placeholder="Descrição da role..."
+                                />
+                                <InputError message={errors.description} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Permissões</Label>
+                                <div className="rounded-lg border border-input p-4 max-h-64 overflow-y-auto">
+                                    {permissions.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground">
+                                            Nenhuma permissão cadastrada. Crie permissões primeiro.
                                         </p>
-                                        <InputError message={errors.slug} />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="description">
-                                            Descrição
-                                        </Label>
-                                        <textarea
-                                            id="description"
-                                            name="description"
-                                            rows={3}
-                                            className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                            placeholder="Descrição da role..."
-                                        />
-                                        <InputError message={errors.description} />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label>Permissões</Label>
-                                        <div className="rounded-lg border border-input p-4 max-h-64 overflow-y-auto">
-                                            {permissions.length === 0 ? (
-                                                <p className="text-sm text-muted-foreground">
-                                                    Nenhuma permissão cadastrada. Crie permissões primeiro.
-                                                </p>
-                                            ) : (
-                                                <div className="space-y-2">
-                                                    {permissions.map((permission) => (
-                                                        <div
-                                                            key={permission.id}
-                                                            className="flex items-center space-x-2"
-                                                        >
-                                                            <Checkbox
-                                                                id={`permission-${permission.id}`}
-                                                                checked={selectedPermissions.includes(
-                                                                    permission.id
-                                                                )}
-                                                                onCheckedChange={() =>
-                                                                    handlePermissionToggle(
-                                                                        permission.id
-                                                                    )
-                                                                }
-                                                            />
-                                                            <label
-                                                                htmlFor={`permission-${permission.id}`}
-                                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                                            >
-                                                                {permission.name}
-                                                                {permission.description && (
-                                                                    <span className="block text-xs text-muted-foreground">
-                                                                        {permission.description}
-                                                                    </span>
-                                                                )}
-                                                            </label>
-                                                        </div>
-                                                    ))}
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {permissions.map((permission) => (
+                                                <div
+                                                    key={permission.id}
+                                                    className="flex items-center space-x-2"
+                                                >
+                                                    <Checkbox
+                                                        id={`permission-${permission.id}`}
+                                                        checked={(data.permissions || []).includes(permission.id)}
+                                                        onCheckedChange={() =>
+                                                            handlePermissionToggle(permission.id)
+                                                        }
+                                                    />
+                                                    <label
+                                                        htmlFor={`permission-${permission.id}`}
+                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                                    >
+                                                        {permission.name}
+                                                        {permission.description && (
+                                                            <span className="block text-xs text-muted-foreground">
+                                                                {permission.description}
+                                                            </span>
+                                                        )}
+                                                    </label>
                                                 </div>
-                                            )}
+                                            ))}
                                         </div>
-                                        {selectedPermissions.map((permissionId) => (
-                                            <input
-                                                key={permissionId}
-                                                type="hidden"
-                                                name={`permissions[]`}
-                                                value={permissionId}
-                                            />
-                                        ))}
-                                        <InputError message={errors.permissions} />
-                                    </div>
+                                    )}
+                                </div>
+                                <InputError message={errors.permissions} />
+                            </div>
 
-                                    <div className="flex items-center gap-4">
-                                        <Button type="submit" disabled={processing}>
-                                            {processing ? 'Salvando...' : 'Criar Role'}
-                                        </Button>
-                                        <Link href="/roles">
-                                            <Button type="button" variant="outline">
-                                                Cancelar
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </>
-                            )}
-                        </Form>
+                            <div className="flex items-center gap-4">
+                                <Button type="submit" disabled={processing}>
+                                    {processing ? 'Salvando...' : 'Criar Role'}
+                                </Button>
+                                <Link href="/roles">
+                                    <Button type="button" variant="outline">
+                                        Cancelar
+                                    </Button>
+                                </Link>
+                            </div>
+                        </form>
                     </CardContent>
                 </Card>
             </div>

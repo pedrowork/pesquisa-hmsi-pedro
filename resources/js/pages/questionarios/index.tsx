@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import Can from '@/components/Can';
 import { useState, FormEvent } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -68,12 +69,14 @@ export default function QuestionariosIndex({
                             Visualize e gerencie questionários de pesquisa de satisfação
                         </p>
                     </div>
-                    <Link href="/questionarios/create">
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Novo Questionário
-                        </Button>
-                    </Link>
+                    <Can permission="questionarios.create">
+                        <Link href="/questionarios/create">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Novo Questionário
+                            </Button>
+                        </Link>
+                    </Can>
                 </div>
 
                 <Card>
@@ -150,12 +153,14 @@ export default function QuestionariosIndex({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end">
-                                                        <Link href={`/questionarios/${questionario.cod_paciente}`}>
-                                                            <Button variant="outline" size="sm">
-                                                                <Eye className="mr-2 h-4 w-4" />
-                                                                Ver
-                                                            </Button>
-                                                        </Link>
+                                                        <Can permission="questionarios.show">
+                                                            <Link href={`/questionarios/${questionario.cod_paciente}`}>
+                                                                <Button variant="outline" size="sm">
+                                                                    <Eye className="mr-2 h-4 w-4" />
+                                                                    Ver
+                                                                </Button>
+                                                            </Link>
+                                                        </Can>
                                                     </div>
                                                 </td>
                                             </tr>

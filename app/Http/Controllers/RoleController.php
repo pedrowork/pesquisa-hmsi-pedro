@@ -51,7 +51,10 @@ class RoleController extends Controller
      */
     public function create(): Response
     {
-        $permissions = DB::table('permissions')->orderBy('name')->get();
+        $permissions = DB::table('permissions')
+            ->orderBy('name')
+            ->get()
+            ->toArray();
 
         return Inertia::render('roles/create', [
             'permissions' => $permissions,
@@ -97,6 +100,40 @@ class RoleController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(int $id): Response
+    {
+        $role = DB::table('roles')->where('id', $id)->first();
+
+        if (!$role) {
+            abort(404);
+        }
+
+        // Get role permissions
+        $rolePermissions = DB::table('role_permissions')
+            ->join('permissions', 'role_permissions.permission_id', '=', 'permissions.id')
+            ->where('role_permissions.role_id', $id)
+            ->select('permissions.*')
+            ->get()
+            ->toArray();
+
+        // Get users with this role
+        $users = DB::table('user_roles')
+            ->join('users', 'user_roles.user_id', '=', 'users.id')
+            ->where('user_roles.role_id', $id)
+            ->select('users.id', 'users.name', 'users.email', 'users.status')
+            ->get()
+            ->toArray();
+
+        return Inertia::render('roles/show', [
+            'role' => $role,
+            'permissions' => $rolePermissions,
+            'users' => $users,
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(int $id): Response
@@ -107,7 +144,10 @@ class RoleController extends Controller
             abort(404);
         }
 
-        $permissions = DB::table('permissions')->orderBy('name')->get();
+        $permissions = DB::table('permissions')
+            ->orderBy('name')
+            ->get()
+            ->toArray();
 
         $rolePermissions = DB::table('role_permissions')
             ->where('role_id', $id)
