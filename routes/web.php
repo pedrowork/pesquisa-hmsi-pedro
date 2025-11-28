@@ -47,13 +47,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->distinct()
                 ->count('cod_paciente');
 
-            // Calcular taxa de satisfação média
+            // Calcular taxa de satisfação média (apenas perguntas tipo 3 -> escala 0 a 10)
+            // Mapeia os códigos 10..20 para valores 0..10 e ignora NA (cod=7)
             $satisfacaoMedia = \Illuminate\Support\Facades\DB::table('questionario')
                 ->join('satisfacao', 'questionario.resposta', '=', 'satisfacao.cod')
-                ->selectRaw('AVG(satisfacao.cod) as media')
+                ->join('perguntas_descricao', 'questionario.cod_pergunta', '=', 'perguntas_descricao.cod')
+                ->where('perguntas_descricao.cod_tipo_pergunta', 3)
+                ->whereBetween('satisfacao.cod', [10, 20]) // somente valores 0..10
+                ->selectRaw('AVG(satisfacao.cod - 10) as media') // normaliza para 0..10
                 ->value('media');
 
-            $researchStats['satisfacaoMedia'] = $satisfacaoMedia ? round($satisfacaoMedia, 2) : 0;
+            $researchStats['satisfacaoMedia'] = $satisfacaoMedia !== null ? round($satisfacaoMedia, 2) : 0;
         }
 
         // Calcular métricas secundárias apenas se tiver permissão

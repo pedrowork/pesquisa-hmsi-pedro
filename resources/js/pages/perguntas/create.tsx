@@ -85,7 +85,7 @@ export default function PerguntasCreate({ setoresPesquisa }: PerguntasCreateProp
                                     name="cod_setor_pesquis"
                                     value={data.cod_setor_pesquis}
                                     onChange={(e) => setData('cod_setor_pesquis', e.target.value)}
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <option value="">Selecione um setor de pesquisa</option>
                                     {setoresPesquisa.map((setor) => (

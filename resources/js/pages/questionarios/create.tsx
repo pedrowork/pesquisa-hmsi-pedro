@@ -290,7 +290,7 @@ export default function QuestionariosCreate({
                                         required
                                         value={data.sexo}
                                         onChange={(e) => setData('sexo', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
                                         <option value="M">Masculino</option>
@@ -323,7 +323,7 @@ export default function QuestionariosCreate({
                                         name="tipo_paciente"
                                         value={data.tipo_paciente}
                                         onChange={(e) => setData('tipo_paciente', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
                                         <option value="Paciente">Paciente</option>
@@ -339,7 +339,7 @@ export default function QuestionariosCreate({
                                         name="tp_cod_convenio"
                                         value={data.tp_cod_convenio}
                                         onChange={(e) => setData('tp_cod_convenio', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
                                         {tiposConvenio.map((tipo) => (
@@ -365,7 +365,7 @@ export default function QuestionariosCreate({
                                             // Limpar leito quando trocar setor
                                             setData('leito', '');
                                         }}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione um setor</option>
                                         {setores.map((setor) => (
@@ -385,7 +385,7 @@ export default function QuestionariosCreate({
                                         value={data.leito}
                                         onChange={(e) => setData('leito', e.target.value)}
                                         disabled={!data.cod_setor || leitosFiltrados.length === 0}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">
                                             {!data.cod_setor
@@ -410,7 +410,7 @@ export default function QuestionariosCreate({
                                         name="renda"
                                         value={data.renda}
                                         onChange={(e) => setData('renda', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
                                         {opcoesRenda.map((opcao) => (
@@ -465,7 +465,7 @@ export default function QuestionariosCreate({
                                                         Number(e.target.value)
                                                     )
                                                 }
-                                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 <option value="">
                                                     {satisfacoesFiltradas.length === 0

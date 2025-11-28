@@ -179,6 +179,12 @@ class AdminSeeder extends Seeder
             'dashboard.view',
             'questionarios.show',
             'metricas.view',
+            'metricas.overview',
+            'metricas.setores',
+            'metricas.nps',
+            'metricas.dimensoes',
+            'metricas.distribuicoes',
+            'metricas.temporal',
             'dashboard.research.metrics',
             'dashboard.research.secondary',
             'questionarios.view',
@@ -209,6 +215,8 @@ class AdminSeeder extends Seeder
             'questionarios.show',
             'dashboard.view',
             'questionarios.view',
+            'metricas.view',
+            'metricas.overview',
         ];
 
         // Limpar permissões antigas do role colaborador

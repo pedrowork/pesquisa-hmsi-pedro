@@ -37,7 +37,13 @@ export type PermissionName =
     | 'setores-pesquisa.manage'
     | 'perguntas.manage'
     | 'satisfacao.manage'
-    | 'metricas.view';
+    | 'metricas.view'
+    | 'metricas.overview'
+    | 'metricas.setores'
+    | 'metricas.nps'
+    | 'metricas.dimensoes'
+    | 'metricas.distribuicoes'
+    | 'metricas.temporal';
 
 export interface Permission {
     id: number;

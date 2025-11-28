@@ -175,6 +175,37 @@ class PermissionSeeder extends Seeder
                 'slug' => 'metricas.view',
                 'description' => 'Permite visualizar métricas e relatórios',
             ],
+            // Métricas - Permissões Granulares (admin pode delegar cada seção)
+            [
+                'name' => 'Métricas - Visão Geral',
+                'slug' => 'metricas.overview',
+                'description' => 'Permite ver KPIs gerais (totais, taxa de satisfação)',
+            ],
+            [
+                'name' => 'Métricas - Setores',
+                'slug' => 'metricas.setores',
+                'description' => 'Permite ver médias por setor e ranking',
+            ],
+            [
+                'name' => 'Métricas - NPS',
+                'slug' => 'metricas.nps',
+                'description' => 'Permite ver o indicador de recomendação (NPS)',
+            ],
+            [
+                'name' => 'Métricas - Dimensões',
+                'slug' => 'metricas.dimensoes',
+                'description' => 'Permite ver médias por dimensão/pergunta',
+            ],
+            [
+                'name' => 'Métricas - Distribuições',
+                'slug' => 'metricas.distribuicoes',
+                'description' => 'Permite ver distribuições (tipo, idade, sexo, renda, convênio)',
+            ],
+            [
+                'name' => 'Métricas - Série Temporal',
+                'slug' => 'metricas.temporal',
+                'description' => 'Permite ver evolução mensal',
+            ],
         ];
 
         foreach ($permissions as $permission) {

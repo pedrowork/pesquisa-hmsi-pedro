@@ -168,4 +168,21 @@
   body {
     @apply bg-background text-foreground;
     }
+  
+  /* Estilos para selects e options no modo dark */
+  select {
+    @apply bg-background text-foreground;
+  }
+  
+  select option {
+    @apply bg-background text-foreground;
+  }
+  
+  .dark select {
+    @apply bg-background text-foreground;
+  }
+  
+  .dark select option {
+    @apply bg-background text-foreground;
+  }
 }
