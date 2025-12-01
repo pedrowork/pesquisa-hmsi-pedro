@@ -74,14 +74,20 @@ export default function SatisfacaoEdit({ satisfacao }: SatisfacaoEditProps) {
                                 <InputError message={errors.descricao} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="cod_tipo_pergunta">Tipo de Pergunta</Label>
-                                <Input
+                                <Label htmlFor="cod_tipo_pergunta">Tipo de Resposta</Label>
+                                <select
                                     id="cod_tipo_pergunta"
                                     name="cod_tipo_pergunta"
-                                    type="number"
                                     value={data.cod_tipo_pergunta}
                                     onChange={(e) => setData('cod_tipo_pergunta', e.target.value)}
-                                />
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="">Selecione o tipo de resposta</option>
+                                    <option value="1">Avaliativa (Ruim, Regular, Bom, Ótimo, Excelente)</option>
+                                    <option value="2">Objetiva (Sim/Não)</option>
+                                    <option value="3">Classificação (0-10)</option>
+                                    <option value="4">Livre (texto)</option>
+                                </select>
                                 <InputError message={errors.cod_tipo_pergunta} />
                             </div>
                             <div className="flex items-center gap-4">

@@ -13,6 +13,8 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -68,7 +70,7 @@ interface QuestionariosCreateProps {
 const applyPhoneMask = (value: string): string => {
     // Remove tudo que não é número
     const numbers = value.replace(/\D/g, '');
-    
+
     // Aplica máscara: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
     if (numbers.length <= 10) {
         return numbers
@@ -90,6 +92,7 @@ export default function QuestionariosCreate({
     setoresPesquisa,
 }: QuestionariosCreateProps) {
     const [respostas, setRespostas] = useState<Record<number, number>>({});
+    const [respostasTexto, setRespostasTexto] = useState<Record<number, string>>({});
 
     const { data, setData, post, processing, errors } = useForm({
         // Dados do paciente
@@ -104,11 +107,9 @@ export default function QuestionariosCreate({
         renda: '',
         tp_cod_convenio: '',
         // Dados do questionário
-        data_questionario: new Date().toISOString().split('T')[0],
         data_isretroativa: false,
         data_retroativa: '',
-        observacao: '',
-        respostas: [] as Array<{ cod_pergunta: number; resposta: number }>,
+        respostas: [] as Array<{ cod_pergunta: number; resposta: number | null; resposta_texto: string | null }>,
     });
 
     // Filtrar leitos por setor selecionado
@@ -133,14 +134,48 @@ export default function QuestionariosCreate({
         }));
     };
 
+    // Toggle via checkbox (mantém comportamento de seleção única por pergunta)
+    const handleRespostaCheckbox = (
+        perguntaCod: number,
+        satisfacaoCod: number,
+        checked: boolean | string,
+    ) => {
+        const isChecked = checked === true;
+        setRespostas((prev) => {
+            if (!isChecked) {
+                const { [perguntaCod]: _remove, ...rest } = prev;
+                return rest;
+            }
+            return {
+                ...prev,
+                [perguntaCod]: satisfacaoCod,
+            };
+        });
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Converter respostas para array
-        const respostasArray = Object.entries(respostas).map(([perguntaCod, satisfacaoCod]) => ({
-            cod_pergunta: Number(perguntaCod),
-            resposta: Number(satisfacaoCod),
-        }));
+        // Preparar array de respostas incluindo texto livre
+        const respostasArray: Array<{ cod_pergunta: number; resposta: number | null; resposta_texto: string | null }> = [];
+
+        // Adicionar respostas de opções (tipos 1, 2, 3)
+        Object.entries(respostas).forEach(([perguntaCod, satisfacaoCod]) => {
+            respostasArray.push({
+                cod_pergunta: Number(perguntaCod),
+                resposta: Number(satisfacaoCod),
+                resposta_texto: null,
+            });
+        });
+
+        // Adicionar respostas de texto livre (tipo 4)
+        Object.entries(respostasTexto).forEach(([perguntaCod, texto]) => {
+            respostasArray.push({
+                cod_pergunta: Number(perguntaCod),
+                resposta: null,
+                resposta_texto: texto || null,
+            });
+        });
 
         if (respostasArray.length === 0) {
             alert('Por favor, responda pelo menos uma pergunta.');
@@ -162,10 +197,8 @@ export default function QuestionariosCreate({
             leito: data.leito ? Number(data.leito) : null,
             renda: data.renda || null,
             tp_cod_convenio: data.tp_cod_convenio ? Number(data.tp_cod_convenio) : null,
-            data_questionario: data.data_questionario || null,
             data_isretroativa: data.data_isretroativa || false,
             data_retroativa: data.data_retroativa || null,
-            observacao: data.observacao || null,
             respostas: respostasArray,
         };
 
@@ -232,8 +265,8 @@ export default function QuestionariosCreate({
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="grid gap-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="space-y-2">
                                     <Label htmlFor="nome">
                                         Nome <span className="text-red-500">*</span>
                                     </Label>
@@ -248,7 +281,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.nome} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="email">
                                         Email <span className="text-red-500">*</span>
                                     </Label>
@@ -263,7 +296,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.email} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="telefone">
                                         Telefone <span className="text-red-500">*</span>
                                     </Label>
@@ -280,7 +313,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.telefone} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="sexo">
                                         Sexo <span className="text-red-500">*</span>
                                     </Label>
@@ -300,7 +333,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.sexo} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="idade">
                                         Idade <span className="text-red-500">*</span>
                                     </Label>
@@ -316,7 +349,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.idade} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="tipo_paciente">Tipo de Paciente</Label>
                                     <select
                                         id="tipo_paciente"
@@ -332,7 +365,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.tipo_paciente} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="tp_cod_convenio">Tipo de Convênio</Label>
                                     <select
                                         id="tp_cod_convenio"
@@ -351,7 +384,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.tp_cod_convenio} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="cod_setor">
                                         Setor <span className="text-red-500">*</span>
                                     </Label>
@@ -377,7 +410,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.cod_setor} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="leito">Leito</Label>
                                     <select
                                         id="leito"
@@ -403,7 +436,7 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.leito} />
                                 </div>
 
-                                <div className="grid gap-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="renda">Renda</Label>
                                     <select
                                         id="renda"
@@ -439,98 +472,130 @@ export default function QuestionariosCreate({
                                     Nenhuma pergunta cadastrada. Cadastre perguntas primeiro.
                                 </p>
                             ) : (
-                                perguntas.map((pergunta) => {
+                                [...perguntas].sort((a, b) => a.cod - b.cod).map((pergunta) => {
+                                    // Tipo 4 = texto livre
+                                    const isTipoLivre = pergunta.cod_tipo_pergunta === 4;
+
+                                    if (isTipoLivre) {
+                                        // Renderizar textarea para perguntas tipo 4
+                                        return (
+                                            <div key={pergunta.cod} className="space-y-2">
+                                                <Label htmlFor={`pergunta-texto-${pergunta.cod}`}>
+                                                    {pergunta.descricao} <span className="text-red-500">*</span>
+                                                </Label>
+                                                <textarea
+                                                    id={`pergunta-texto-${pergunta.cod}`}
+                                                    name={`pergunta-texto-${pergunta.cod}`}
+                                                    rows={4}
+                                                    value={respostasTexto[pergunta.cod] || ''}
+                                                    onChange={(e) =>
+                                                        setRespostasTexto((prev) => ({
+                                                            ...prev,
+                                                            [pergunta.cod]: e.target.value,
+                                                        }))
+                                                    }
+                                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                                    maxLength={1000}
+                                                    required
+                                                />
+                                            </div>
+                                        );
+                                    }
+
                                     // Filtrar satisfações baseado no cod_tipo_pergunta da pergunta
-                                    const satisfacoesFiltradas = satisfacoes.filter((satisfacao) => {
-                                        // Se a pergunta não tem tipo, mostrar todas as satisfações sem tipo
-                                        if (!pergunta.cod_tipo_pergunta) {
-                                            return !satisfacao.cod_tipo_pergunta;
-                                        }
-                                        // Se a pergunta tem tipo, mostrar apenas satisfações com o mesmo tipo
-                                        return satisfacao.cod_tipo_pergunta === pergunta.cod_tipo_pergunta;
-                                    });
+                                    const satisfacoesFiltradas = satisfacoes
+                                        .filter((satisfacao) => {
+                                            // Se a pergunta não tem tipo, mostrar todas as satisfações sem tipo
+                                            if (!pergunta.cod_tipo_pergunta) {
+                                                return !satisfacao.cod_tipo_pergunta;
+                                            }
+                                            // Se a pergunta tem tipo, mostrar apenas satisfações com o mesmo tipo
+                                            return satisfacao.cod_tipo_pergunta === pergunta.cod_tipo_pergunta;
+                                        })
+                                        .sort((a, b) => {
+                                            // Para perguntas tipo 3 (escala 0-10), ordenar numericamente
+                                            if (pergunta.cod_tipo_pergunta === 3) {
+                                                // Tentar converter descrição para número
+                                                const numA = parseInt(a.descricao, 10);
+                                                const numB = parseInt(b.descricao, 10);
+
+                                                // Se ambas são números, ordenar numericamente
+                                                if (!isNaN(numA) && !isNaN(numB)) {
+                                                    return numA - numB;
+                                                }
+
+                                                // Se A é número e B não é (NA), A vem primeiro
+                                                if (!isNaN(numA) && isNaN(numB)) {
+                                                    return -1;
+                                                }
+
+                                                // Se B é número e A não é (NA), B vem primeiro
+                                                if (isNaN(numA) && !isNaN(numB)) {
+                                                    return 1;
+                                                }
+
+                                                // Se nenhuma é número, manter ordem original
+                                                return 0;
+                                            }
+
+                                            // Para outros tipos, ordenar por código
+                                            return a.cod - b.cod;
+                                        });
 
                                     return (
                                         <div key={pergunta.cod} className="space-y-2">
                                             <Label htmlFor={`pergunta-${pergunta.cod}`}>
                                                 {pergunta.descricao} <span className="text-red-500">*</span>
                                             </Label>
-                                            <select
-                                                id={`pergunta-${pergunta.cod}`}
-                                                required
-                                                value={respostas[pergunta.cod] || ''}
-                                                onChange={(e) =>
-                                                    handleRespostaChange(
-                                                        pergunta.cod,
-                                                        Number(e.target.value)
-                                                    )
-                                                }
-                                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                            >
-                                                <option value="">
-                                                    {satisfacoesFiltradas.length === 0
-                                                        ? 'Nenhuma opção disponível'
-                                                        : 'Selecione uma resposta'}
-                                                </option>
-                                                {satisfacoesFiltradas.map((satisfacao) => (
-                                                    <option key={satisfacao.cod} value={satisfacao.cod}>
-                                                        {satisfacao.descricao}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                            <div className="grid gap-2">
+                                                {satisfacoesFiltradas.length === 0 ? (
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Nenhuma opção disponível
+                                                    </p>
+                                                ) : (
+                                                    <div
+                                                        className="flex items-center gap-2 overflow-x-auto whitespace-nowrap p-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                                                        role="group"
+                                                        aria-label={`Opções de resposta para a pergunta ${pergunta.descricao}`}
+                                                    >
+                                                        {satisfacoesFiltradas.map((satisfacao) => {
+                                                            const checked =
+                                                                respostas[pergunta.cod] === satisfacao.cod;
+                                                            const checkboxId = `pergunta-${pergunta.cod}-satisf-${satisfacao.cod}`;
+                                                            return (
+                                                                <label
+                                                                    key={satisfacao.cod}
+                                                                    htmlFor={checkboxId}
+                                                                    className={cn(
+                                                                        'inline-flex shrink-0 items-center gap-2 rounded-md border border-input px-3 py-1 text-sm hover:bg-muted/50 transition-colors',
+                                                                        checked && 'bg-primary/10 border-primary'
+                                                                    )}
+                                                                >
+                                                                    <Checkbox
+                                                                        id={checkboxId}
+                                                                        checked={checked}
+                                                                        onCheckedChange={(c) =>
+                                                                            handleRespostaCheckbox(
+                                                                                pergunta.cod,
+                                                                                satisfacao.cod,
+                                                                                c,
+                                                                            )
+                                                                        }
+                                                                        aria-label={`Selecionar resposta ${satisfacao.descricao}`}
+                                                                    />
+                                                                    <span className="text-sm leading-none">
+                                                                        {satisfacao.descricao}
+                                                                    </span>
+                                                                </label>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     );
                                 })
                             )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Informações Adicionais */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Informações Adicionais</CardTitle>
-                            <CardDescription>
-                                Dados complementares do questionário
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="data_questionario">Data do Questionário</Label>
-                                    <Input
-                                        id="data_questionario"
-                                        name="data_questionario"
-                                        type="date"
-                                        value={data.data_questionario}
-                                        onChange={(e) => setData('data_questionario', e.target.value)}
-                                    />
-                                    <InputError message={errors.data_questionario} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="cod_setor_pesquis">Setor de Pesquisa</Label>
-                                    <div className="flex h-9 w-full items-center rounded-md border border-input bg-muted px-3 py-1 text-sm text-muted-foreground">
-                                        Será vinculado automaticamente conforme o cadastro de cada pergunta
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Cada pergunta já possui seu setor de pesquisa cadastrado. O vínculo será feito automaticamente ao salvar.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="observacao">Observações</Label>
-                                <textarea
-                                    id="observacao"
-                                    name="observacao"
-                                    rows={4}
-                                    value={data.observacao}
-                                    onChange={(e) => setData('observacao', e.target.value)}
-                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                    maxLength={1000}
-                                />
-                                <InputError message={errors.observacao} />
-                            </div>
                         </CardContent>
                     </Card>
 

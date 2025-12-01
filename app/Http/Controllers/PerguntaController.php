@@ -23,7 +23,7 @@ class PerguntaController extends Controller
             $query->where('descricao', 'like', "%{$search}%");
         }
 
-        $perguntas = $query->orderBy('descricao')->paginate(10);
+        $perguntas = $query->orderBy('cod', 'asc')->paginate(10);
 
         return Inertia::render('perguntas/index', [
             'perguntas' => $perguntas,

@@ -65,7 +65,7 @@ class QuestionarioController extends Controller
     {
         $perguntas = DB::table('perguntas_descricao')
             ->select('cod', 'descricao', 'cod_setor_pesquis', 'cod_tipo_pergunta')
-            ->orderBy('descricao')
+            ->orderBy('cod', 'asc')
             ->get();
 
         $satisfacoes = DB::table('satisfacao')
@@ -141,16 +141,20 @@ class QuestionarioController extends Controller
                 'tp_cod_convenio' => ['nullable', 'integer', 'exists:tipoconvenio,cod'],
 
                 // Dados do questionário
-                'data_questionario' => ['nullable', 'date'],
                 'data_isretroativa' => ['nullable', 'boolean'],
                 'data_retroativa' => ['nullable', 'date'],
-                'observacao' => ['nullable', 'string', 'max:1000'],
 
                 // Respostas (array de perguntas e respostas)
                 'respostas' => ['required', 'array', 'min:1'],
                 'respostas.*.cod_pergunta' => ['required', 'integer', 'exists:perguntas_descricao,cod'],
-                'respostas.*.resposta' => ['required', 'integer', 'exists:satisfacao,cod'],
+                'respostas.*.resposta' => ['nullable', 'integer', 'exists:satisfacao,cod'],
+                'respostas.*.resposta_texto' => ['nullable', 'string', 'max:1000'],
+            ], [
+                'respostas.*.cod_pergunta.required' => 'Código da pergunta é obrigatório.',
+                'respostas.*.cod_pergunta.exists' => 'Pergunta não encontrada.',
+                'respostas.*.resposta.exists' => 'Opção de resposta inválida.',
             ]);
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Erro de validação ao criar questionário: ' . json_encode($e->errors()));
             return redirect()->back()
@@ -203,38 +207,64 @@ class QuestionarioController extends Controller
                     ->withInput();
             }
 
-            $dataQuestionario = $validated['data_questionario'] ?? now()->format('Y-m-d');
+            $dataQuestionario = now()->format('Y-m-d');
 
-            // Buscar todas as perguntas para obter seus cod_setor_pesquis
+            // Buscar todas as perguntas para obter seus cod_setor_pesquis e tipos
             $perguntasIds = array_map(function ($resposta) {
                 return (int) $resposta['cod_pergunta'];
             }, $validated['respostas']);
 
             $perguntasData = DB::table('perguntas_descricao')
                 ->whereIn('cod', $perguntasIds)
-                ->pluck('cod_setor_pesquis', 'cod');
+                ->select('cod', 'cod_setor_pesquis', 'cod_tipo_pergunta')
+                ->get()
+                ->keyBy('cod');
 
             foreach ($validated['respostas'] as $index => $resposta) {
                 $codPergunta = (int) $resposta['cod_pergunta'];
+                $perguntaData = $perguntasData[$codPergunta] ?? null;
+
+                if (!$perguntaData) {
+                    throw new \Exception("Pergunta com código {$codPergunta} não encontrada");
+                }
 
                 // Usar o cod_setor_pesquis da pergunta cadastrada (vinculação automática)
-                $codSetorPesquis = $perguntasData[$codPergunta] ?? null;
-                if ($codSetorPesquis) {
-                    $codSetorPesquis = (int) $codSetorPesquis;
+                $codSetorPesquis = $perguntaData->cod_setor_pesquis ? (int) $perguntaData->cod_setor_pesquis : null;
+
+                // Determinar se é pergunta tipo 4 (texto livre)
+                $isTipoLivre = $perguntaData->cod_tipo_pergunta == 4;
+
+                // Para perguntas tipo 4, resposta é null e o texto vai em observacao
+                // Para outras perguntas, resposta é um código de satisfação
+                $respostaCod = null;
+                $observacaoTexto = null;
+
+                if ($isTipoLivre) {
+                    // Pergunta tipo 4: usar resposta_texto em observacao
+                    $observacaoTexto = $resposta['resposta_texto'] ?? null;
+                    if (empty($observacaoTexto)) {
+                        throw new \Exception("Resposta de texto obrigatória para pergunta tipo livre (código {$codPergunta})");
+                    }
+                    // Criar uma resposta padrão para satisfação tipo 4 (cod=9 conforme seed.MD)
+                    $respostaCod = 9; // "Observação" da satisfação tipo 4
                 } else {
-                    $codSetorPesquis = null;
+                    // Perguntas tipo 1, 2, 3: usar resposta normal
+                    $respostaCod = isset($resposta['resposta']) ? (int) $resposta['resposta'] : null;
+                    if (!$respostaCod) {
+                        throw new \Exception("Resposta obrigatória para pergunta {$codPergunta}");
+                    }
                 }
 
                 $questionarioData = [
                     'cod_pergunta' => $codPergunta,
-                    'resposta' => (int) $resposta['resposta'],
+                    'resposta' => $respostaCod,
                     'cod_paciente' => (int) $pacienteId,
                     'cod_usuario' => (int) $usuarioId,
                     'data_questionario' => $dataQuestionario,
                     'data_isretroativa' => $validated['data_isretroativa'] ?? false,
                     'data_retroativa' => $validated['data_retroativa'] ?? null,
                     'cod_setor_pesquis' => $codSetorPesquis, // Vinculado automaticamente da pergunta
-                    'observacao' => $validated['observacao'] ?? null,
+                    'observacao' => $observacaoTexto,
                 ];
 
                 DB::table('questionario')->insert($questionarioData);
