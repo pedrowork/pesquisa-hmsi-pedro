@@ -142,13 +142,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('roles.destroy');
 
     // Gerenciamento de Permissões
+    // Rotas específicas devem vir antes das rotas com parâmetros
     Route::middleware('permission:permissions.view')->group(function () {
         Route::get('permissions', [\App\Http\Controllers\PermissionController::class, 'index'])->name('permissions.index');
-        Route::get('permissions/{permission}', [\App\Http\Controllers\PermissionController::class, 'show'])->name('permissions.show');
     });
     Route::middleware('permission:permissions.create')->group(function () {
         Route::get('permissions/create', [\App\Http\Controllers\PermissionController::class, 'create'])->name('permissions.create');
         Route::post('permissions', [\App\Http\Controllers\PermissionController::class, 'store'])->name('permissions.store');
+    });
+    Route::middleware('permission:permissions.view')->group(function () {
+        Route::get('permissions/{permission}', [\App\Http\Controllers\PermissionController::class, 'show'])->name('permissions.show');
     });
     Route::middleware('permission:permissions.edit')->group(function () {
         Route::get('permissions/{permission}/edit', [\App\Http\Controllers\PermissionController::class, 'edit'])->name('permissions.edit');
@@ -170,30 +173,126 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:questionarios.show')
         ->name('questionarios.show');
 
-    // Módulos de Pesquisa (gerenciamento completo)
-    Route::middleware('permission:leitos.manage')->group(function () {
-        Route::resource('leitos', \App\Http\Controllers\LeitoController::class);
+    // Módulos de Pesquisa (permissões granulares)
+    // Leitos
+    // Rotas específicas devem vir antes das rotas com parâmetros
+    Route::middleware('permission:leitos.view')->group(function () {
+        Route::get('leitos', [\App\Http\Controllers\LeitoController::class, 'index'])->name('leitos.index');
     });
+    Route::middleware('permission:leitos.create')->group(function () {
+        Route::get('leitos/create', [\App\Http\Controllers\LeitoController::class, 'create'])->name('leitos.create');
+        Route::post('leitos', [\App\Http\Controllers\LeitoController::class, 'store'])->name('leitos.store');
+    });
+    Route::middleware('permission:leitos.view')->group(function () {
+        Route::get('leitos/{leito}', [\App\Http\Controllers\LeitoController::class, 'show'])->name('leitos.show');
+    });
+    Route::middleware('permission:leitos.edit')->group(function () {
+        Route::get('leitos/{leito}/edit', [\App\Http\Controllers\LeitoController::class, 'edit'])->name('leitos.edit');
+        Route::put('leitos/{leito}', [\App\Http\Controllers\LeitoController::class, 'update'])->name('leitos.update');
+    });
+    Route::delete('leitos/{leito}', [\App\Http\Controllers\LeitoController::class, 'destroy'])
+        ->middleware('permission:leitos.delete')
+        ->name('leitos.destroy');
 
-    Route::middleware('permission:setores.manage')->group(function () {
-        Route::resource('setores', \App\Http\Controllers\SetorController::class);
+    // Setores
+    // Rotas específicas devem vir antes das rotas com parâmetros
+    Route::middleware('permission:setores.view')->group(function () {
+        Route::get('setores', [\App\Http\Controllers\SetorController::class, 'index'])->name('setores.index');
     });
+    Route::middleware('permission:setores.create')->group(function () {
+        Route::get('setores/create', [\App\Http\Controllers\SetorController::class, 'create'])->name('setores.create');
+        Route::post('setores', [\App\Http\Controllers\SetorController::class, 'store'])->name('setores.store');
+    });
+    Route::middleware('permission:setores.view')->group(function () {
+        Route::get('setores/{setor}', [\App\Http\Controllers\SetorController::class, 'show'])->name('setores.show');
+    });
+    Route::middleware('permission:setores.edit')->group(function () {
+        Route::get('setores/{setor}/edit', [\App\Http\Controllers\SetorController::class, 'edit'])->name('setores.edit');
+        Route::put('setores/{setor}', [\App\Http\Controllers\SetorController::class, 'update'])->name('setores.update');
+    });
+    Route::delete('setores/{setor}', [\App\Http\Controllers\SetorController::class, 'destroy'])
+        ->middleware('permission:setores.delete')
+        ->name('setores.destroy');
 
-    Route::middleware('permission:tipos-convenio.manage')->group(function () {
-        Route::resource('tipos-convenio', \App\Http\Controllers\TipoConvenioController::class);
+    // Tipos de Convênio
+    // Rotas específicas devem vir antes das rotas com parâmetros
+    Route::middleware('permission:tipos-convenio.view')->group(function () {
+        Route::get('tipos-convenio', [\App\Http\Controllers\TipoConvenioController::class, 'index'])->name('tipos-convenio.index');
     });
+    Route::middleware('permission:tipos-convenio.create')->group(function () {
+        Route::get('tipos-convenio/create', [\App\Http\Controllers\TipoConvenioController::class, 'create'])->name('tipos-convenio.create');
+        Route::post('tipos-convenio', [\App\Http\Controllers\TipoConvenioController::class, 'store'])->name('tipos-convenio.store');
+    });
+    Route::middleware('permission:tipos-convenio.view')->group(function () {
+        Route::get('tipos-convenio/{tipoConvenio}', [\App\Http\Controllers\TipoConvenioController::class, 'show'])->name('tipos-convenio.show');
+    });
+    Route::middleware('permission:tipos-convenio.edit')->group(function () {
+        Route::get('tipos-convenio/{tipoConvenio}/edit', [\App\Http\Controllers\TipoConvenioController::class, 'edit'])->name('tipos-convenio.edit');
+        Route::put('tipos-convenio/{tipoConvenio}', [\App\Http\Controllers\TipoConvenioController::class, 'update'])->name('tipos-convenio.update');
+    });
+    Route::delete('tipos-convenio/{tipoConvenio}', [\App\Http\Controllers\TipoConvenioController::class, 'destroy'])
+        ->middleware('permission:tipos-convenio.delete')
+        ->name('tipos-convenio.destroy');
 
-    Route::middleware('permission:setores-pesquisa.manage')->group(function () {
-        Route::resource('setores-pesquisa', \App\Http\Controllers\SetorPesquisaController::class);
+    // Setores de Pesquisa
+    // Rotas específicas devem vir antes das rotas com parâmetros
+    Route::middleware('permission:setores-pesquisa.view')->group(function () {
+        Route::get('setores-pesquisa', [\App\Http\Controllers\SetorPesquisaController::class, 'index'])->name('setores-pesquisa.index');
     });
+    Route::middleware('permission:setores-pesquisa.create')->group(function () {
+        Route::get('setores-pesquisa/create', [\App\Http\Controllers\SetorPesquisaController::class, 'create'])->name('setores-pesquisa.create');
+        Route::post('setores-pesquisa', [\App\Http\Controllers\SetorPesquisaController::class, 'store'])->name('setores-pesquisa.store');
+    });
+    Route::middleware('permission:setores-pesquisa.view')->group(function () {
+        Route::get('setores-pesquisa/{setorPesquisa}', [\App\Http\Controllers\SetorPesquisaController::class, 'show'])->name('setores-pesquisa.show');
+    });
+    Route::middleware('permission:setores-pesquisa.edit')->group(function () {
+        Route::get('setores-pesquisa/{setorPesquisa}/edit', [\App\Http\Controllers\SetorPesquisaController::class, 'edit'])->name('setores-pesquisa.edit');
+        Route::put('setores-pesquisa/{setorPesquisa}', [\App\Http\Controllers\SetorPesquisaController::class, 'update'])->name('setores-pesquisa.update');
+    });
+    Route::delete('setores-pesquisa/{setorPesquisa}', [\App\Http\Controllers\SetorPesquisaController::class, 'destroy'])
+        ->middleware('permission:setores-pesquisa.delete')
+        ->name('setores-pesquisa.destroy');
 
-    Route::middleware('permission:perguntas.manage')->group(function () {
-        Route::resource('perguntas', \App\Http\Controllers\PerguntaController::class);
+    // Perguntas
+    // Rotas específicas devem vir antes das rotas com parâmetros
+    Route::middleware('permission:perguntas.view')->group(function () {
+        Route::get('perguntas', [\App\Http\Controllers\PerguntaController::class, 'index'])->name('perguntas.index');
     });
+    Route::middleware('permission:perguntas.create')->group(function () {
+        Route::get('perguntas/create', [\App\Http\Controllers\PerguntaController::class, 'create'])->name('perguntas.create');
+        Route::post('perguntas', [\App\Http\Controllers\PerguntaController::class, 'store'])->name('perguntas.store');
+    });
+    Route::middleware('permission:perguntas.view')->group(function () {
+        Route::get('perguntas/{pergunta}', [\App\Http\Controllers\PerguntaController::class, 'show'])->name('perguntas.show');
+    });
+    Route::middleware('permission:perguntas.edit')->group(function () {
+        Route::get('perguntas/{pergunta}/edit', [\App\Http\Controllers\PerguntaController::class, 'edit'])->name('perguntas.edit');
+        Route::put('perguntas/{pergunta}', [\App\Http\Controllers\PerguntaController::class, 'update'])->name('perguntas.update');
+    });
+    Route::delete('perguntas/{pergunta}', [\App\Http\Controllers\PerguntaController::class, 'destroy'])
+        ->middleware('permission:perguntas.delete')
+        ->name('perguntas.destroy');
 
-    Route::middleware('permission:satisfacao.manage')->group(function () {
-        Route::resource('satisfacao', \App\Http\Controllers\SatisfacaoController::class);
+    // Satisfação
+    // Rotas específicas devem vir antes das rotas com parâmetros
+    Route::middleware('permission:satisfacao.view')->group(function () {
+        Route::get('satisfacao', [\App\Http\Controllers\SatisfacaoController::class, 'index'])->name('satisfacao.index');
     });
+    Route::middleware('permission:satisfacao.create')->group(function () {
+        Route::get('satisfacao/create', [\App\Http\Controllers\SatisfacaoController::class, 'create'])->name('satisfacao.create');
+        Route::post('satisfacao', [\App\Http\Controllers\SatisfacaoController::class, 'store'])->name('satisfacao.store');
+    });
+    Route::middleware('permission:satisfacao.view')->group(function () {
+        Route::get('satisfacao/{satisfacao}', [\App\Http\Controllers\SatisfacaoController::class, 'show'])->name('satisfacao.show');
+    });
+    Route::middleware('permission:satisfacao.edit')->group(function () {
+        Route::get('satisfacao/{satisfacao}/edit', [\App\Http\Controllers\SatisfacaoController::class, 'edit'])->name('satisfacao.edit');
+        Route::put('satisfacao/{satisfacao}', [\App\Http\Controllers\SatisfacaoController::class, 'update'])->name('satisfacao.update');
+    });
+    Route::delete('satisfacao/{satisfacao}', [\App\Http\Controllers\SatisfacaoController::class, 'destroy'])
+        ->middleware('permission:satisfacao.delete')
+        ->name('satisfacao.destroy');
 
     Route::get('metricas', [\App\Http\Controllers\MetricaController::class, 'index'])
         ->middleware('permission:metricas.view')

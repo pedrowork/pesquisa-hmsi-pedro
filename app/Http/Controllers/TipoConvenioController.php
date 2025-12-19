@@ -34,6 +34,22 @@ class TipoConvenioController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id): Response
+    {
+        $tipoConvenio = DB::table('tipoconvenio')->where('cod', $id)->first();
+
+        if (!$tipoConvenio) {
+            abort(404);
+        }
+
+        return Inertia::render('tipos-convenio/show', [
+            'tipoConvenio' => $tipoConvenio,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): Response

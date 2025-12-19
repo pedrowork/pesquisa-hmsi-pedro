@@ -27,6 +27,14 @@ class CheckPermission
             return $next($request);
         }
 
+        // Recarregar o usuário do banco para garantir que as permissões estão atualizadas
+        // Isso é necessário porque o usuário pode ter sido modificado após a autenticação
+        $user = \App\Models\User::find($user->id);
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
         // Verificar se o usuário tem a permissão necessária
         if (!$user->hasPermission($permission)) {
             if ($request->header('X-Inertia')) {

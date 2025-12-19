@@ -34,6 +34,22 @@ class SetorPesquisaController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id): Response
+    {
+        $setorPesquisa = DB::table('setor_pesquis')->where('cod', $id)->first();
+
+        if (!$setorPesquisa) {
+            abort(404);
+        }
+
+        return Inertia::render('setores-pesquisa/show', [
+            'setorPesquisa' => $setorPesquisa,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): Response

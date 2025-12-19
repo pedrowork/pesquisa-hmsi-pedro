@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import Can from '@/components/Can';
 import { useState, FormEvent } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -72,12 +73,14 @@ export default function SatisfacaoIndex({
                             Cadastre e gerencie níveis de satisfação do sistema
                         </p>
                     </div>
-                    <Link href="/satisfacao/create">
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Nova Satisfação
-                        </Button>
-                    </Link>
+                    <Can permission="satisfacao.create">
+                        <Link href="/satisfacao/create">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Nova Satisfação
+                            </Button>
+                        </Link>
+                    </Can>
                 </div>
 
                 <Card>
@@ -138,19 +141,23 @@ export default function SatisfacaoIndex({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
-                                                        <Link href={`/satisfacao/${satisfacao.cod}/edit`}>
-                                                            <Button variant="outline" size="sm">
-                                                                <Edit className="h-4 w-4" />
+                                                        <Can permission="satisfacao.edit">
+                                                            <Link href={`/satisfacao/${satisfacao.cod}/edit`}>
+                                                                <Button variant="outline" size="sm">
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        </Can>
+                                                        <Can permission="satisfacao.delete">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleDelete(satisfacao.cod)}
+                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
                                                             </Button>
-                                                        </Link>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => handleDelete(satisfacao.cod)}
-                                                            className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        </Can>
                                                     </div>
                                                 </td>
                                             </tr>

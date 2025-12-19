@@ -34,6 +34,22 @@ class SatisfacaoController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id): Response
+    {
+        $satisfacao = DB::table('satisfacao')->where('cod', $id)->first();
+
+        if (!$satisfacao) {
+            abort(404);
+        }
+
+        return Inertia::render('satisfacao/show', [
+            'satisfacao' => $satisfacao,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): Response

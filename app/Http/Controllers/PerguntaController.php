@@ -34,6 +34,26 @@ class PerguntaController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id): Response
+    {
+        $pergunta = DB::table('perguntas_descricao')
+            ->leftJoin('setor_pesquis', 'perguntas_descricao.cod_setor_pesquis', '=', 'setor_pesquis.cod')
+            ->where('perguntas_descricao.cod', $id)
+            ->select('perguntas_descricao.*', 'setor_pesquis.descricao as setor_pesquisa_descricao')
+            ->first();
+
+        if (!$pergunta) {
+            abort(404);
+        }
+
+        return Inertia::render('perguntas/show', [
+            'pergunta' => $pergunta,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): Response

@@ -71,7 +71,7 @@ class RoleController extends Controller
             'slug' => ['required', 'string', 'max:255', 'unique:roles,slug'],
             'description' => ['nullable', 'string'],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['exists:permissions,id'],
+            'permissions.*' => ['integer', 'exists:permissions,id'],
         ]);
 
         $roleId = DB::table('roles')->insertGetId([
@@ -84,14 +84,22 @@ class RoleController extends Controller
         ]);
 
         // Attach permissions
-        if (!empty($validated['permissions'])) {
+        if (isset($validated['permissions']) && is_array($validated['permissions']) && count($validated['permissions']) > 0) {
+            $permissionsToInsert = [];
             foreach ($validated['permissions'] as $permissionId) {
-                DB::table('role_permissions')->insert([
-                    'role_id' => $roleId,
-                    'permission_id' => $permissionId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                $permissionId = (int) $permissionId;
+                if ($permissionId > 0) {
+                    $permissionsToInsert[] = [
+                        'role_id' => $roleId,
+                        'permission_id' => $permissionId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+            
+            if (!empty($permissionsToInsert)) {
+                DB::table('role_permissions')->insert($permissionsToInsert);
             }
         }
 
@@ -171,7 +179,7 @@ class RoleController extends Controller
             'slug' => ['required', 'string', 'max:255', 'unique:roles,slug,' . $id],
             'description' => ['nullable', 'string'],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['exists:permissions,id'],
+            'permissions.*' => ['integer', 'exists:permissions,id'],
         ]);
 
         DB::table('roles')
@@ -183,22 +191,33 @@ class RoleController extends Controller
                 'updated_at' => now(),
             ]);
 
-        // Sync permissions
+        // Sync permissions - sempre deletar e recriar
         DB::table('role_permissions')->where('role_id', $id)->delete();
 
-        if (!empty($validated['permissions'])) {
-            foreach ($validated['permissions'] as $permissionId) {
-                DB::table('role_permissions')->insert([
-                    'role_id' => $id,
-                    'permission_id' => $permissionId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+        // Processar permissões mesmo se for array vazio (para limpar todas)
+        $permissions = $validated['permissions'] ?? [];
+        
+        if (is_array($permissions) && count($permissions) > 0) {
+            $permissionsToInsert = [];
+            foreach ($permissions as $permissionId) {
+                $permissionId = (int) $permissionId;
+                if ($permissionId > 0) {
+                    $permissionsToInsert[] = [
+                        'role_id' => $id,
+                        'permission_id' => $permissionId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+            
+            if (!empty($permissionsToInsert)) {
+                DB::table('role_permissions')->insert($permissionsToInsert);
             }
         }
 
         return redirect()->route('roles.index')
-            ->with('success', 'Role atualizada com sucesso!');
+            ->with('success', 'Role atualizada com sucesso! Os usuários com este role precisam fazer logout e login novamente para que as novas permissões sejam aplicadas.');
     }
 
     /**

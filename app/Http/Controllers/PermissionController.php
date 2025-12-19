@@ -47,6 +47,41 @@ class PermissionController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(string|int $id): Response
+    {
+        $id = (int) $id;
+        $permission = DB::table('permissions')->where('id', $id)->first();
+
+        if (!$permission) {
+            abort(404);
+        }
+
+        // Get roles with this permission
+        $roles = DB::table('role_permissions')
+            ->join('roles', 'role_permissions.role_id', '=', 'roles.id')
+            ->where('role_permissions.permission_id', $id)
+            ->select('roles.*')
+            ->get()
+            ->toArray();
+
+        // Get users with direct permission
+        $users = DB::table('user_permissions')
+            ->join('users', 'user_permissions.user_id', '=', 'users.id')
+            ->where('user_permissions.permission_id', $id)
+            ->select('users.id', 'users.name', 'users.email', 'users.status')
+            ->get()
+            ->toArray();
+
+        return Inertia::render('permissions/show', [
+            'permission' => $permission,
+            'roles' => $roles,
+            'users' => $users,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): Response
@@ -81,8 +116,9 @@ class PermissionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(int $id): Response
+    public function edit(string|int $id): Response
     {
+        $id = (int) $id;
         $permission = DB::table('permissions')->where('id', $id)->first();
 
         if (!$permission) {
@@ -97,8 +133,9 @@ class PermissionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, string|int $id): RedirectResponse
     {
+        $id = (int) $id;
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:permissions,slug,' . $id],
@@ -121,8 +158,9 @@ class PermissionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id): RedirectResponse
+    public function destroy(string|int $id): RedirectResponse
     {
+        $id = (int) $id;
         // Delete role permissions first
         DB::table('role_permissions')->where('permission_id', $id)->delete();
 

@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import Can from '@/components/Can';
 import { useState, FormEvent } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -85,12 +86,14 @@ export default function TiposConvenioIndex({
                             Cadastre e gerencie tipos de convênio do sistema
                         </p>
                     </div>
-                    <Link href="/tipos-convenio/create">
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Novo Tipo de Convênio
-                        </Button>
-                    </Link>
+                    <Can permission="tipos-convenio.create">
+                        <Link href="/tipos-convenio/create">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Novo Tipo de Convênio
+                            </Button>
+                        </Link>
+                    </Can>
                 </div>
 
                 {/* Filters */}
@@ -169,28 +172,32 @@ export default function TiposConvenioIndex({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
-                                                        <Link
-                                                            href={`/tipos-convenio/${tipoConvenio.cod}/edit`}
-                                                        >
+                                                        <Can permission="tipos-convenio.edit">
+                                                            <Link
+                                                                href={`/tipos-convenio/${tipoConvenio.cod}/edit`}
+                                                            >
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        </Can>
+                                                        <Can permission="tipos-convenio.delete">
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        tipoConvenio.cod
+                                                                    )
+                                                                }
+                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                             >
-                                                                <Edit className="h-4 w-4" />
+                                                                <Trash2 className="h-4 w-4" />
                                                             </Button>
-                                                        </Link>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                handleDelete(
-                                                                    tipoConvenio.cod
-                                                                )
-                                                            }
-                                                            className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        </Can>
                                                     </div>
                                                 </td>
                                             </tr>

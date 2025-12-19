@@ -12,6 +12,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import Can from '@/components/Can';
 import { useState, FormEvent } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -73,12 +74,14 @@ export default function PerguntasIndex({
                             Cadastre e gerencie perguntas do sistema
                         </p>
                     </div>
-                    <Link href="/perguntas/create">
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Nova Pergunta
-                        </Button>
-                    </Link>
+                    <Can permission="perguntas.create">
+                        <Link href="/perguntas/create">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Nova Pergunta
+                            </Button>
+                        </Link>
+                    </Can>
                 </div>
 
                 <Card>
@@ -143,19 +146,23 @@ export default function PerguntasIndex({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
-                                                        <Link href={`/perguntas/${pergunta.cod}/edit`}>
-                                                            <Button variant="outline" size="sm">
-                                                                <Edit className="h-4 w-4" />
+                                                        <Can permission="perguntas.edit">
+                                                            <Link href={`/perguntas/${pergunta.cod}/edit`}>
+                                                                <Button variant="outline" size="sm">
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        </Can>
+                                                        <Can permission="perguntas.delete">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleDelete(pergunta.cod)}
+                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
                                                             </Button>
-                                                        </Link>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => handleDelete(pergunta.cod)}
-                                                            className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        </Can>
                                                     </div>
                                                 </td>
                                             </tr>

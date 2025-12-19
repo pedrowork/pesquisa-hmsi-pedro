@@ -85,6 +85,13 @@ export default function RolesEdit({
         e.preventDefault();
         put(`/roles/${role.id}`, {
             preserveScroll: true,
+            onError: (errors) => {
+                console.error('Erros ao atualizar role:', errors);
+            },
+            onSuccess: () => {
+                // Redirecionar para a lista de roles
+                router.visit('/roles');
+            },
         });
     };
 

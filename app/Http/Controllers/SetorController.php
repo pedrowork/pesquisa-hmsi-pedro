@@ -34,6 +34,22 @@ class SetorController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id): Response
+    {
+        $setor = DB::table('setor')->where('cod', $id)->first();
+
+        if (!$setor) {
+            abort(404);
+        }
+
+        return Inertia::render('setores/show', [
+            'setor' => $setor,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): Response

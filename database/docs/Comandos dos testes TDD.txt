@@ -1,0 +1,30 @@
+Comandos principais
+
+Executar todos os testes de permissões
+php artisan test tests/Feature/Permissions
+
+Executar um arquivo específico
+php artisan test tests/Feature/Permissions/LeitosPermissionsTest.php
+
+Executar um teste específico (filtro)
+php artisan test tests/Feature/Permissions --filter="user with leitos.create can access leitos create form"
+
+Parar no primeiro erro
+php artisan test tests/Feature/Permissions --stop-on-failure
+
+Modo verboso (mais detalhes)
+php artisan test tests/Feature/Permissions -v
+
+Executar apenas testes que passaram/falharam
+# Ver apenas resumo
+php artisan test tests/Feature/Permissions 2>&1 | Select-String -Pattern "Tests:" | Select-Object -Last 1
+
+# Ver apenas falhas
+php artisan test tests/Feature/Permissions 2>&1 | Select-String -Pattern "FAILED"
+
+Executar testes unitários de permissões
+php artisan test tests/Unit/HasPermissionsTest.php
+php artisan test tests/Unit/CheckPermissionMiddlewareTest.php
+
+Executar todos os testes (incluindo unitários)
+php artisan test tests/Featur

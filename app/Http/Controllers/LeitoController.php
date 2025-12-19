@@ -34,6 +34,26 @@ class LeitoController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id): Response
+    {
+        $leito = DB::table('leito')
+            ->leftJoin('setor', 'leito.cod_setor', '=', 'setor.cod')
+            ->where('leito.cod', $id)
+            ->select('leito.*', 'setor.descricao as setor_descricao')
+            ->first();
+
+        if (!$leito) {
+            abort(404);
+        }
+
+        return Inertia::render('leitos/show', [
+            'leito' => $leito,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create(): Response

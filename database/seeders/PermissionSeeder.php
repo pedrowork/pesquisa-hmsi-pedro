@@ -139,36 +139,136 @@ class PermissionSeeder extends Seeder
                 'description' => 'Permite visualizar detalhes de um questionário',
             ],
 
-            // Pesquisa - Módulos (gerenciamento completo)
+            // Pesquisa - Leitos (permissões granulares)
             [
-                'name' => 'Gerenciar Leitos',
-                'slug' => 'leitos.manage',
-                'description' => 'Permite gerenciar leitos (visualizar, criar, editar, excluir)',
+                'name' => 'Visualizar Leitos',
+                'slug' => 'leitos.view',
+                'description' => 'Permite visualizar a lista de leitos',
             ],
             [
-                'name' => 'Gerenciar Setores',
-                'slug' => 'setores.manage',
-                'description' => 'Permite gerenciar setores (visualizar, criar, editar, excluir)',
+                'name' => 'Criar Leito',
+                'slug' => 'leitos.create',
+                'description' => 'Permite criar novos leitos',
             ],
             [
-                'name' => 'Gerenciar Tipos de Convênio',
-                'slug' => 'tipos-convenio.manage',
-                'description' => 'Permite gerenciar tipos de convênio (visualizar, criar, editar, excluir)',
+                'name' => 'Editar Leito',
+                'slug' => 'leitos.edit',
+                'description' => 'Permite editar leitos existentes',
             ],
             [
-                'name' => 'Gerenciar Setores de Pesquisa',
-                'slug' => 'setores-pesquisa.manage',
-                'description' => 'Permite gerenciar setores de pesquisa (visualizar, criar, editar, excluir)',
+                'name' => 'Excluir Leito',
+                'slug' => 'leitos.delete',
+                'description' => 'Permite excluir leitos do sistema',
+            ],
+
+            // Pesquisa - Setores (permissões granulares)
+            [
+                'name' => 'Visualizar Setores',
+                'slug' => 'setores.view',
+                'description' => 'Permite visualizar a lista de setores',
             ],
             [
-                'name' => 'Gerenciar Perguntas',
-                'slug' => 'perguntas.manage',
-                'description' => 'Permite gerenciar perguntas (visualizar, criar, editar, excluir)',
+                'name' => 'Criar Setor',
+                'slug' => 'setores.create',
+                'description' => 'Permite criar novos setores',
             ],
             [
-                'name' => 'Gerenciar Satisfação',
-                'slug' => 'satisfacao.manage',
-                'description' => 'Permite gerenciar opções de satisfação (visualizar, criar, editar, excluir)',
+                'name' => 'Editar Setor',
+                'slug' => 'setores.edit',
+                'description' => 'Permite editar setores existentes',
+            ],
+            [
+                'name' => 'Excluir Setor',
+                'slug' => 'setores.delete',
+                'description' => 'Permite excluir setores do sistema',
+            ],
+
+            // Pesquisa - Tipos de Convênio (permissões granulares)
+            [
+                'name' => 'Visualizar Tipos de Convênio',
+                'slug' => 'tipos-convenio.view',
+                'description' => 'Permite visualizar a lista de tipos de convênio',
+            ],
+            [
+                'name' => 'Criar Tipo de Convênio',
+                'slug' => 'tipos-convenio.create',
+                'description' => 'Permite criar novos tipos de convênio',
+            ],
+            [
+                'name' => 'Editar Tipo de Convênio',
+                'slug' => 'tipos-convenio.edit',
+                'description' => 'Permite editar tipos de convênio existentes',
+            ],
+            [
+                'name' => 'Excluir Tipo de Convênio',
+                'slug' => 'tipos-convenio.delete',
+                'description' => 'Permite excluir tipos de convênio do sistema',
+            ],
+
+            // Pesquisa - Setores de Pesquisa (permissões granulares)
+            [
+                'name' => 'Visualizar Setores de Pesquisa',
+                'slug' => 'setores-pesquisa.view',
+                'description' => 'Permite visualizar a lista de setores de pesquisa',
+            ],
+            [
+                'name' => 'Criar Setor de Pesquisa',
+                'slug' => 'setores-pesquisa.create',
+                'description' => 'Permite criar novos setores de pesquisa',
+            ],
+            [
+                'name' => 'Editar Setor de Pesquisa',
+                'slug' => 'setores-pesquisa.edit',
+                'description' => 'Permite editar setores de pesquisa existentes',
+            ],
+            [
+                'name' => 'Excluir Setor de Pesquisa',
+                'slug' => 'setores-pesquisa.delete',
+                'description' => 'Permite excluir setores de pesquisa do sistema',
+            ],
+
+            // Pesquisa - Perguntas (permissões granulares)
+            [
+                'name' => 'Visualizar Perguntas',
+                'slug' => 'perguntas.view',
+                'description' => 'Permite visualizar a lista de perguntas',
+            ],
+            [
+                'name' => 'Criar Pergunta',
+                'slug' => 'perguntas.create',
+                'description' => 'Permite criar novas perguntas',
+            ],
+            [
+                'name' => 'Editar Pergunta',
+                'slug' => 'perguntas.edit',
+                'description' => 'Permite editar perguntas existentes',
+            ],
+            [
+                'name' => 'Excluir Pergunta',
+                'slug' => 'perguntas.delete',
+                'description' => 'Permite excluir perguntas do sistema',
+            ],
+
+            // Pesquisa - Satisfação (permissões granulares)
+            [
+                'name' => 'Visualizar Satisfação',
+                'slug' => 'satisfacao.view',
+                'description' => 'Permite visualizar a lista de opções de satisfação',
+            ],
+            [
+                'name' => 'Criar Satisfação',
+                'slug' => 'satisfacao.create',
+                'description' => 'Permite criar novas opções de satisfação',
+            ],
+            [
+                'name' => 'Editar Satisfação',
+                'slug' => 'satisfacao.edit',
+                'description' => 'Permite editar opções de satisfação existentes',
+            ],
+            [
+                'name' => 'Excluir Satisfação',
+                'slug' => 'satisfacao.delete',
+                'description' => 'Permite excluir opções de satisfação do sistema',
             ],
             [
                 'name' => 'Visualizar Métricas',
