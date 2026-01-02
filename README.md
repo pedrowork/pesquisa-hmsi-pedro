@@ -2,6 +2,14 @@
 
 Sistema de pesquisa de satisfação hospitalar desenvolvido com Laravel 12, Inertia.js, React e TypeScript.
 
+## 📄 Licença
+
+Este software é proprietário e pertence exclusivamente a **Pedro**.
+
+**Uso não comercial apenas** - É estritamente proibido o uso comercial deste software sem autorização expressa do desenvolvedor.
+
+Para mais informações, consulte o arquivo [LICENSE](LICENSE).
+
 ## Requisitos
 
 - PHP ^8.2

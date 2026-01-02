@@ -1,13 +1,22 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "pesquisa-hmsi/pesquisa-hmsi-pedro",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Sistema de Pesquisa de Satisfação Hospitalar - Hospital e Maternidade Santa Isabel",
     "keywords": [
         "laravel",
-        "framework"
+        "pesquisa",
+        "satisfacao",
+        "hospital",
+        "questionario"
     ],
-    "license": "MIT",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Pedro",
+            "role": "Developer"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "inertiajs/inertia-laravel": "^2.0",

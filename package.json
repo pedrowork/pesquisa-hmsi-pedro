@@ -1,5 +1,10 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
+    "name": "pesquisa-hmsi-pedro",
+    "version": "1.0.0",
+    "description": "Sistema de Pesquisa de Satisfação Hospitalar - Hospital e Maternidade Santa Isabel",
+    "author": "Pedro",
+    "license": "UNLICENSED",
     "private": true,
     "type": "module",
     "scripts": {
