@@ -79,8 +79,19 @@ class AdminSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'status' => 1,
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => null, // Auto-aprovado no seed
             ]
         );
+
+        // Atualizar aprovação se o usuário já existir
+        if ($adminUser->wasRecentlyCreated === false) {
+            $adminUser->update([
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+            ]);
+        }
 
         // usuário master
         $masterUser = User::firstOrCreate(
@@ -90,8 +101,19 @@ class AdminSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'status' => 1,
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => null, // Auto-aprovado no seed
             ]
         );
+
+        // Atualizar aprovação se o usuário já existir
+        if ($masterUser->wasRecentlyCreated === false) {
+            $masterUser->update([
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+            ]);
+        }
 
         // usuário colaborador
         $userUser = User::firstOrCreate(
@@ -101,8 +123,19 @@ class AdminSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'status' => 1,
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => null, // Auto-aprovado no seed
             ]
         );
+
+        // Atualizar aprovação se o usuário já existir
+        if ($userUser->wasRecentlyCreated === false) {
+            $userUser->update([
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+            ]);
+        }
 
         // Associar role master ao usuário master (remover outras roles primeiro)
         DB::table('user_roles')->where('user_id', $masterUser->id)->delete();

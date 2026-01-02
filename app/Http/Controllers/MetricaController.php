@@ -317,13 +317,17 @@ class MetricaController extends Controller
                 ->whereBetween('satisfacao.cod', [10, 20]);
             $applyFilters($temporal);
 
-            // Cross-DB expressions for year/month (SQLite vs MySQL/PostgreSQL)
+            // Cross-DB expressions for year/month (SQLite vs MySQL vs PostgreSQL)
             $driver = DB::connection()->getDriverName();
             if ($driver === 'sqlite') {
                 $yearExpr = "CAST(strftime('%Y', questionario.data_questionario) AS INTEGER)";
                 $monthExpr = "CAST(strftime('%m', questionario.data_questionario) AS INTEGER)";
+            } elseif ($driver === 'pgsql') {
+                // PostgreSQL uses EXTRACT function
+                $yearExpr = "EXTRACT(YEAR FROM questionario.data_questionario)::INTEGER";
+                $monthExpr = "EXTRACT(MONTH FROM questionario.data_questionario)::INTEGER";
             } else {
-                // Works for MySQL and MariaDB; for PgSQL you could use EXTRACT(YEAR FROM ...)
+                // Works for MySQL and MariaDB
                 $yearExpr = 'YEAR(questionario.data_questionario)';
                 $monthExpr = 'MONTH(questionario.data_questionario)';
             }

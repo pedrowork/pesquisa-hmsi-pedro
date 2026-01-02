@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Grid3x3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -90,14 +90,23 @@ export default function PermissionsIndex({
                             Visualize e gerencie as permissões do sistema
                         </p>
                     </div>
-                    <Can permission="permissions.create">
-                        <Link href="/permissions/create">
-                            <Button>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Nova Permissão
-                            </Button>
-                        </Link>
-                    </Can>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="outline"
+                            onClick={() => router.get('/permissions', { matrix: 'true', view: 'roles' })}
+                        >
+                            <Grid3x3 className="mr-2 h-4 w-4" />
+                            Matriz de Permissões
+                        </Button>
+                        <Can permission="permissions.create">
+                            <Link href="/permissions/create">
+                                <Button>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Nova Permissão
+                                </Button>
+                            </Link>
+                        </Can>
+                    </div>
                 </div>
 
                 {/* Filters */}

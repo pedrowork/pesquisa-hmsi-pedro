@@ -53,18 +53,19 @@ function assignPermissionToUser(User $user, string $permissionSlug): void
         ->exists();
     
     if (!$exists) {
-        DB::table('user_permissions')->insert([
-            'user_id' => $user->id,
-            'permission_id' => $permissionId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
+    DB::table('user_permissions')->insert([
+        'user_id' => $user->id,
+        'permission_id' => $permissionId,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
     
-    // Limpar cache do modelo se necessário
-    if (method_exists($user, 'refresh')) {
-        $user->refresh();
-    }
+    // Limpar cache de permissões do usuário
+    $user->clearPermissionsCache();
+}
+    
+    // Limpar cache de permissões do usuário
+    $user->clearPermissionsCache();
 }
 
 /**
@@ -84,6 +85,9 @@ function assignRoleToUser(User $user, string $roleSlug): int
         ['user_id' => $user->id, 'role_id' => $roleId],
         ['created_at' => now(), 'updated_at' => now()]
     );
+    
+    // Limpar cache de permissões do usuário
+    $user->clearPermissionsCache();
     
     return $roleId;
 }
@@ -105,6 +109,27 @@ function assignPermissionToRole(int $roleId, string $permissionSlug): void
         ['role_id' => $roleId, 'permission_id' => $permissionId],
         ['created_at' => now(), 'updated_at' => now()]
     );
+    
+    // Limpar cache de todos os usuários que têm esta role
+    clearCacheForUsersWithRole($roleId);
+}
+
+/**
+ * Limpa o cache de permissões de todos os usuários que têm uma role específica
+ */
+function clearCacheForUsersWithRole(int $roleId): void
+{
+    $userIds = DB::table('user_roles')
+        ->where('role_id', $roleId)
+        ->pluck('user_id')
+        ->toArray();
+    
+    foreach ($userIds as $userId) {
+        $user = User::find($userId);
+        if ($user) {
+            $user->clearPermissionsCache();
+        }
+    }
 }
 
 /**

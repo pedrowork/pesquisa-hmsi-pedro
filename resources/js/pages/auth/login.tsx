@@ -5,11 +5,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
+import { register, home } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
+import { useAppearance } from '@/hooks/use-appearance';
+import { Moon, Sun, Mail } from 'lucide-react';
 
 interface LoginProps {
     status?: string;
@@ -22,12 +23,88 @@ export default function Login({
     canResetPassword,
     canRegister,
 }: LoginProps) {
+    const { appearance, updateAppearance } = useAppearance();
+
+    const isDark =
+        appearance === 'dark' ||
+        (appearance === 'system' &&
+            typeof window !== 'undefined' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    const toggleTheme = () => {
+        updateAppearance(isDark ? 'light' : 'dark');
+    };
+
     return (
-        <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
-        >
-            <Head title="Log in" />
+        <>
+            <Head title="Entrar" />
+            <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-teal-950">
+                {/* Background Effects */}
+                <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-br from-teal-400/20 to-cyan-600/20 blur-3xl dark:from-teal-500/10 dark:to-cyan-500/10 animate-pulse" />
+                    <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-600/20 blur-3xl dark:from-emerald-500/10 dark:to-teal-500/10 animate-pulse delay-1000" />
+                </div>
+
+                {/* Grid Pattern */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)]" />
+
+                <div className="relative z-10 flex min-h-screen flex-col items-center justify-center p-6 sm:p-8">
+                    {/* Header */}
+                    <div className="absolute top-6 left-6 right-6 flex items-center justify-between sm:left-8 sm:right-8">
+                        <Link
+                            href={home()}
+                            className="transition-transform hover:scale-105"
+                        >
+                            <img
+                                src="/logomarca.png"
+                                alt="Hospital e Maternidade Santa Isabel"
+                                className="h-12 w-auto max-w-[200px] object-contain sm:h-14 sm:max-w-[240px]"
+                                loading="eager"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                }}
+                            />
+                        </Link>
+                        <button
+                            onClick={toggleTheme}
+                            className="group relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-sm transition-all hover:bg-white hover:shadow-md dark:bg-slate-800/80 dark:border-slate-700/50 dark:hover:bg-slate-800"
+                            aria-label="Alternar tema"
+                        >
+                            <Sun className="h-5 w-5 text-amber-500 transition-all group-hover:rotate-90 dark:hidden" />
+                            <Moon className="hidden h-5 w-5 text-teal-400 transition-all group-hover:-rotate-12 dark:block" />
+                        </button>
+                    </div>
+
+                    {/* Login Card */}
+                    <div className="w-full max-w-md">
+                        <div className="rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/50 shadow-xl p-8 dark:bg-slate-800/60 dark:border-slate-700/50">
+                            <div className="mb-8 text-center">
+                                <div className="mb-4 flex justify-center">
+                                    <img
+                                        src="/logomarca.png"
+                                        alt="Hospital e Maternidade Santa Isabel"
+                                        className="h-20 w-auto max-w-[300px] object-contain sm:h-24 sm:max-w-[360px]"
+                                        loading="eager"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                        }}
+                                    />
+                                </div>
+                                <h1 className="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">
+                                    Bem-vindo de volta
+                                </h1>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                    Entre com suas credenciais para acessar o sistema
+                                </p>
+                            </div>
+
+                            {status && (
+                                <div className="mb-6 rounded-xl bg-green-50 border border-green-200 p-4 text-center text-sm font-medium text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                                    {status}
+                                </div>
+                            )}
 
             <Form
                 {...store.form()}
@@ -38,7 +115,14 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                                <Label
+                                                    htmlFor="email"
+                                                    className="text-sm font-semibold text-slate-700 dark:text-slate-300"
+                                                >
+                                                    Email
+                                                </Label>
+                                                <div className="relative">
+                                                    <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                 <Input
                                     id="email"
                                     type="email"
@@ -47,21 +131,28 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                                    placeholder="seu@email.com"
+                                                    className="pl-10 h-11 bg-white/80 backdrop-blur-sm border-slate-200 dark:bg-slate-900/80 dark:border-slate-700 focus:border-teal-500 focus:ring-teal-500/20 dark:focus:border-teal-400"
                                 />
+                                                </div>
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                                    <Label
+                                                        htmlFor="password"
+                                                        className="text-sm font-semibold text-slate-700 dark:text-slate-300"
+                                                    >
+                                                        Senha
+                                                    </Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                                            className="ml-auto text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
+                                                            Esqueceu a senha?
                                         </TextLink>
                                     )}
                                 </div>
@@ -72,7 +163,8 @@ export default function Login({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                                    placeholder="••••••••"
+                                                    className="h-11 bg-white/80 backdrop-blur-sm border-slate-200 dark:bg-slate-900/80 dark:border-slate-700 focus:border-teal-500 focus:ring-teal-500/20 dark:focus:border-teal-400"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -83,38 +175,47 @@ export default function Login({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                                <Label
+                                                    htmlFor="remember"
+                                                    className="text-sm text-slate-600 dark:text-slate-400 cursor-pointer"
+                                                >
+                                                    Lembrar-me
+                                                </Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                                className="mt-2 h-11 w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-500/25 transition-all hover:shadow-xl hover:shadow-teal-500/30 hover:scale-[1.02] dark:shadow-teal-500/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
                             >
-                                {processing && <Spinner />}
-                                Log in
+                                                {processing ? (
+                                                    <Spinner className="mr-2" />
+                                                ) : null}
+                                                {processing ? 'Entrando...' : 'Entrar'}
                             </Button>
                         </div>
 
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
-                                    Sign up
+                                            <div className="text-center text-sm text-slate-600 dark:text-slate-400">
+                                                Não tem uma conta?{' '}
+                                                <TextLink
+                                                    href={register()}
+                                                    className="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
+                                                    tabIndex={5}
+                                                >
+                                                    Criar conta
                                 </TextLink>
                             </div>
                         )}
                     </>
                 )}
             </Form>
-
-            {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
+                        </div>
+                    </div>
                 </div>
-            )}
-        </AuthLayout>
+            </div>
+        </>
     );
 }

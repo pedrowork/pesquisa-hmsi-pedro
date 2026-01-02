@@ -25,6 +25,7 @@ interface Resposta {
     resposta_descricao: string;
     usuario_nome: string;
     data_questionario: string | null;
+    hora_questionario: string | null;
     observacao: string | null;
 }
 
@@ -179,6 +180,7 @@ export default function QuestionariosShow({
                                                     {new Date(
                                                         resposta.data_questionario
                                                     ).toLocaleDateString('pt-BR')}
+                                                    {resposta.hora_questionario && ` ${resposta.hora_questionario}`}
                                                 </span>
                                             )}
                                         </div>

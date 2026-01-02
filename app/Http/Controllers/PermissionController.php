@@ -15,6 +15,11 @@ class PermissionController extends Controller
      */
     public function index(Request $request): Response
     {
+        // Se o parâmetro 'matrix' estiver presente, retornar a matriz
+        if ($request->has('matrix') && $request->matrix === 'true') {
+            return $this->matrix($request);
+        }
+
         $query = DB::table('permissions');
 
         // Search
@@ -42,6 +47,85 @@ class PermissionController extends Controller
             'permissions' => $permissions,
             'filters' => [
                 'search' => $request->search ?? '',
+            ],
+        ]);
+    }
+
+    /**
+     * Display permissions matrix.
+     */
+    public function matrix(Request $request): Response
+    {
+        $viewType = $request->get('view', 'roles'); // 'roles' ou 'users'
+        $search = $request->get('search', '');
+
+        // Buscar todas as permissões
+        $permissionsQuery = DB::table('permissions');
+        if ($search) {
+            $permissionsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        $permissions = $permissionsQuery->orderBy('name')->get();
+
+        // Buscar todas as roles
+        $roles = DB::table('roles')->orderBy('name')->get();
+
+        // Buscar usuários ativos (limitado para performance)
+        $usersQuery = DB::table('users')->where('status', 1);
+        if ($search) {
+            $usersQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        $users = $usersQuery->orderBy('name')->limit(100)->get();
+
+        // Buscar permissões por role (formato: role_id => [permission_ids])
+        $rolePermissionsData = DB::table('role_permissions')->get();
+        $rolePermissions = [];
+        foreach ($rolePermissionsData as $rp) {
+            if (!isset($rolePermissions[$rp->role_id])) {
+                $rolePermissions[$rp->role_id] = [];
+            }
+            $rolePermissions[$rp->role_id][] = $rp->permission_id;
+        }
+
+        // Buscar permissões por usuário (formato: user_id => [permission_ids])
+        $userPermissionsData = DB::table('user_permissions')->get();
+        $userPermissions = [];
+        foreach ($userPermissionsData as $up) {
+            if (!isset($userPermissions[$up->user_id])) {
+                $userPermissions[$up->user_id] = [];
+            }
+            $userPermissions[$up->user_id][] = $up->permission_id;
+        }
+
+        // Organizar permissões por contexto (agrupar por prefixo)
+        $groupedPermissions = [];
+        foreach ($permissions as $permission) {
+            $parts = explode('.', $permission->slug);
+            $context = count($parts) > 1 ? $parts[0] : 'outros';
+            
+            if (!isset($groupedPermissions[$context])) {
+                $groupedPermissions[$context] = [];
+            }
+            
+            $groupedPermissions[$context][] = $permission;
+        }
+
+        return Inertia::render('permissions/matrix', [
+            'permissions' => $permissions,
+            'roles' => $roles,
+            'users' => $users,
+            'groupedPermissions' => $groupedPermissions,
+            'rolePermissions' => $rolePermissions,
+            'userPermissions' => $userPermissions,
+            'viewType' => $viewType,
+            'filters' => [
+                'search' => $search,
             ],
         ]);
     }
@@ -172,6 +256,126 @@ class PermissionController extends Controller
 
         return redirect()->route('permissions.index')
             ->with('success', 'Permissão excluída com sucesso!');
+    }
+
+    /**
+     * Update permissions for a role.
+     */
+    public function updateRolePermissions(Request $request, int $roleId): RedirectResponse
+    {
+        $validated = $request->validate([
+            'permissions' => ['required', 'array'],
+            'permissions.*' => ['integer', 'exists:permissions,id'],
+        ]);
+
+        // Remover todas as permissões atuais da role
+        DB::table('role_permissions')->where('role_id', $roleId)->delete();
+
+        // Adicionar novas permissões
+        if (!empty($validated['permissions'])) {
+            $insertData = array_map(function ($permissionId) use ($roleId) {
+                return [
+                    'role_id' => $roleId,
+                    'permission_id' => $permissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }, $validated['permissions']);
+
+            DB::table('role_permissions')->insert($insertData);
+        }
+
+        return redirect()->back()
+            ->with('success', 'Permissões da role atualizadas com sucesso!');
+    }
+
+    /**
+     * Update permissions for a user.
+     */
+    public function updateUserPermissions(Request $request, int $userId): RedirectResponse
+    {
+        $validated = $request->validate([
+            'permissions' => ['required', 'array'],
+            'permissions.*' => ['integer', 'exists:permissions,id'],
+        ]);
+
+        // Remover todas as permissões diretas do usuário
+        DB::table('user_permissions')->where('user_id', $userId)->delete();
+
+        // Adicionar novas permissões diretas
+        if (!empty($validated['permissions'])) {
+            $insertData = array_map(function ($permissionId) use ($userId) {
+                return [
+                    'user_id' => $userId,
+                    'permission_id' => $permissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }, $validated['permissions']);
+
+            DB::table('user_permissions')->insert($insertData);
+        }
+
+        return redirect()->back()
+            ->with('success', 'Permissões do usuário atualizadas com sucesso!');
+    }
+
+    /**
+     * Toggle a single permission for a role.
+     */
+    public function toggleRolePermission(Request $request, int $roleId, int $permissionId): \Illuminate\Http\JsonResponse
+    {
+        $exists = DB::table('role_permissions')
+            ->where('role_id', $roleId)
+            ->where('permission_id', $permissionId)
+            ->exists();
+
+        if ($exists) {
+            DB::table('role_permissions')
+                ->where('role_id', $roleId)
+                ->where('permission_id', $permissionId)
+                ->delete();
+            
+            return response()->json(['granted' => false]);
+        } else {
+            DB::table('role_permissions')->insert([
+                'role_id' => $roleId,
+                'permission_id' => $permissionId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            return response()->json(['granted' => true]);
+        }
+    }
+
+    /**
+     * Toggle a single permission for a user.
+     */
+    public function toggleUserPermission(Request $request, int $userId, int $permissionId): \Illuminate\Http\JsonResponse
+    {
+        $exists = DB::table('user_permissions')
+            ->where('user_id', $userId)
+            ->where('permission_id', $permissionId)
+            ->exists();
+
+        if ($exists) {
+            DB::table('user_permissions')
+                ->where('user_id', $userId)
+                ->where('permission_id', $permissionId)
+                ->delete();
+            
+            return response()->json(['granted' => false]);
+        } else {
+            DB::table('user_permissions')->insert([
+                'user_id' => $userId,
+                'permission_id' => $permissionId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            return response()->json(['granted' => true]);
+        }
     }
 }
 

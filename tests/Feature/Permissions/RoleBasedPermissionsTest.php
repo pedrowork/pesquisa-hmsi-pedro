@@ -73,7 +73,8 @@ test('updating role permissions affects users with that role', function () {
         ->where('permission_id', $permission->id)
         ->delete();
     
-    // Recarregar usuário para refletir mudanças
+    // Limpar cache do usuário
+    $user->clearPermissionsCache();
     $user->refresh();
     
     expect($user->hasPermission('perm1'))->toBeFalse();
@@ -96,6 +97,8 @@ test('user loses access when permission is removed from role', function () {
         ->where('permission_id', $permission->id)
         ->delete();
     
+    // Limpar cache do usuário
+    $user->clearPermissionsCache();
     $user->refresh();
     expect($user->hasPermission('dashboard.view'))->toBeFalse();
 });

@@ -26,6 +26,7 @@ interface Questionario {
     email: string;
     telefone: string;
     data_questionario: string;
+    hora_questionario: string | null;
     usuario_nome: string;
     total_respostas: number;
 }
@@ -140,7 +141,7 @@ export default function QuestionariosIndex({
                                                 <td className="px-4 py-3">{questionario.telefone}</td>
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
                                                     {questionario.data_questionario
-                                                        ? new Date(questionario.data_questionario).toLocaleDateString('pt-BR')
+                                                        ? `${new Date(questionario.data_questionario).toLocaleDateString('pt-BR')}${questionario.hora_questionario ? ` ${questionario.hora_questionario}` : ''}`
                                                         : '—'}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">

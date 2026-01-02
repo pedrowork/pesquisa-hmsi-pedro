@@ -1,0 +1,8 @@
+2026/01/02 03:15:08 [error] 22#22: *29 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"
+2026/01/02 03:17:19 [error] 24#24: *26 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"
+2026/01/02 03:18:26 [error] 24#24: *26 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"
+2026/01/02 03:22:15 [error] 24#24: *26 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"
+2026/01/02 03:22:51 [error] 24#24: *26 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"
+2026/01/02 03:25:39 [error] 22#22: *121 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"
+2026/01/02 03:25:55 [error] 22#22: *121 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"
+2026/01/02 03:29:57 [error] 22#22: *169 access forbidden by rule, client: 172.29.0.1, server: _, request: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1", host: "localhost"

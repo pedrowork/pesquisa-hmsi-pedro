@@ -23,6 +23,13 @@ class ResetUserPassword implements ResetsUserPasswords
 
         $user->forceFill([
             'password' => $input['password'],
+            'password_changed_at' => now(),
         ])->save();
+
+        // Invalidar todas as sessões após reset de senha
+        app(\App\Services\SessionSecurityService::class)->invalidateAllSessions($user);
+
+        // Registrar mudança de senha
+        app(\App\Services\AuditService::class)->logPasswordChanged($user);
     }
 }

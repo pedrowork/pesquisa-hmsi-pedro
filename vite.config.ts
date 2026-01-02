@@ -24,4 +24,9 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    server: {
+        host: '127.0.0.1', // Força IPv4 para evitar problemas com CSP e IPv6
+        port: 5173,
+        strictPort: false, // Permite usar próxima porta disponível se 5173 estiver ocupada
+    },
 });

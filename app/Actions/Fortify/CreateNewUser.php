@@ -30,10 +30,15 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
+        // Criar usuário com status pendente se aprovação estiver habilitada
+        $requiresApproval = config('security.user_approval_required', true);
+
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'approval_status' => $requiresApproval ? 'pending' : 'approved',
+            'status' => $requiresApproval ? 0 : 1, // Inativo até aprovação
         ]);
     }
 }

@@ -265,7 +265,7 @@ export default function QuestionariosCreate({
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="nome">
                                         Nome <span className="text-red-500">*</span>
@@ -295,7 +295,11 @@ export default function QuestionariosCreate({
                                     />
                                     <InputError message={errors.email} />
                                 </div>
+                            </div>
 
+
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="telefone">
                                         Telefone <span className="text-red-500">*</span>
@@ -311,6 +315,22 @@ export default function QuestionariosCreate({
                                         onChange={handleTelefoneChange}
                                     />
                                     <InputError message={errors.telefone} />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="idade">
+                                        Idade <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="idade"
+                                        name="idade"
+                                        type="number"
+                                        required
+                                        min="0"
+                                        value={data.idade}
+                                        onChange={(e) => setData('idade', e.target.value)}
+                                    />
+                                    <InputError message={errors.idade} />
                                 </div>
 
                                 <div className="space-y-2">
@@ -333,21 +353,6 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.sexo} />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="idade">
-                                        Idade <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Input
-                                        id="idade"
-                                        name="idade"
-                                        type="number"
-                                        required
-                                        min="0"
-                                        value={data.idade}
-                                        onChange={(e) => setData('idade', e.target.value)}
-                                    />
-                                    <InputError message={errors.idade} />
-                                </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="tipo_paciente">Tipo de Paciente</Label>
@@ -460,15 +465,15 @@ export default function QuestionariosCreate({
 
                     {/* Perguntas e Respostas */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Perguntas</CardTitle>
-                            <CardDescription>
+                        <CardHeader className="px-4 sm:px-6">
+                            <CardTitle className="text-lg sm:text-xl">Perguntas</CardTitle>
+                            <CardDescription className="text-sm sm:text-base">
                                 Responda as perguntas de pesquisa de satisfação
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-6">
+                        <CardContent className="space-y-2 sm:space-y-2 px-2 sm:px-4">
                             {perguntas.length === 0 ? (
-                                <p className="text-muted-foreground text-center py-4">
+                                <p className="text-muted-foreground text-center py-4 text-sm sm:text-base">
                                     Nenhuma pergunta cadastrada. Cadastre perguntas primeiro.
                                 </p>
                             ) : (
@@ -480,7 +485,10 @@ export default function QuestionariosCreate({
                                         // Renderizar textarea para perguntas tipo 4
                                         return (
                                             <div key={pergunta.cod} className="space-y-2">
-                                                <Label htmlFor={`pergunta-texto-${pergunta.cod}`}>
+                                                <Label
+                                                    htmlFor={`pergunta-texto-${pergunta.cod}`}
+                                                    className="text-sm sm:text-base"
+                                                >
                                                     {pergunta.descricao} <span className="text-red-500">*</span>
                                                 </Label>
                                                 <textarea
@@ -494,7 +502,7 @@ export default function QuestionariosCreate({
                                                             [pergunta.cod]: e.target.value,
                                                         }))
                                                     }
-                                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm sm:text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                                     maxLength={1000}
                                                     required
                                                 />
@@ -542,19 +550,27 @@ export default function QuestionariosCreate({
                                             return a.cod - b.cod;
                                         });
 
+                                    // Determinar se é escala 0-10 (tipo 3) para usar layout diferente em mobile
+                                    const isEscalaNumerica = pergunta.cod_tipo_pergunta === 3;
+
                                     return (
                                         <div key={pergunta.cod} className="space-y-2">
-                                            <Label htmlFor={`pergunta-${pergunta.cod}`}>
+                                            <Label
+                                                htmlFor={`pergunta-${pergunta.cod}`}
+                                                className="text-sm sm:text-base break-words"
+                                            >
                                                 {pergunta.descricao} <span className="text-red-500">*</span>
                                             </Label>
-                                            <div className="grid gap-2">
                                                 {satisfacoesFiltradas.length === 0 ? (
                                                     <p className="text-sm text-muted-foreground">
                                                         Nenhuma opção disponível
                                                     </p>
                                                 ) : (
                                                     <div
-                                                        className="flex items-center gap-2 overflow-x-auto whitespace-nowrap p-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                                                    className={cn(
+                                                        // Layout horizontal com wrap para que todos fiquem na mesma linha
+                                                        'flex flex-wrap items-center gap-2'
+                                                    )}
                                                         role="group"
                                                         aria-label={`Opções de resposta para a pergunta ${pergunta.descricao}`}
                                                     >
@@ -567,8 +583,8 @@ export default function QuestionariosCreate({
                                                                     key={satisfacao.cod}
                                                                     htmlFor={checkboxId}
                                                                     className={cn(
-                                                                        'inline-flex shrink-0 items-center gap-2 rounded-md border border-input px-3 py-1 text-sm hover:bg-muted/50 transition-colors',
-                                                                        checked && 'bg-primary/10 border-primary'
+                                                                    'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors cursor-pointer',
+                                                                    checked && 'bg-primary/10'
                                                                     )}
                                                                 >
                                                                     <Checkbox
@@ -582,6 +598,7 @@ export default function QuestionariosCreate({
                                                                             )
                                                                         }
                                                                         aria-label={`Selecionar resposta ${satisfacao.descricao}`}
+                                                                    className="h-4 w-4"
                                                                     />
                                                                     <span className="text-sm leading-none">
                                                                         {satisfacao.descricao}
@@ -591,7 +608,6 @@ export default function QuestionariosCreate({
                                                         })}
                                                     </div>
                                                 )}
-                                            </div>
                                         </div>
                                     );
                                 })

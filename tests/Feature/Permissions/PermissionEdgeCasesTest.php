@@ -86,6 +86,9 @@ test('removed permission from database does not cause error', function () {
     // Remover permissão do banco
     DB::table('permissions')->where('id', $permissionId)->delete();
     
+    // Limpar cache do usuário para refletir a mudança
+    $user->clearPermissionsCache();
+    
     // Deve retornar false sem causar erro
     expect($user->hasPermission('test.permission'))->toBeFalse();
 });

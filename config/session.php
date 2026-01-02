@@ -32,9 +32,21 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 120), // 2 horas padrão
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Session Inactivity Timeout
+    |--------------------------------------------------------------------------
+    |
+    | Timeout de inatividade em minutos. Se o usuário não realizar nenhuma
+    | ação por este período, será deslogado automaticamente.
+    |
+    */
+    
+    'inactivity_timeout' => (int) env('SESSION_INACTIVITY_TIMEOUT', 30), // 30 minutos
 
     /*
     |--------------------------------------------------------------------------
@@ -169,7 +181,7 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => env('SESSION_SECURE_COOKIE', false), // true em produção, false em desenvolvimento
 
     /*
     |--------------------------------------------------------------------------
@@ -199,7 +211,7 @@ return [
     |
     */
 
-    'same_site' => env('SESSION_SAME_SITE', 'lax'),
+    'same_site' => env('SESSION_SAME_SITE', 'lax'), // lax, strict, ou none
 
     /*
     |--------------------------------------------------------------------------

@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\CheckSessionSecurity;
+use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,10 +20,18 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        // Middleware de segurança HTTP/HTTPS (global, executa primeiro)
+        $middleware->web(prepend: [
+            ForceHttps::class,
+            SecurityHeaders::class,
+        ]);
+
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            CheckSessionSecurity::class, // Verificação de segurança de sessão
+            \App\Http\Middleware\RequireApproval::class, // Verificação de aprovação
         ]);
 
         // Registrar middleware de permissões com alias

@@ -25,6 +25,7 @@ class QuestionarioController extends Controller
                 'dados_do_paciente.email',
                 'dados_do_paciente.telefone',
                 DB::raw('MAX(questionario.data_questionario) as data_questionario'),
+                DB::raw('MAX(questionario.hora_questionario) as hora_questionario'),
                 DB::raw('MAX(users.name) as usuario_nome'),
                 DB::raw('COUNT(*) as total_respostas')
             )
@@ -208,6 +209,7 @@ class QuestionarioController extends Controller
             }
 
             $dataQuestionario = now()->format('Y-m-d');
+            $horaQuestionario = now()->format('H:i:s');
 
             // Buscar todas as perguntas para obter seus cod_setor_pesquis e tipos
             $perguntasIds = array_map(function ($resposta) {
@@ -261,6 +263,7 @@ class QuestionarioController extends Controller
                     'cod_paciente' => (int) $pacienteId,
                     'cod_usuario' => (int) $usuarioId,
                     'data_questionario' => $dataQuestionario,
+                    'hora_questionario' => $horaQuestionario,
                     'data_isretroativa' => $validated['data_isretroativa'] ?? false,
                     'data_retroativa' => $validated['data_retroativa'] ?? null,
                     'cod_setor_pesquis' => $codSetorPesquis, // Vinculado automaticamente da pergunta

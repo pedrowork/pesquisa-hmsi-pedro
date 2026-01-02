@@ -56,8 +56,22 @@ class RoleController extends Controller
             ->get()
             ->toArray();
 
+        // Agrupar permissões por contexto (prefixo do slug)
+        $groupedPermissions = [];
+        foreach ($permissions as $permission) {
+            $parts = explode('.', $permission->slug);
+            $context = count($parts) > 1 ? $parts[0] : 'outros';
+            
+            if (!isset($groupedPermissions[$context])) {
+                $groupedPermissions[$context] = [];
+            }
+            
+            $groupedPermissions[$context][] = $permission;
+        }
+
         return Inertia::render('roles/create', [
             'permissions' => $permissions,
+            'groupedPermissions' => $groupedPermissions,
         ]);
     }
 
@@ -162,9 +176,23 @@ class RoleController extends Controller
             ->pluck('permission_id')
             ->toArray();
 
+        // Agrupar permissões por contexto (prefixo do slug)
+        $groupedPermissions = [];
+        foreach ($permissions as $permission) {
+            $parts = explode('.', $permission->slug);
+            $context = count($parts) > 1 ? $parts[0] : 'outros';
+            
+            if (!isset($groupedPermissions[$context])) {
+                $groupedPermissions[$context] = [];
+            }
+            
+            $groupedPermissions[$context][] = $permission;
+        }
+
         return Inertia::render('roles/edit', [
             'role' => $role,
             'permissions' => $permissions,
+            'groupedPermissions' => $groupedPermissions,
             'rolePermissions' => $rolePermissions,
         ]);
     }

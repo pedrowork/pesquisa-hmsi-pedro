@@ -23,6 +23,66 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $stats = [];
         $researchStats = [];
 
+        // Métricas de evolução - sempre disponíveis para todos os colaboradores autenticados
+        // Questionários do dia (hoje)
+        $questionariosHoje = \Illuminate\Support\Facades\DB::table('questionario')
+            ->whereDate('data_questionario', now()->toDateString())
+            ->select('cod_paciente')
+            ->distinct()
+            ->count('cod_paciente');
+        $researchStats['questionariosHoje'] = $questionariosHoje;
+
+        // Questionários da semana (últimos 7 dias)
+        $questionariosSemana = \Illuminate\Support\Facades\DB::table('questionario')
+            ->whereBetween('data_questionario', [
+                now()->subDays(6)->startOfDay()->toDateString(),
+                now()->endOfDay()->toDateString()
+            ])
+            ->select('cod_paciente')
+            ->distinct()
+            ->count('cod_paciente');
+        $researchStats['questionariosSemana'] = $questionariosSemana;
+
+        // Questionários do mês (mês atual)
+        $questionariosMesAtual = \Illuminate\Support\Facades\DB::table('questionario')
+            ->whereMonth('data_questionario', now()->month)
+            ->whereYear('data_questionario', now()->year)
+            ->select('cod_paciente')
+            ->distinct()
+            ->count('cod_paciente');
+        $researchStats['questionariosMesAtual'] = $questionariosMesAtual;
+
+        // Comparação com o ano passado
+        $anoAtual = now()->year;
+        $anoPassado = $anoAtual - 1;
+
+        // Questionários do mesmo dia do ano passado
+        $mesmoDiaAnoPassado = \Illuminate\Support\Facades\DB::table('questionario')
+            ->whereDate('data_questionario', now()->subYear()->toDateString())
+            ->select('cod_paciente')
+            ->distinct()
+            ->count('cod_paciente');
+        $researchStats['questionariosMesmoDiaAnoPassado'] = $mesmoDiaAnoPassado;
+
+        // Questionários da mesma semana do ano passado (mesmos dias da semana)
+        $inicioSemanaAnoPassado = now()->subYear()->startOfWeek()->toDateString();
+        $fimSemanaAnoPassado = now()->subYear()->endOfWeek()->toDateString();
+        $mesmaSemanaAnoPassado = \Illuminate\Support\Facades\DB::table('questionario')
+            ->whereBetween('data_questionario', [$inicioSemanaAnoPassado, $fimSemanaAnoPassado])
+            ->select('cod_paciente')
+            ->distinct()
+            ->count('cod_paciente');
+        $researchStats['questionariosMesmaSemanaAnoPassado'] = $mesmaSemanaAnoPassado;
+
+        // Questionários do mesmo mês do ano passado
+        $mesmoMesAnoPassado = \Illuminate\Support\Facades\DB::table('questionario')
+            ->whereMonth('data_questionario', now()->month)
+            ->whereYear('data_questionario', $anoPassado)
+            ->select('cod_paciente')
+            ->distinct()
+            ->count('cod_paciente');
+        $researchStats['questionariosMesmoMesAnoPassado'] = $mesmoMesAnoPassado;
+
         // Calcular estatísticas de gerenciamento apenas se tiver permissão
         if ($isAdmin || $user->hasPermission('dashboard.stats.management')) {
             $stats = [
@@ -156,6 +216,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('permission:permissions.edit')->group(function () {
         Route::get('permissions/{permission}/edit', [\App\Http\Controllers\PermissionController::class, 'edit'])->name('permissions.edit');
         Route::put('permissions/{permission}', [\App\Http\Controllers\PermissionController::class, 'update'])->name('permissions.update');
+        // Rotas para matriz de permissões
+        Route::post('permissions/roles/{role}/permissions', [\App\Http\Controllers\PermissionController::class, 'updateRolePermissions'])->name('permissions.roles.update');
+        Route::post('permissions/users/{user}/permissions', [\App\Http\Controllers\PermissionController::class, 'updateUserPermissions'])->name('permissions.users.update');
+        Route::post('permissions/roles/{role}/toggle/{permission}', [\App\Http\Controllers\PermissionController::class, 'toggleRolePermission'])->name('permissions.roles.toggle');
+        Route::post('permissions/users/{user}/toggle/{permission}', [\App\Http\Controllers\PermissionController::class, 'toggleUserPermission'])->name('permissions.users.toggle');
     });
     Route::delete('permissions/{permission}', [\App\Http\Controllers\PermissionController::class, 'destroy'])
         ->middleware('permission:permissions.delete')
@@ -297,6 +362,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('metricas', [\App\Http\Controllers\MetricaController::class, 'index'])
         ->middleware('permission:metricas.view')
         ->name('metricas.index');
+
+    // Dashboard de Segurança
+    Route::middleware('permission:security.view')->group(function () {
+        Route::get('admin/security', [\App\Http\Controllers\Admin\SecurityDashboardController::class, 'index'])->name('admin.security.dashboard');
+        Route::get('admin/security/alerts', [\App\Http\Controllers\Admin\SecurityDashboardController::class, 'alerts'])->name('admin.security.alerts');
+        Route::post('admin/security/alerts/{alert}/resolve', [\App\Http\Controllers\Admin\SecurityDashboardController::class, 'resolve'])->name('admin.security.alerts.resolve');
+        Route::get('admin/security/export-siem', [\App\Http\Controllers\Admin\SecurityDashboardController::class, 'exportSIEM'])->name('admin.security.export-siem');
+    });
+
+    // Aprovação de Usuários
+    Route::middleware('permission:users.approve')->group(function () {
+        Route::get('admin/users/pending-approval', [\App\Http\Controllers\Admin\UserApprovalController::class, 'index'])->name('admin.users.pending-approval');
+        Route::post('admin/users/{user}/approve', [\App\Http\Controllers\Admin\UserApprovalController::class, 'approve'])->name('admin.users.approve');
+        Route::post('admin/users/{user}/reject', [\App\Http\Controllers\Admin\UserApprovalController::class, 'reject'])->name('admin.users.reject');
+    });
+
+    // Foto de Perfil
+    Route::post('profile-photo', [\App\Http\Controllers\ProfilePhotoController::class, 'update'])->name('profile-photo.update');
+    Route::delete('profile-photo', [\App\Http\Controllers\ProfilePhotoController::class, 'destroy'])->name('profile-photo.destroy');
+
+    // Recuperação de Conta
+    Route::get('account-recovery', [\App\Http\Controllers\AccountRecoveryController::class, 'show'])->name('account-recovery.show');
+    Route::post('account-recovery', [\App\Http\Controllers\AccountRecoveryController::class, 'recover'])->name('account-recovery.recover');
 });
 
 require __DIR__.'/settings.php';

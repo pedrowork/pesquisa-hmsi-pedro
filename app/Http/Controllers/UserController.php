@@ -72,6 +72,10 @@ class UserController extends Controller
             'status' => ['required', 'integer', 'in:0,1'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,id'],
+            'department' => ['nullable', 'string', 'max:255'],
+            'position' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'bio' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $user = User::create([
@@ -79,7 +83,19 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'status' => $validated['status'],
+            'department' => $validated['department'] ?? null,
+            'position' => $validated['position'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'bio' => $validated['bio'] ?? null,
+            'approval_status' => config('security.user_approval_required', true) ? 'pending' : 'approved',
         ]);
+
+        // Registrar criação (o observer também registrará, mas aqui temos roles)
+        app(\App\Services\AuditService::class)->logUserCreated(
+            $user,
+            $user->getAttributes(),
+            "Usuário criado via UserController"
+        );
 
         // Attach roles
         if (!empty($validated['roles'])) {
@@ -203,17 +219,46 @@ class UserController extends Controller
             'permissions.*' => ['exists:permissions,id'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,id'],
+            'department' => ['nullable', 'string', 'max:255'],
+            'position' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'bio' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->status = $validated['status'];
+        $user->department = $validated['department'] ?? null;
+        $user->position = $validated['position'] ?? null;
+        $user->phone = $validated['phone'] ?? null;
+        $user->bio = $validated['bio'] ?? null;
 
         if (!empty($validated['password'])) {
+            // Verificar histórico de senhas
+            $passwordPolicy = app(\App\Services\PasswordPolicyService::class);
+            if ($passwordPolicy->isPasswordInHistory($user, $validated['password'])) {
+                return back()->withErrors([
+                    'password' => 'Esta senha foi usada recentemente. Escolha uma senha diferente.',
+                ]);
+            }
+
             $user->password = Hash::make($validated['password']);
+            $passwordPolicy->updatePasswordPolicy($user, $validated['password']);
         }
 
+        $oldValues = $user->getOriginal();
         $user->save();
+        $newValues = $user->getChanges();
+
+        // Registrar no audit log (o observer também registrará, mas aqui temos mais contexto)
+        if (!empty($newValues)) {
+            app(\App\Services\AuditService::class)->logUserUpdated(
+                $user,
+                $oldValues,
+                $newValues,
+                "Usuário atualizado via UserController"
+            );
+        }
 
         // Sincronizar permissões diretas
         DB::table('user_permissions')->where('user_id', $user->id)->delete();
@@ -250,6 +295,15 @@ class UserController extends Controller
      */
     public function destroy(User $user): RedirectResponse
     {
+        $deletedData = $user->toArray();
+        
+        // Registrar antes de deletar (o observer também registrará)
+        app(\App\Services\AuditService::class)->logUserDeleted(
+            $user,
+            $deletedData,
+            "Usuário excluído via UserController"
+        );
+        
         $user->delete();
 
         return redirect()->route('users.index')
