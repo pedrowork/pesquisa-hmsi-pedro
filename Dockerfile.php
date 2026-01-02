@@ -13,7 +13,9 @@ RUN apk add --no-cache \
     zip \
     unzip \
     nodejs \
-    npm
+    npm \
+    $PHPIZE_DEPS \
+    redis-dev
 
 # Instalar extensões PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -26,7 +28,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     pcntl \
     bcmath \
     gd \
-    zip
+    zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
