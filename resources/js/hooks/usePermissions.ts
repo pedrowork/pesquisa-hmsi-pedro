@@ -19,10 +19,22 @@ interface SharedAuthData {
 export const usePermissions = () => {
     const { auth } = usePage<SharedAuthData>().props;
 
+    // VALIDAÇÃO CRÍTICA: Garante que permissions seja sempre array
+    let permissions: PermissionName[] = [];
+    
+    if (auth?.permissions) {
+        if (Array.isArray(auth.permissions)) {
+            // Garantir que todos os valores sejam strings válidas
+            permissions = auth.permissions.filter((p): p is PermissionName => 
+                typeof p === 'string' && p.length > 0
+            );
+        }
+    }
+
     return {
-        permissions: auth.permissions || [],
-        isAdmin: auth.isAdmin || false,
-        user: auth.user,
+        permissions: permissions,
+        isAdmin: auth?.isAdmin || false,
+        user: auth?.user || null,
     };
 };
 

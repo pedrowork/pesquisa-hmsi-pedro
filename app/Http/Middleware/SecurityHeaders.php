@@ -21,12 +21,12 @@ class SecurityHeaders
         if ($request->secure()) {
             $maxAge = config('security.hsts_max_age', 31536000); // 1 ano padrão
             $includeSubDomains = config('security.hsts_include_subdomains', true);
-            
+
             $hstsHeader = "max-age={$maxAge}";
             if ($includeSubDomains) {
                 $hstsHeader .= '; includeSubDomains';
             }
-            
+
             $response->headers->set('Strict-Transport-Security', $hstsHeader);
         }
 
@@ -94,7 +94,7 @@ class SecurityHeaders
     protected function getDefaultCsp(): string
     {
         $isDevelopment = app()->environment('local', 'development');
-        
+
         // Em desenvolvimento, usar CSP mais permissivo para Vite
         if ($isDevelopment) {
             // CSP mais permissivo para desenvolvimento com Vite
@@ -112,7 +112,7 @@ class SecurityHeaders
                 "form-action 'self'",
             ]);
         }
-        
+
         // CSP padrão restritivo para produção
         $directives = [
             "default-src 'self'",

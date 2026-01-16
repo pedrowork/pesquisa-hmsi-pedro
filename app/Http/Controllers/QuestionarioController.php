@@ -64,7 +64,14 @@ class QuestionarioController extends Controller
      */
     public function create(): Response
     {
+        // Carregar apenas perguntas ativas (ativo = 1 ou true)
+        // Usar whereRaw para garantir compatibilidade com SQLite
         $perguntas = DB::table('perguntas_descricao')
+            ->where(function ($query) {
+                $query->where('ativo', 1)
+                    ->orWhere('ativo', true)
+                    ->orWhereNull('ativo'); // Incluir registros antigos que podem não ter o campo
+            })
             ->select('cod', 'descricao', 'cod_setor_pesquis', 'cod_tipo_pergunta')
             ->orderBy('cod', 'asc')
             ->get();
@@ -87,8 +94,13 @@ class QuestionarioController extends Controller
             ->orderBy('descricao')
             ->get();
 
-        // Buscar setores de pesquisa das perguntas
+        // Buscar setores de pesquisa apenas das perguntas ativas
         $perguntasComSetor = DB::table('perguntas_descricao')
+            ->where(function ($query) {
+                $query->where('ativo', 1)
+                    ->orWhere('ativo', true)
+                    ->orWhereNull('ativo'); // Incluir registros antigos
+            })
             ->whereNotNull('cod_setor_pesquis')
             ->distinct()
             ->pluck('cod_setor_pesquis')

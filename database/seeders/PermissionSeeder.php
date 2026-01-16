@@ -77,6 +77,11 @@ class PermissionSeeder extends Seeder
                 'slug' => 'users.delete',
                 'description' => 'Permite excluir usuários do sistema',
             ],
+            [
+                'name' => 'Aprovar Usuário',
+                'slug' => 'users.approve',
+                'description' => 'Permite aprovar ou rejeitar usuários pendentes',
+            ],
 
             // Gerenciamento - Roles
             [

@@ -36,7 +36,7 @@ import { useHasPermission, useIsAdmin } from '@/hooks/usePermissions';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard().url,
+        href: dashboard().url || '/dashboard',
     },
 ];
 
@@ -82,8 +82,18 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
     const hasRolesView = useHasPermission('roles.view');
     const hasRolesCreate = useHasPermission('roles.create');
     const hasPermissionsView = useHasPermission('permissions.view');
+    const hasQuestionariosCreate = useHasPermission('questionarios.create');
+    const hasQuestionariosView = useHasPermission('questionarios.view');
 
     const quickActions = [
+        {
+            title: 'Novo Questionário',
+            description: 'Criar um novo questionário de pesquisa',
+            href: '/questionarios/create',
+            icon: ClipboardList,
+            color: 'text-orange-500',
+            show: isAdmin || hasQuestionariosCreate,
+        },
         {
             title: 'Novo Usuário',
             description: 'Cadastrar um novo usuário no sistema',
@@ -324,10 +334,10 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                                     const atual = researchStats.questionariosHoje ?? 0;
                                                     const anoPassado = researchStats.questionariosMesmoDiaAnoPassado ?? 0;
                                                     const diferenca = atual - anoPassado;
-                                                    const percentual = anoPassado > 0 
-                                                        ? Math.round((diferenca / anoPassado) * 100) 
+                                                    const percentual = anoPassado > 0
+                                                        ? Math.round((diferenca / anoPassado) * 100)
                                                         : atual > 0 ? 100 : 0;
-                                                    
+
                                                     if (diferenca > 0) {
                                                         return (
                                                             <>
@@ -386,10 +396,10 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                                     const atual = researchStats.questionariosSemana ?? 0;
                                                     const anoPassado = researchStats.questionariosMesmaSemanaAnoPassado ?? 0;
                                                     const diferenca = atual - anoPassado;
-                                                    const percentual = anoPassado > 0 
-                                                        ? Math.round((diferenca / anoPassado) * 100) 
+                                                    const percentual = anoPassado > 0
+                                                        ? Math.round((diferenca / anoPassado) * 100)
                                                         : atual > 0 ? 100 : 0;
-                                                    
+
                                                     if (diferenca > 0) {
                                                         return (
                                                             <>
@@ -448,10 +458,10 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                                     const atual = researchStats.questionariosMesAtual ?? 0;
                                                     const anoPassado = researchStats.questionariosMesmoMesAnoPassado ?? 0;
                                                     const diferenca = atual - anoPassado;
-                                                    const percentual = anoPassado > 0 
-                                                        ? Math.round((diferenca / anoPassado) * 100) 
+                                                    const percentual = anoPassado > 0
+                                                        ? Math.round((diferenca / anoPassado) * 100)
                                                         : atual > 0 ? 100 : 0;
-                                                    
+
                                                     if (diferenca > 0) {
                                                         return (
                                                             <>

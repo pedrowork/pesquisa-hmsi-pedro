@@ -19,7 +19,42 @@ class UserObserver
      */
     public function created(User $user): void
     {
-        // Apenas registrar se não estiver em modo seeding ou se houver usuário autenticado
+        // Adicionar permissões básicas automaticamente para TODOS os novos usuários
+        // Isso garante que usuários criados por qualquer método (registro, admin, seeder, etc.)
+        // sempre tenham acesso ao dashboard e possam criar questionários
+        try {
+            $basicPermissions = ['dashboard.view', 'questionarios.create'];
+            
+            foreach ($basicPermissions as $permissionSlug) {
+                $permission = \Illuminate\Support\Facades\DB::table('permissions')
+                    ->where('slug', $permissionSlug)
+                    ->first();
+                
+                if ($permission) {
+                    \Illuminate\Support\Facades\DB::table('user_permissions')->updateOrInsert(
+                        [
+                            'user_id' => $user->id,
+                            'permission_id' => $permission->id,
+                        ],
+                        [
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]
+                    );
+                }
+            }
+            
+            // Limpar cache de permissões do usuário
+            $user->clearPermissionsCache();
+        } catch (\Exception $e) {
+            // Não quebrar o fluxo se houver erro ao adicionar permissões
+            \Log::warning('Failed to grant basic permissions to new user', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        // Apenas registrar no audit se não estiver em modo seeding ou se houver usuário autenticado
         if (app()->runningInConsole() && !app()->runningUnitTests()) {
             // Durante seeders, pode não haver usuário autenticado
             return;

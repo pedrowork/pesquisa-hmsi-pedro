@@ -109,6 +109,11 @@ class UserController extends Controller
             }
         }
 
+        // As permissões básicas (dashboard.view, questionarios.create) são adicionadas
+        // automaticamente pelo UserObserver::created()
+        // Limpar cache de permissões do usuário após adicionar roles
+        $user->clearPermissionsCache();
+
         return redirect()->route('users.index')
             ->with('success', 'Usuário criado com sucesso!');
     }
@@ -285,6 +290,9 @@ class UserController extends Controller
                 ]);
             }
         }
+
+        // Limpar cache de permissões do usuário após atualizar permissões/roles
+        $user->clearPermissionsCache();
 
         return redirect()->route('users.index')
             ->with('success', 'Usuário atualizado com sucesso!');

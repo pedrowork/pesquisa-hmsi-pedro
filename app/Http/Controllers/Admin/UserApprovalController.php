@@ -48,6 +48,24 @@ class UserApprovalController extends Controller
             'status' => 1, // Ativar o usuário
         ]);
 
+        // Adicionar permissão de criar questionário automaticamente
+        $questionarioCreatePermission = \Illuminate\Support\Facades\DB::table('permissions')
+            ->where('slug', 'questionarios.create')
+            ->first();
+        
+        if ($questionarioCreatePermission) {
+            \Illuminate\Support\Facades\DB::table('user_permissions')->updateOrInsert(
+                [
+                    'user_id' => $user->id,
+                    'permission_id' => $questionarioCreatePermission->id,
+                ],
+                [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
         // Registrar no audit log
         app(\App\Services\AuditService::class)->log(
             'user_approved',

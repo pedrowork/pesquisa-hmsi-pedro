@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Plus, Search, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import Can from '@/components/Can';
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -25,6 +25,8 @@ interface Pergunta {
     descricao: string;
     cod_setor_pesquis: number | null;
     cod_tipo_pergunta: number | null;
+    ativo: boolean;
+    total_pesquisas: number;
 }
 
 interface PaginatedPerguntas {
@@ -46,6 +48,7 @@ export default function PerguntasIndex({
     filters,
 }: PerguntasIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
+    const { flash } = usePage().props as { flash?: { success?: string; warning?: string; error?: string } };
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
@@ -55,13 +58,33 @@ export default function PerguntasIndex({
         });
     };
 
-    const handleDelete = (perguntaId: number) => {
-        if (confirm('Tem certeza que deseja excluir esta pergunta?')) {
-            router.delete(`/perguntas/${perguntaId}`, {
-                preserveScroll: true,
-            });
+    const handleDelete = (perguntaId: number, totalPesquisas: number) => {
+        if (totalPesquisas > 0) {
+            const message = `Esta pergunta possui ${totalPesquisas} pesquisa(s) associada(s). Para manter o histórico, a pergunta será apenas desativada ao invés de excluída. Deseja continuar?`;
+            if (confirm(message)) {
+                router.delete(`/perguntas/${perguntaId}`, {
+                    preserveScroll: true,
+                });
+            }
+        } else {
+            if (confirm('Tem certeza que deseja excluir esta pergunta?')) {
+                router.delete(`/perguntas/${perguntaId}`, {
+                    preserveScroll: true,
+                });
+            }
         }
     };
+
+    // Exibir mensagens flash
+    useEffect(() => {
+        if (flash?.success) {
+            alert(flash.success);
+        } else if (flash?.warning) {
+            alert(flash.warning);
+        } else if (flash?.error) {
+            alert(flash.error);
+        }
+    }, [flash]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -121,8 +144,8 @@ export default function PerguntasIndex({
                                     <tr className="border-b">
                                         <th className="px-4 py-3 text-left text-sm font-medium">Código</th>
                                         <th className="px-4 py-3 text-left text-sm font-medium">Descrição</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Setor Pesquisa</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Tipo Pergunta</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">Pesquisas</th>
                                         <th className="px-4 py-3 text-right text-sm font-medium">Ações</th>
                                     </tr>
                                 </thead>
@@ -135,14 +158,35 @@ export default function PerguntasIndex({
                                         </tr>
                                     ) : (
                                         perguntas.data.map((pergunta) => (
-                                            <tr key={pergunta.cod} className="border-b hover:bg-muted/50">
+                                            <tr 
+                                                key={pergunta.cod} 
+                                                className={`border-b hover:bg-muted/50 ${
+                                                    pergunta.ativo === false || pergunta.ativo === 0 
+                                                        ? 'bg-red-50/50 dark:bg-red-950/20' 
+                                                        : ''
+                                                }`}
+                                            >
                                                 <td className="px-4 py-3 font-medium">#{pergunta.cod}</td>
-                                                <td className="px-4 py-3">{pergunta.descricao}</td>
-                                                <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                    {pergunta.cod_setor_pesquis || '—'}
+                                                <td className={`px-4 py-3 ${
+                                                    pergunta.ativo === false || pergunta.ativo === 0 
+                                                        ? 'text-red-600 dark:text-red-400' 
+                                                        : ''
+                                                }`}>
+                                                    {pergunta.descricao}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {pergunta.ativo === false || pergunta.ativo === 0 ? (
+                                                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                                            Desativada
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                                            Ativa
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                    {pergunta.cod_tipo_pergunta || '—'}
+                                                    {pergunta.total_pesquisas || 0} pesquisa(s)
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
@@ -157,7 +201,7 @@ export default function PerguntasIndex({
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                onClick={() => handleDelete(pergunta.cod)}
+                                                                onClick={() => handleDelete(pergunta.cod, pergunta.total_pesquisas || 0)}
                                                                 className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                             >
                                                                 <Trash2 className="h-4 w-4" />

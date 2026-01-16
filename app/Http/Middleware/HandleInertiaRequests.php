@@ -45,6 +45,10 @@ class HandleInertiaRequests extends Middleware
         if ($user) {
             $permissions = $user->getUserPermissions();
             $isAdmin = $user->isAdmin();
+            
+            // Garantir que permissions seja um array indexado numericamente
+            // e converter valores para strings (caso algum venha como objeto)
+            $permissions = array_values(array_map('strval', $permissions));
         }
 
         return [
@@ -52,9 +56,18 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $user,
-                'permissions' => $permissions,
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ] : null,
+                'permissions' => $permissions ?? [], // Sempre array, mesmo se vazio
                 'isAdmin' => $isAdmin,
+            ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'warning' => $request->session()->get('warning'),
+                'error' => $request->session()->get('error'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

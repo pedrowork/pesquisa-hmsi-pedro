@@ -31,6 +31,7 @@ import {
     BarChart3,
     HelpCircle,
     FileText,
+    UserCheck,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -38,15 +39,38 @@ export function AppSidebar() {
     const isAdmin = useIsAdmin();
     const hasDashboardView = useHasPermission('dashboard.view');
     const hasUsersView = useHasPermission('users.view');
+    const hasUsersApprove = useHasPermission('users.approve');
     const hasRolesView = useHasPermission('roles.view');
     const hasPermissionsView = useHasPermission('permissions.view');
     const hasQuestionariosView = useHasPermission('questionarios.view');
-    const hasLeitosManage = useHasPermission('leitos.manage');
-    const hasSetoresManage = useHasPermission('setores.manage');
-    const hasTiposConvenioManage = useHasPermission('tipos-convenio.manage');
-    const hasSetoresPesquisaManage = useHasPermission('setores-pesquisa.manage');
-    const hasPerguntasManage = useHasPermission('perguntas.manage');
-    const hasSatisfacaoManage = useHasPermission('satisfacao.manage');
+    const hasQuestionariosCreate = useHasPermission('questionarios.create');
+    // Usuário pode ver Questionários se tiver view OU create (para fazer pesquisa)
+    // Sempre exibir se tiver create, mesmo sem view
+    const hasQuestionarios = hasQuestionariosView || hasQuestionariosCreate;
+    // Verificar permissões granulares (view OU create para cada módulo)
+    const hasLeitosView = useHasPermission('leitos.view');
+    const hasLeitosCreate = useHasPermission('leitos.create');
+    const hasLeitosManage = hasLeitosView || hasLeitosCreate;
+    
+    const hasSetoresView = useHasPermission('setores.view');
+    const hasSetoresCreate = useHasPermission('setores.create');
+    const hasSetoresManage = hasSetoresView || hasSetoresCreate;
+    
+    const hasTiposConvenioView = useHasPermission('tipos-convenio.view');
+    const hasTiposConvenioCreate = useHasPermission('tipos-convenio.create');
+    const hasTiposConvenioManage = hasTiposConvenioView || hasTiposConvenioCreate;
+    
+    const hasSetoresPesquisaView = useHasPermission('setores-pesquisa.view');
+    const hasSetoresPesquisaCreate = useHasPermission('setores-pesquisa.create');
+    const hasSetoresPesquisaManage = hasSetoresPesquisaView || hasSetoresPesquisaCreate;
+    
+    const hasPerguntasView = useHasPermission('perguntas.view');
+    const hasPerguntasCreate = useHasPermission('perguntas.create');
+    const hasPerguntasManage = hasPerguntasView || hasPerguntasCreate;
+    
+    const hasSatisfacaoView = useHasPermission('satisfacao.view');
+    const hasSatisfacaoCreate = useHasPermission('satisfacao.create');
+    const hasSatisfacaoManage = hasSatisfacaoView || hasSatisfacaoCreate;
     const hasMetricasView = useHasPermission('metricas.view');
 
     const allMainNavItems: NavItem[] = [
@@ -62,6 +86,11 @@ export function AppSidebar() {
             title: 'Usuários',
             href: '/users',
             icon: Users,
+        },
+        {
+            title: 'Aprovações Pendentes',
+            href: '/admin/users/pending-approval',
+            icon: UserCheck,
         },
         {
             title: 'Roles',
@@ -119,14 +148,17 @@ export function AppSidebar() {
     ];
 
     // Filtrar itens baseado em permissões
+    // Dashboard sempre deve aparecer para usuários autenticados (rota protegida por auth/verified)
+    // Se chegou aqui, o usuário está autenticado e pode ver o Dashboard
     const mainNavItems = allMainNavItems.filter(() => {
-        if (isAdmin) return true;
-        return hasDashboardView;
+        // Dashboard sempre aparece para usuários autenticados
+        return true;
     });
 
     const managementNavItems = allManagementNavItems.filter((item) => {
         if (isAdmin) return true;
         if (item.href === '/users') return hasUsersView;
+        if (item.href === '/admin/users/pending-approval') return hasUsersApprove || hasUsersView; // Quem pode aprovar ou ver usuários
         if (item.href === '/roles') return hasRolesView;
         if (item.href === '/permissions') return hasPermissionsView;
         return false;
@@ -134,7 +166,12 @@ export function AppSidebar() {
 
     const researchNavItems = allResearchNavItems.filter((item) => {
         if (isAdmin) return true;
-        if (item.href === '/questionarios') return hasQuestionariosView;
+        // Verificar permissões específicas para cada item
+        if (item.href === '/questionarios') {
+            // SEMPRE permitir se tiver create (para fazer pesquisa) OU view (para visualizar)
+            // Isso garante que usuários com questionarios.create vejam o link no sidebar
+            return hasQuestionariosCreate || hasQuestionariosView;
+        }
         if (item.href === '/leitos') return hasLeitosManage;
         if (item.href === '/setores') return hasSetoresManage;
         if (item.href === '/tipos-convenio') return hasTiposConvenioManage;
@@ -173,6 +210,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
+                {/* Dashboard sempre aparece para usuários autenticados */}
                 {mainNavItems.length > 0 && <NavMain items={mainNavItems} />}
                 {managementNavItems.length > 0 && (
                     <NavManagement items={managementNavItems} />

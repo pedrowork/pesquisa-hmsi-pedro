@@ -7,7 +7,7 @@ class DataMaskingHelper
     /**
      * Mascara um email (ex: jo***@example.com).
      */
-    public static function maskEmail(string $email): string
+    public static function maskEmail(?string $email): string
     {
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return '***';
@@ -27,9 +27,9 @@ class DataMaskingHelper
     /**
      * Mascara um telefone (ex: (11) 9****-1234).
      */
-    public static function maskPhone(string $phone): string
+    public static function maskPhone(?string $phone): string
     {
-        if (empty($phone)) {
+        if (empty($phone) || $phone === null) {
             return '***';
         }
 
@@ -57,9 +57,9 @@ class DataMaskingHelper
     /**
      * Mascara um CPF (ex: 123.***.***-45).
      */
-    public static function maskCpf(string $cpf): string
+    public static function maskCpf(?string $cpf): string
     {
-        if (empty($cpf)) {
+        if (empty($cpf) || $cpf === null) {
             return '***';
         }
 
@@ -75,9 +75,9 @@ class DataMaskingHelper
     /**
      * Mascara um nome (ex: João S***).
      */
-    public static function maskName(string $name): string
+    public static function maskName(?string $name): string
     {
-        if (empty($name)) {
+        if (empty($name) || $name === null) {
             return '***';
         }
 
@@ -104,9 +104,9 @@ class DataMaskingHelper
     /**
      * Mascara um IP (ex: 192.168.***.***).
      */
-    public static function maskIp(string $ip): string
+    public static function maskIp(?string $ip): string
     {
-        if (empty($ip)) {
+        if (empty($ip) || $ip === null) {
             return '***';
         }
 
@@ -161,7 +161,8 @@ class DataMaskingHelper
                 if (is_callable($maskFunction)) {
                     $masked[$key] = $maskFunction($value);
                 } elseif (method_exists(self::class, $maskFunction)) {
-                    $masked[$key] = self::$maskFunction($value);
+                    // Garante que valores nulos sejam tratados corretamente
+                    $masked[$key] = self::$maskFunction($value ?? null);
                 } else {
                     $masked[$key] = '***';
                 }
@@ -178,9 +179,9 @@ class DataMaskingHelper
     /**
      * Mascara um valor genérico mantendo apenas primeiros e últimos caracteres.
      */
-    public static function maskGeneric(string $value, int $visibleStart = 2, int $visibleEnd = 2): string
+    public static function maskGeneric(?string $value, int $visibleStart = 2, int $visibleEnd = 2): string
     {
-        if (empty($value)) {
+        if (empty($value) || $value === null) {
             return '***';
         }
         

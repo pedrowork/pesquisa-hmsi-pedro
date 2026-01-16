@@ -161,7 +161,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'stats' => $stats,
             'researchStats' => $researchStats,
         ]);
-    })->middleware('permission:dashboard.view')->name('dashboard');
+    })->name('dashboard');
 
     // Gerenciamento de Usuários
     Route::middleware('permission:users.view')->group(function () {

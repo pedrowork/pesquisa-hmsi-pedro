@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2, Filter } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Filter, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -101,6 +101,15 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                             Cadastre e gerencie usuários do sistema
                         </p>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <Can permission="users.approve">
+                            <Link href="/admin/users/pending-approval">
+                                <Button variant="outline">
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Aprovações Pendentes
+                                </Button>
+                            </Link>
+                        </Can>
                     <Can permission="users.create">
                         <Link href="/users/create">
                             <Button>
@@ -109,6 +118,7 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                             </Button>
                         </Link>
                     </Can>
+                    </div>
                 </div>
 
                 {/* Filters */}

@@ -21,7 +21,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                                 asChild
-                                isActive={page.url.startsWith(
+                                isActive={page.url && typeof page.url === 'string' && page.url.startsWith(
                                     resolveUrl(item.href),
                                 )}
                                 tooltip={{ children: item.title }}

@@ -22,7 +22,7 @@ export function NavManagement({ items = [] }: { items: NavItem[] }) {
 
     // Verifica se algum item está ativo para deixar o grupo expandido por padrão
     const hasActiveItem = items.some((item) =>
-        currentUrl.startsWith(resolveUrl(item.href)),
+        currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(resolveUrl(item.href)),
     );
 
     return (
@@ -41,7 +41,7 @@ export function NavManagement({ items = [] }: { items: NavItem[] }) {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {
-                                const isActive = currentUrl.startsWith(
+                                const isActive = currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(
                                     resolveUrl(item.href),
                                 );
                                 return (

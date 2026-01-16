@@ -22,12 +22,16 @@ export function NavResearch({ items = [] }: { items: NavItem[] }) {
 
     // Verifica se algum item está ativo para deixar o grupo expandido por padrão
     const hasActiveItem = items.some((item) =>
-        currentUrl.startsWith(resolveUrl(item.href)),
+        currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(resolveUrl(item.href)),
     );
+
+    // Se houver itens, deixar aberto por padrão
+    // Isso garante que usuários vejam as opções de pesquisa imediatamente
+    const shouldBeOpen = hasActiveItem || items.length > 0;
 
     return (
         <Collapsible
-            defaultOpen={hasActiveItem}
+            defaultOpen={shouldBeOpen}
             className="group/collapsible"
         >
             <SidebarGroup>
@@ -41,7 +45,7 @@ export function NavResearch({ items = [] }: { items: NavItem[] }) {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {
-                                const isActive = currentUrl.startsWith(
+                                const isActive = currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(
                                     resolveUrl(item.href),
                                 );
                                 return (

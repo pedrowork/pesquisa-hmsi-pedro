@@ -33,12 +33,17 @@ class CreateNewUser implements CreatesNewUsers
         // Criar usuário com status pendente se aprovação estiver habilitada
         $requiresApproval = config('security.user_approval_required', true);
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
             'approval_status' => $requiresApproval ? 'pending' : 'approved',
             'status' => $requiresApproval ? 0 : 1, // Inativo até aprovação
         ]);
+
+        // As permissões básicas (dashboard.view, questionarios.create) são adicionadas
+        // automaticamente pelo UserObserver::created()
+
+        return $user;
     }
 }

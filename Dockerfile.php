@@ -14,8 +14,7 @@ RUN apk add --no-cache \
     unzip \
     nodejs \
     npm \
-    $PHPIZE_DEPS \
-    redis-dev
+    $PHPIZE_DEPS
 
 # Instalar extensões PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
