@@ -94,9 +94,15 @@ class SecurityHeaders
     protected function getDefaultCsp(): string
     {
         $isDevelopment = app()->environment('local', 'development');
+        
+        // Detectar desenvolvimento local mesmo com APP_ENV=production
+        // Verifica se está rodando em localhost/127.0.0.1 (php artisan serve)
+        $request = request();
+        $isLocalHost = in_array($request->getHost(), ['localhost', '127.0.0.1', '::1'])
+            || $request->getPort() == 8000;
 
         // Em desenvolvimento, usar CSP mais permissivo para Vite
-        if ($isDevelopment) {
+        if ($isDevelopment || $isLocalHost) {
             // CSP mais permissivo para desenvolvimento com Vite
             // Vite está configurado para usar IPv4 (127.0.0.1), então não precisamos de IPv6
             // Usando wildcards para facilitar desenvolvimento

@@ -110,6 +110,10 @@ export default function PermissionsMatrix({
 
             if (response.ok) {
                 const data = await response.json();
+                // Se houver mensagem especial, exibir aviso
+                if (data.message) {
+                    alert(data.message);
+                }
                 // Recarregar a página para atualizar os dados
                 router.reload({ only: ['rolePermissions', 'userPermissions'] });
             }
@@ -135,6 +139,10 @@ export default function PermissionsMatrix({
 
             if (response.ok) {
                 const data = await response.json();
+                // Se houver mensagem especial, exibir aviso
+                if (data.message) {
+                    alert(data.message);
+                }
                 // Recarregar a página para atualizar os dados
                 router.reload({ only: ['rolePermissions', 'userPermissions'] });
             }

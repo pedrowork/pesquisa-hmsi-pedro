@@ -73,6 +73,8 @@ class QuestionarioController extends Controller
                     ->orWhereNull('ativo'); // Incluir registros antigos que podem não ter o campo
             })
             ->select('cod', 'descricao', 'cod_setor_pesquis', 'cod_tipo_pergunta')
+            ->orderByRaw('CASE WHEN ordem IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('ordem', 'asc')
             ->orderBy('cod', 'asc')
             ->get();
 
@@ -332,6 +334,8 @@ class QuestionarioController extends Controller
                 'satisfacao.descricao as resposta_descricao',
                 'users.name as usuario_nome'
             )
+            ->orderByRaw('CASE WHEN perguntas_descricao.ordem IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('perguntas_descricao.ordem', 'asc')
             ->orderBy('perguntas_descricao.descricao')
             ->get();
 

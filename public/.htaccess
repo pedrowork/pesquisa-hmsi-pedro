@@ -6,8 +6,11 @@
     RewriteEngine On
 
     # Force HTTPS in production (backup para o middleware)
+    # Não força HTTPS em localhost/127.0.0.1 para desenvolvimento
     RewriteCond %{HTTPS} off
     RewriteCond %{ENV:APP_ENV} production
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header

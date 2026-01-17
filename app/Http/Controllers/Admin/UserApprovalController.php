@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,12 +14,36 @@ use Inertia\Response;
 class UserApprovalController extends Controller
 {
     /**
+     * Obtém o ID do usuário admin (com role 'admin').
+     */
+    protected function getAdminUserId(): ?int
+    {
+        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+        
+        if (!$adminRole) {
+            return null;
+        }
+
+        $adminUser = DB::table('user_roles')
+            ->where('role_id', $adminRole->id)
+            ->first();
+
+        return $adminUser ? (int) $adminUser->user_id : null;
+    }
+
+    /**
      * Lista usuários pendentes de aprovação.
      */
     public function index(Request $request): Response
     {
         $query = User::where('approval_status', 'pending')
             ->orderBy('created_at', 'desc');
+
+        // Excluir admin da listagem - ninguém pode ver o admin
+        $adminId = $this->getAdminUserId();
+        if ($adminId) {
+            $query->where('id', '!=', $adminId);
+        }
 
         $users = $query->paginate(20);
 
@@ -32,6 +57,12 @@ class UserApprovalController extends Controller
      */
     public function approve(Request $request, User $user): RedirectResponse
     {
+        // Proteger admin - não pode ser aprovado/rejeitado via este controller
+        $adminId = $this->getAdminUserId();
+        if ($adminId && $user->id === $adminId) {
+            abort(403, 'Acesso negado: operações no usuário admin não são permitidas.');
+        }
+
         $validated = $request->validate([
             'approval_notes' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -90,6 +121,12 @@ class UserApprovalController extends Controller
      */
     public function reject(Request $request, User $user): RedirectResponse
     {
+        // Proteger admin - não pode ser aprovado/rejeitado via este controller
+        $adminId = $this->getAdminUserId();
+        if ($adminId && $user->id === $adminId) {
+            abort(403, 'Acesso negado: operações no usuário admin não são permitidas.');
+        }
+
         $validated = $request->validate([
             'approval_notes' => ['required', 'string', 'max:1000'],
         ]);

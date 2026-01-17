@@ -14,11 +14,121 @@ use Inertia\Response;
 class UserController extends Controller
 {
     /**
+     * Obtém o ID do usuário admin (com role 'admin').
+     * Retorna null se não encontrar.
+     */
+    protected function getAdminUserId(): ?int
+    {
+        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+        
+        if (!$adminRole) {
+            return null;
+        }
+
+        $adminUser = DB::table('user_roles')
+            ->where('role_id', $adminRole->id)
+            ->first();
+
+        return $adminUser ? (int) $adminUser->user_id : null;
+    }
+
+    /**
+     * Obtém o ID do primeiro Master criado (protegido).
+     * Retorna null se não encontrar.
+     */
+    protected function getFirstMasterUserId(): ?int
+    {
+        $masterRole = DB::table('roles')->where('slug', 'master')->first();
+        
+        if (!$masterRole) {
+            return null;
+        }
+
+        // Busca o primeiro Master criado (por ordem de criação)
+        $firstMaster = DB::table('user_roles')
+            ->join('users', 'user_roles.user_id', '=', 'users.id')
+            ->where('user_roles.role_id', $masterRole->id)
+            ->orderBy('users.created_at', 'asc')
+            ->orderBy('users.id', 'asc')
+            ->select('users.id')
+            ->first();
+
+        return $firstMaster ? (int) $firstMaster->id : null;
+    }
+
+    /**
+     * Verifica se um usuário é admin e lança exceção se for.
+     */
+    protected function preventAdminAccess(User $user): void
+    {
+        $adminId = $this->getAdminUserId();
+        
+        if ($adminId && $user->id === $adminId) {
+            abort(403, 'Acesso negado: operações no usuário admin não são permitidas.');
+        }
+    }
+
+    /**
+     * Verifica se um usuário é o primeiro Master e lança exceção se for.
+     * Apenas o próprio Master pode modificar a si mesmo.
+     */
+    protected function preventFirstMasterAccess(User $user, Request $request): void
+    {
+        $firstMasterId = $this->getFirstMasterUserId();
+        $currentUser = $request->user();
+        
+        if ($firstMasterId && $user->id === $firstMasterId) {
+            // Apenas o próprio Master pode modificar a si mesmo
+            if (!$currentUser || $currentUser->id !== $firstMasterId) {
+                abort(403, 'Acesso negado: o primeiro Master não pode ser alterado ou removido por outros usuários.');
+            }
+        }
+    }
+
+    /**
+     * Exclui o admin da query base.
+     */
+    protected function excludeAdminFromQuery($query)
+    {
+        $adminId = $this->getAdminUserId();
+        
+        if ($adminId) {
+            $query->where('users.id', '!=', $adminId);
+        }
+        
+        return $query;
+    }
+
+    /**
+     * Exclui o primeiro Master da query base.
+     */
+    protected function excludeFirstMasterFromQuery($query)
+    {
+        $firstMasterId = $this->getFirstMasterUserId();
+        
+        if ($firstMasterId) {
+            $query->where('users.id', '!=', $firstMasterId);
+        }
+        
+        return $query;
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request): Response
     {
         $query = User::query();
+
+        // Excluir admin da listagem - ninguém pode ver o admin
+        $this->excludeAdminFromQuery($query);
+        
+        // Excluir primeiro Master da listagem - apenas ele pode ver a si mesmo
+        $currentUser = $request->user();
+        $firstMasterId = $this->getFirstMasterUserId();
+        if ($firstMasterId && (!$currentUser || $currentUser->id !== $firstMasterId)) {
+            $this->excludeFirstMasterFromQuery($query);
+        }
 
         // Search
         if ($request->has('search') && $request->search) {
@@ -36,12 +146,45 @@ class UserController extends Controller
 
         $users = $query->orderBy('created_at', 'desc')->paginate(10);
 
+        // Buscar roles de cada usuário
+        $userIds = $users->pluck('id')->toArray();
+        $userRoles = [];
+        if (!empty($userIds)) {
+            $rolesData = DB::table('user_roles')
+                ->join('roles', 'user_roles.role_id', '=', 'roles.id')
+                ->whereIn('user_roles.user_id', $userIds)
+                ->select('user_roles.user_id', 'roles.name as role_name', 'roles.slug as role_slug')
+                ->get();
+
+            foreach ($rolesData as $role) {
+                if (!isset($userRoles[$role->user_id])) {
+                    $userRoles[$role->user_id] = [];
+                }
+                $userRoles[$role->user_id][] = [
+                    'name' => $role->role_name,
+                    'slug' => $role->role_slug,
+                ];
+            }
+        }
+
+        // Adicionar roles aos usuários
+        foreach ($users->items() as $user) {
+            $user->roles = $userRoles[$user->id] ?? [];
+        }
+
+        $firstMasterId = $this->getFirstMasterUserId();
+        $currentUser = $request->user();
+        $canModifyFirstMaster = $firstMasterId && $currentUser && $currentUser->id === $firstMasterId;
+
         return Inertia::render('users/index', [
             'users' => $users,
             'filters' => [
                 'search' => $request->search ?? '',
                 'status' => $request->status ?? '',
             ],
+            'firstMasterId' => $firstMasterId,
+            'currentUserId' => $currentUser?->id,
+            'canModifyFirstMaster' => $canModifyFirstMaster,
         ]);
     }
 
@@ -55,8 +198,12 @@ class UserController extends Controller
             ->get()
             ->toArray();
 
+        $currentUser = auth()->user();
+        $isAdmin = $currentUser && $currentUser->isAdmin();
+
         return Inertia::render('users/create', [
             'roles' => $roles,
+            'isAdmin' => $isAdmin,
         ]);
     }
 
@@ -77,6 +224,24 @@ class UserController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'bio' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        // Verificar se o usuário atual é admin
+        $currentUser = $request->user();
+        $isCurrentUserAdmin = $currentUser && $currentUser->isAdmin();
+
+        // Verificar se está tentando atribuir role de admin
+        if (!empty($validated['roles'])) {
+            $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+            
+            if ($adminRole && in_array($adminRole->id, $validated['roles'])) {
+                // Se não for admin, não pode criar usuário com role admin
+                if (!$isCurrentUserAdmin) {
+                    return back()->withErrors([
+                        'roles' => 'Você não tem permissão para criar usuários com perfil de Administrador. Apenas administradores podem criar outros administradores.',
+                    ])->withInput();
+                }
+            }
+        }
 
         $user = User::create([
             'name' => $validated['name'],
@@ -121,8 +286,14 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user): Response
+    public function show(User $user, Request $request): Response
     {
+        // Proteger admin - ninguém pode ver o admin
+        $this->preventAdminAccess($user);
+        
+        // Proteger primeiro Master - apenas ele pode ver a si mesmo
+        $this->preventFirstMasterAccess($user, $request);
+
         // Get user roles
         $userRoles = DB::table('user_roles')
             ->join('roles', 'user_roles.role_id', '=', 'roles.id')
@@ -160,8 +331,14 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user): Response
+    public function edit(User $user, Request $request): Response
     {
+        // Proteger admin - ninguém pode editar o admin
+        $this->preventAdminAccess($user);
+        
+        // Proteger primeiro Master - apenas ele pode editar a si mesmo
+        $this->preventFirstMasterAccess($user, $request);
+
         // Buscar todas as permissões organizadas por categoria
         $allPermissions = DB::table('permissions')
             ->orderBy('name')
@@ -201,12 +378,47 @@ class UserController extends Controller
             ->pluck('role_id')
             ->toArray();
 
+        $currentUser = $request->user();
+        $isAdmin = $currentUser && $currentUser->isAdmin();
+        
+        $firstMasterId = $this->getFirstMasterUserId();
+        $adminId = $this->getAdminUserId();
+        $isCurrentUserFirstMaster = $currentUser && $firstMasterId && $currentUser->id === $firstMasterId;
+        $isEditingSelf = $currentUser && $user->id === $currentUser->id;
+        
+        // Verificar se pode alterar permissões deste usuário
+        $canModifyPermissions = true;
+        // Prevenir auto-elevação: usuários não podem alterar suas próprias permissões (exceto primeiro Master)
+        if ($isEditingSelf && !$isCurrentUserFirstMaster) {
+            $canModifyPermissions = false;
+        } elseif ($user->id === $firstMasterId && !$isCurrentUserFirstMaster) {
+            $canModifyPermissions = false;
+        } elseif ($adminId && $user->id === $adminId && !$isCurrentUserFirstMaster) {
+            $canModifyPermissions = false;
+        }
+        
+        // Verificar se pode alterar roles deste usuário
+        $canModifyRoles = true;
+        // Prevenir auto-elevação: usuários não podem alterar suas próprias roles (exceto primeiro Master)
+        if ($isEditingSelf && !$isCurrentUserFirstMaster) {
+            $canModifyRoles = false;
+        } elseif ($user->id === $firstMasterId && !$isCurrentUserFirstMaster) {
+            // Ninguém pode alterar roles do primeiro Master exceto ele mesmo
+            $canModifyRoles = false;
+        } elseif ($adminId && $user->id === $adminId && !$isCurrentUserFirstMaster) {
+            // Apenas o primeiro Master pode alterar roles do Admin
+            $canModifyRoles = false;
+        }
+
         return Inertia::render('users/edit', [
             'user' => $user,
             'permissions' => $allPermissions,
             'userPermissions' => $userPermissions,
             'roles' => $allRoles,
             'userRoles' => $userRoles,
+            'isAdmin' => $isAdmin,
+            'canModifyPermissions' => $canModifyPermissions,
+            'canModifyRoles' => $canModifyRoles,
         ]);
     }
 
@@ -215,6 +427,12 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
+        // Proteger admin - ninguém pode atualizar o admin
+        $this->preventAdminAccess($user);
+        
+        // Proteger primeiro Master - apenas ele pode atualizar a si mesmo
+        $this->preventFirstMasterAccess($user, $request);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
@@ -265,6 +483,35 @@ class UserController extends Controller
             );
         }
 
+        // Proteger permissões do primeiro Master e primeiro Admin
+        $firstMasterId = $this->getFirstMasterUserId();
+        $adminId = $this->getAdminUserId();
+        $currentUser = $request->user();
+        $isCurrentUserFirstMaster = $currentUser && $firstMasterId && $currentUser->id === $firstMasterId;
+        
+        // Prevenir auto-elevação de privilégios: usuários não podem alterar suas próprias permissões/roles
+        // Exceção: primeiro Master pode alterar suas próprias permissões/roles
+        if ($currentUser && $user->id === $currentUser->id && !$isCurrentUserFirstMaster) {
+            return back()->withErrors([
+                'permissions' => 'Você não pode alterar suas próprias permissões ou roles. Isso previne elevação de privilégios não autorizada.',
+            ])->withInput();
+        }
+        
+        // Verificar se está tentando alterar permissões de usuários protegidos
+        if ($user->id === $firstMasterId && !$isCurrentUserFirstMaster) {
+            // Ninguém pode alterar permissões do primeiro Master exceto ele mesmo
+            return back()->withErrors([
+                'permissions' => 'Você não tem permissão para alterar as permissões do primeiro Master.',
+            ])->withInput();
+        }
+        
+        if ($adminId && $user->id === $adminId && !$isCurrentUserFirstMaster) {
+            // Apenas o primeiro Master pode alterar permissões do Admin
+            return back()->withErrors([
+                'permissions' => 'Apenas o primeiro Master pode alterar as permissões do Administrador.',
+            ])->withInput();
+        }
+
         // Sincronizar permissões diretas
         DB::table('user_permissions')->where('user_id', $user->id)->delete();
         if (!empty($validated['permissions'])) {
@@ -278,9 +525,41 @@ class UserController extends Controller
             }
         }
 
+        // Verificar se o usuário atual é admin
+        $currentUser = $request->user();
+        $isCurrentUserAdmin = $currentUser && $currentUser->isAdmin();
+        $isCurrentUserFirstMaster = $currentUser && $firstMasterId && $currentUser->id === $firstMasterId;
+
+        // Proteger roles do primeiro Master e primeiro Admin
+        // Ninguém pode alterar roles do primeiro Master exceto ele mesmo
+        if ($user->id === $firstMasterId && !$isCurrentUserFirstMaster) {
+            return back()->withErrors([
+                'roles' => 'Você não tem permissão para alterar as roles do primeiro Master.',
+            ])->withInput();
+        }
+        
+        // Apenas o primeiro Master pode alterar roles do Admin
+        if ($adminId && $user->id === $adminId && !$isCurrentUserFirstMaster) {
+            return back()->withErrors([
+                'roles' => 'Apenas o primeiro Master pode alterar as roles do Administrador.',
+            ])->withInput();
+        }
+
         // Sincronizar roles
         DB::table('user_roles')->where('user_id', $user->id)->delete();
         if (!empty($validated['roles'])) {
+            // Verificar se está tentando atribuir role de admin
+            $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+            
+            if ($adminRole && in_array($adminRole->id, $validated['roles'])) {
+                // Se não for admin, não pode atribuir role admin
+                if (!$isCurrentUserAdmin) {
+                    return back()->withErrors([
+                        'roles' => 'Você não tem permissão para atribuir perfil de Administrador. Apenas administradores podem atribuir este perfil.',
+                    ])->withInput();
+                }
+            }
+
             foreach ($validated['roles'] as $roleId) {
                 DB::table('user_roles')->insert([
                     'user_id' => $user->id,
@@ -301,8 +580,17 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user): RedirectResponse
+    public function destroy(User $user, Request $request): RedirectResponse
     {
+        // Proteger admin - ninguém pode deletar o admin
+        $this->preventAdminAccess($user);
+        
+        // Proteger primeiro Master - ninguém pode deletar o primeiro Master (nem ele mesmo)
+        $firstMasterId = $this->getFirstMasterUserId();
+        if ($firstMasterId && $user->id === $firstMasterId) {
+            abort(403, 'Acesso negado: o primeiro Master não pode ser removido.');
+        }
+
         $deletedData = $user->toArray();
         
         // Registrar antes de deletar (o observer também registrará)

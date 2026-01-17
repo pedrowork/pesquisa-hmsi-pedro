@@ -21,7 +21,7 @@ class PerguntaController extends Controller
                 'perguntas_descricao.*',
                 DB::raw('COUNT(DISTINCT questionario.id) as total_pesquisas')
             )
-            ->groupBy('perguntas_descricao.cod', 'perguntas_descricao.descricao', 'perguntas_descricao.cod_setor_pesquis', 'perguntas_descricao.cod_tipo_pergunta', 'perguntas_descricao.ativo');
+            ->groupBy('perguntas_descricao.cod', 'perguntas_descricao.descricao', 'perguntas_descricao.cod_setor_pesquis', 'perguntas_descricao.cod_tipo_pergunta', 'perguntas_descricao.ativo', 'perguntas_descricao.ordem');
 
         // Search
         if ($request->has('search') && $request->search) {
@@ -29,13 +29,29 @@ class PerguntaController extends Controller
             $query->where('perguntas_descricao.descricao', 'like', "%{$search}%");
         }
 
-        $perguntas = $query->orderBy('perguntas_descricao.cod', 'asc')->paginate(10);
+        // Ordenar: primeiro por ordem customizada (ordem ASC, null por último), depois por cod
+        $perguntas = $query
+            ->orderByRaw('CASE WHEN perguntas_descricao.ordem IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('perguntas_descricao.ordem', 'asc')
+            ->orderBy('perguntas_descricao.cod', 'asc')
+            ->paginate(10);
+
+        // Verificar se usuário tem permissão para ordenar
+        $user = $request->user();
+        $canOrder = false;
+
+        if ($user) {
+            // Limpar cache antes de verificar para garantir permissões atualizadas
+            $user->clearPermissionsCache();
+            $canOrder = $user->hasPermission('perguntas.order');
+        }
 
         return Inertia::render('perguntas/index', [
             'perguntas' => $perguntas,
             'filters' => [
                 'search' => $request->search ?? '',
             ],
+            'canOrder' => $canOrder,
         ]);
     }
 
@@ -170,6 +186,34 @@ class PerguntaController extends Controller
 
         return redirect()->route('perguntas.index')
             ->with('success', 'Pergunta excluída com sucesso!');
+    }
+
+    /**
+     * Atualiza a ordem das perguntas.
+     * Requer permissão perguntas.order (apenas admin e master).
+     */
+    public function updateOrder(Request $request): RedirectResponse
+    {
+        // Verificar permissão
+        if (!$request->user() || !$request->user()->hasPermission('perguntas.order')) {
+            abort(403, 'Você não tem permissão para ordenar perguntas.');
+        }
+
+        $validated = $request->validate([
+            'ordem' => ['required', 'array'],
+            'ordem.*.id' => ['required', 'integer', 'exists:perguntas_descricao,cod'],
+            'ordem.*.ordem' => ['required', 'integer', 'min:1'],
+        ]);
+
+        // Atualizar ordem de cada pergunta
+        foreach ($validated['ordem'] as $item) {
+            DB::table('perguntas_descricao')
+                ->where('cod', $item['id'])
+                ->update(['ordem' => $item['ordem']]);
+        }
+
+        return redirect()->route('perguntas.index')
+            ->with('success', 'Ordem das perguntas atualizada com sucesso!');
     }
 }
 

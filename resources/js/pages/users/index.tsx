@@ -27,6 +27,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+interface Role {
+    name: string;
+    slug: string;
+}
+
 interface User {
     id: number;
     name: string;
@@ -35,6 +40,7 @@ interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    roles?: Role[];
 }
 
 interface PaginatedUsers {
@@ -56,9 +62,18 @@ interface UsersIndexProps {
         search: string;
         status: string;
     };
+    firstMasterId?: number | null;
+    currentUserId?: number | null;
+    canModifyFirstMaster?: boolean;
 }
 
-export default function UsersIndex({ users, filters }: UsersIndexProps) {
+export default function UsersIndex({ 
+    users, 
+    filters, 
+    firstMasterId = null,
+    currentUserId = null,
+    canModifyFirstMaster = false,
+}: UsersIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
 
@@ -184,6 +199,9 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                                             Email
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-medium">
+                                            Cargo
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">
                                             Status
                                         </th>
                                         <th className="px-4 py-3 text-left text-sm font-medium">
@@ -201,7 +219,7 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                                     {users.data.length === 0 ? (
                                         <tr>
                                             <td
-                                                colSpan={6}
+                                                colSpan={7}
                                                 className="px-4 py-8 text-center text-muted-foreground"
                                             >
                                                 Nenhum usuário encontrado
@@ -218,6 +236,24 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     {user.email}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {user.roles && user.roles.length > 0 ? (
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {user.roles.map((role, index) => (
+                                                                <span
+                                                                    key={index}
+                                                                    className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                                                >
+                                                                    {role.name}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-muted-foreground text-sm">
+                                                            Sem cargo
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     {getStatusBadge(user.status)}
@@ -240,30 +276,63 @@ export default function UsersIndex({ users, filters }: UsersIndexProps) {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
-                                                        <Can permission="users.edit">
-                                                            <Link
-                                                                href={`/users/${user.id}/edit`}
-                                                            >
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                >
-                                                                    <Edit className="h-4 w-4" />
-                                                                </Button>
-                                                            </Link>
-                                                        </Can>
-                                                        <Can permission="users.delete">
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                    handleDelete(user.id)
-                                                                }
-                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </Can>
+                                                        {(() => {
+                                                            const isFirstMaster = firstMasterId && user.id === firstMasterId;
+                                                            const canEdit = !isFirstMaster || canModifyFirstMaster;
+                                                            const canDelete = !isFirstMaster; // Primeiro Master nunca pode ser deletado
+                                                            
+                                                            return (
+                                                                <>
+                                                                    <Can permission="users.edit">
+                                                                        {canEdit ? (
+                                                                            <Link
+                                                                                href={`/users/${user.id}/edit`}
+                                                                            >
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="sm"
+                                                                                >
+                                                                                    <Edit className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </Link>
+                                                                        ) : (
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                disabled
+                                                                                title="O primeiro Master não pode ser editado por outros usuários"
+                                                                            >
+                                                                                <Edit className="h-4 w-4 opacity-50" />
+                                                                            </Button>
+                                                                        )}
+                                                                    </Can>
+                                                                    <Can permission="users.delete">
+                                                                        {canDelete ? (
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                    handleDelete(user.id)
+                                                                                }
+                                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        ) : (
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                disabled
+                                                                                title="O primeiro Master não pode ser removido"
+                                                                                className="opacity-50"
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        )}
+                                                                    </Can>
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </td>
                                             </tr>

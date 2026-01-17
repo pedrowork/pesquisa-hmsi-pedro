@@ -59,6 +59,9 @@ interface UsersEditProps {
     userPermissions: number[];
     roles: Role[];
     userRoles: number[];
+    isAdmin?: boolean;
+    canModifyPermissions?: boolean;
+    canModifyRoles?: boolean;
 }
 
 export default function UsersEdit({
@@ -67,6 +70,9 @@ export default function UsersEdit({
     userPermissions,
     roles,
     userRoles,
+    isAdmin = false,
+    canModifyPermissions = true,
+    canModifyRoles = true,
 }: UsersEditProps) {
     const { data, setData, put, processing, errors, reset } = useForm({
         name: user.name || '',
@@ -280,31 +286,48 @@ export default function UsersEdit({
                                 </p>
                             ) : (
                                 <div className="space-y-2">
-                                    {roles.map((role) => (
-                                        <div
-                                            key={role.id}
-                                            className="flex items-center space-x-2"
-                                        >
-                                            <Checkbox
-                                                id={`role-${role.id}`}
-                                                checked={(data.roles || []).includes(role.id)}
-                                                onCheckedChange={() =>
-                                                    handleRoleToggle(role.id)
-                                                }
-                                            />
-                                            <label
-                                                htmlFor={`role-${role.id}`}
-                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                    {roles.map((role) => {
+                                        const isAdminRole = role.slug === 'admin';
+                                        const canSelectAdmin = isAdmin || !isAdminRole;
+                                        const canModify = canModifyRoles && canSelectAdmin;
+                                        
+                                        return (
+                                            <div
+                                                key={role.id}
+                                                className={`flex items-center space-x-2 ${!canModify ? 'opacity-50' : ''}`}
                                             >
-                                                {role.name}
-                                                {role.description && (
-                                                    <span className="block text-xs text-muted-foreground">
-                                                        {role.description}
-                                                    </span>
-                                                )}
-                                            </label>
-                                        </div>
-                                    ))}
+                                                <Checkbox
+                                                    id={`role-${role.id}`}
+                                                    checked={(data.roles || []).includes(role.id)}
+                                                    onCheckedChange={() =>
+                                                        canModify && handleRoleToggle(role.id)
+                                                    }
+                                                    disabled={!canModify}
+                                                />
+                                                <label
+                                                    htmlFor={`role-${role.id}`}
+                                                    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canModify ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                                >
+                                                    {role.name}
+                                                    {!canModifyRoles && (
+                                                        <span className="block text-xs text-yellow-600 dark:text-yellow-400">
+                                                            Você não pode alterar suas próprias roles. Isso previne elevação de privilégios.
+                                                        </span>
+                                                    )}
+                                                    {!canSelectAdmin && canModifyRoles && (
+                                                        <span className="block text-xs text-yellow-600 dark:text-yellow-400">
+                                                            Apenas administradores podem atribuir este perfil
+                                                        </span>
+                                                    )}
+                                                    {role.description && canModify && (
+                                                        <span className="block text-xs text-muted-foreground">
+                                                            {role.description}
+                                                        </span>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -337,24 +360,30 @@ export default function UsersEdit({
                                                 {categoryPermissions.map((permission) => (
                                                     <div
                                                         key={permission.id}
-                                                        className="flex items-center space-x-2"
+                                                        className={`flex items-center space-x-2 ${!canModifyPermissions ? 'opacity-50' : ''}`}
                                                     >
                                                         <Checkbox
                                                             id={`permission-${permission.id}`}
                                                             checked={(data.permissions || []).includes(permission.id)}
                                                             onCheckedChange={() =>
-                                                                handlePermissionToggle(permission.id)
+                                                                canModifyPermissions && handlePermissionToggle(permission.id)
                                                             }
+                                                            disabled={!canModifyPermissions}
                                                         />
                                                         <label
                                                             htmlFor={`permission-${permission.id}`}
-                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                                                            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canModifyPermissions ? 'cursor-pointer' : 'cursor-not-allowed'} flex-1`}
                                                         >
                                                             <span className="font-semibold">{permission.name}</span>
                                                             <span className="block text-xs text-muted-foreground">
                                                                 {permission.slug}
                                                             </span>
-                                                            {permission.description && (
+                                                            {!canModifyPermissions && (
+                                                                <span className="block text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                                                    Você não pode alterar as permissões deste usuário
+                                                                </span>
+                                                            )}
+                                                            {permission.description && canModifyPermissions && (
                                                                 <span className="block text-xs text-muted-foreground mt-1">
                                                                     {permission.description}
                                                                 </span>

@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, AlertCircle, ArrowUpDown, Save, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +27,7 @@ interface Pergunta {
     cod_tipo_pergunta: number | null;
     ativo: boolean;
     total_pesquisas: number;
+    ordem: number | null;
 }
 
 interface PaginatedPerguntas {
@@ -41,14 +42,36 @@ interface PaginatedPerguntas {
 interface PerguntasIndexProps {
     perguntas: PaginatedPerguntas;
     filters: { search: string };
+    canOrder?: boolean;
 }
 
 export default function PerguntasIndex({
     perguntas,
     filters,
+    canOrder = false,
 }: PerguntasIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
+    const [isOrdering, setIsOrdering] = useState(false);
+    const [orderValues, setOrderValues] = useState<Record<number, number>>({});
     const { flash } = usePage().props as { flash?: { success?: string; warning?: string; error?: string } };
+
+    // Debug: verificar valor de canOrder (remover em produção)
+    useEffect(() => {
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+            console.log('🔍 canOrder:', canOrder);
+        }
+    }, [canOrder]);
+
+    // Inicializar valores de ordem quando perguntas mudarem
+    useEffect(() => {
+        if (isOrdering) {
+            const initialOrder: Record<number, number> = {};
+            perguntas.data.forEach((p, index) => {
+                initialOrder[p.cod] = p.ordem ?? index + 1;
+            });
+            setOrderValues(initialOrder);
+        }
+    }, [perguntas.data, isOrdering]);
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
@@ -56,6 +79,53 @@ export default function PerguntasIndex({
             preserveState: true,
             replace: true,
         });
+    };
+
+    const handleMoveUp = (index: number) => {
+        if (index === 0) return;
+        const newOrder = { ...orderValues };
+        const currentPergunta = perguntas.data[index];
+        const previousPergunta = perguntas.data[index - 1];
+        // Trocar valores de ordem
+        const currentOrder = newOrder[currentPergunta.cod] ?? currentPergunta.ordem ?? index + 1;
+        const previousOrder = newOrder[previousPergunta.cod] ?? previousPergunta.ordem ?? index;
+        newOrder[currentPergunta.cod] = previousOrder;
+        newOrder[previousPergunta.cod] = currentOrder;
+        setOrderValues(newOrder);
+    };
+
+    const handleMoveDown = (index: number) => {
+        if (index === perguntas.data.length - 1) return;
+        const newOrder = { ...orderValues };
+        const currentPergunta = perguntas.data[index];
+        const nextPergunta = perguntas.data[index + 1];
+        // Trocar valores de ordem
+        const currentOrder = newOrder[currentPergunta.cod] ?? currentPergunta.ordem ?? index + 1;
+        const nextOrder = newOrder[nextPergunta.cod] ?? nextPergunta.ordem ?? index + 2;
+        newOrder[currentPergunta.cod] = nextOrder;
+        newOrder[nextPergunta.cod] = currentOrder;
+        setOrderValues(newOrder);
+    };
+
+    const handleSaveOrder = () => {
+        const ordem = perguntas.data.map((p) => ({
+            id: p.cod,
+            ordem: orderValues[p.cod] || p.ordem || 0,
+        }));
+
+        router.post(
+            '/perguntas/update-order',
+            { ordem },
+            {
+                onSuccess: () => {
+                    setIsOrdering(false);
+                    router.reload({ only: ['perguntas'] });
+                },
+                onError: (errors) => {
+                    alert('Erro ao salvar ordem: ' + JSON.stringify(errors));
+                },
+            }
+        );
     };
 
     const handleDelete = (perguntaId: number, totalPesquisas: number) => {
@@ -97,14 +167,40 @@ export default function PerguntasIndex({
                             Cadastre e gerencie perguntas do sistema
                         </p>
                     </div>
-                    <Can permission="perguntas.create">
-                        <Link href="/perguntas/create">
-                            <Button>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Nova Pergunta
+                    <div className="flex gap-2">
+                        {canOrder && (
+                            <Button
+                                variant={isOrdering ? 'default' : 'outline'}
+                                onClick={() => {
+                                    if (isOrdering) {
+                                        handleSaveOrder();
+                                    } else {
+                                        setIsOrdering(true);
+                                    }
+                                }}
+                            >
+                                {isOrdering ? (
+                                    <>
+                                        <Save className="mr-2 h-4 w-4" />
+                                        Salvar Ordem
+                                    </>
+                                ) : (
+                                    <>
+                                        <ArrowUpDown className="mr-2 h-4 w-4" />
+                                        Ordenar
+                                    </>
+                                )}
                             </Button>
-                        </Link>
-                    </Can>
+                        )}
+                        <Can permission="perguntas.create">
+                            <Link href="/perguntas/create">
+                                <Button>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Nova Pergunta
+                                </Button>
+                            </Link>
+                        </Can>
+                    </div>
                 </div>
 
                 <Card>
@@ -142,6 +238,9 @@ export default function PerguntasIndex({
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b">
+                                        {canOrder && isOrdering && (
+                                            <th className="px-4 py-3 text-left text-sm font-medium">Ordem</th>
+                                        )}
                                         <th className="px-4 py-3 text-left text-sm font-medium">Código</th>
                                         <th className="px-4 py-3 text-left text-sm font-medium">Descrição</th>
                                         <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
@@ -152,7 +251,7 @@ export default function PerguntasIndex({
                                 <tbody>
                                     {perguntas.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                                            <td colSpan={canOrder && isOrdering ? 6 : 5} className="px-4 py-8 text-center text-muted-foreground">
                                                 Nenhuma pergunta encontrada
                                             </td>
                                         </tr>
@@ -166,6 +265,55 @@ export default function PerguntasIndex({
                                                         : ''
                                                 }`}
                                             >
+                                                {canOrder && isOrdering && (
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <Input
+                                                                type="number"
+                                                                min="1"
+                                                                className="w-20"
+                                                                value={orderValues[pergunta.cod] ?? pergunta.ordem ?? ''}
+                                                                onChange={(e) => {
+                                                                    const value = parseInt(e.target.value) || 1;
+                                                                    setOrderValues({
+                                                                        ...orderValues,
+                                                                        [pergunta.cod]: value,
+                                                                    });
+                                                                }}
+                                                            />
+                                                            <div className="flex flex-col gap-1">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0"
+                                                                    onClick={() => {
+                                                                        const currentIndex = perguntas.data.findIndex(p => p.cod === pergunta.cod);
+                                                                        handleMoveUp(currentIndex);
+                                                                    }}
+                                                                    disabled={perguntas.data.findIndex(p => p.cod === pergunta.cod) === 0}
+                                                                    title="Mover para cima"
+                                                                >
+                                                                    <ChevronUp className="h-3 w-3" />
+                                                                </Button>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0"
+                                                                    onClick={() => {
+                                                                        const currentIndex = perguntas.data.findIndex(p => p.cod === pergunta.cod);
+                                                                        handleMoveDown(currentIndex);
+                                                                    }}
+                                                                    disabled={perguntas.data.findIndex(p => p.cod === pergunta.cod) === perguntas.data.length - 1}
+                                                                    title="Mover para baixo"
+                                                                >
+                                                                    <ChevronDown className="h-3 w-3" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                )}
                                                 <td className="px-4 py-3 font-medium">#{pergunta.cod}</td>
                                                 <td className={`px-4 py-3 ${
                                                     pergunta.ativo === false || pergunta.ativo === 0 

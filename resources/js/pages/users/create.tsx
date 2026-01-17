@@ -39,9 +39,10 @@ interface Role {
 
 interface UsersCreateProps {
     roles: Role[];
+    isAdmin?: boolean;
 }
 
-export default function UsersCreate({ roles }: UsersCreateProps) {
+export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -197,31 +198,42 @@ export default function UsersCreate({ roles }: UsersCreateProps) {
                                         </p>
                                     ) : (
                                         <div className="space-y-2">
-                                            {roles.map((role) => (
-                                                <div
-                                                    key={role.id}
-                                                    className="flex items-center space-x-2"
-                                                >
-                                                    <Checkbox
-                                                        id={`role-${role.id}`}
-                                                        checked={(data.roles || []).includes(role.id)}
-                                                        onCheckedChange={() =>
-                                                            handleRoleToggle(role.id)
-                                                        }
-                                                    />
-                                                    <label
-                                                        htmlFor={`role-${role.id}`}
-                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                            {roles.map((role) => {
+                                                const isAdminRole = role.slug === 'admin';
+                                                const canSelectAdmin = isAdmin || !isAdminRole;
+                                                
+                                                return (
+                                                    <div
+                                                        key={role.id}
+                                                        className={`flex items-center space-x-2 ${!canSelectAdmin ? 'opacity-50' : ''}`}
                                                     >
-                                                        {role.name}
-                                                        {role.description && (
-                                                            <span className="block text-xs text-muted-foreground">
-                                                                {role.description}
-                                                            </span>
-                                                        )}
-                                                    </label>
-                                                </div>
-                                            ))}
+                                                        <Checkbox
+                                                            id={`role-${role.id}`}
+                                                            checked={(data.roles || []).includes(role.id)}
+                                                            onCheckedChange={() =>
+                                                                canSelectAdmin && handleRoleToggle(role.id)
+                                                            }
+                                                            disabled={!canSelectAdmin}
+                                                        />
+                                                        <label
+                                                            htmlFor={`role-${role.id}`}
+                                                            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canSelectAdmin ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                                        >
+                                                            {role.name}
+                                                            {!canSelectAdmin && (
+                                                                <span className="block text-xs text-yellow-600 dark:text-yellow-400">
+                                                                    Apenas administradores podem criar usuários com este perfil
+                                                                </span>
+                                                            )}
+                                                            {role.description && canSelectAdmin && (
+                                                                <span className="block text-xs text-muted-foreground">
+                                                                    {role.description}
+                                                                </span>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>

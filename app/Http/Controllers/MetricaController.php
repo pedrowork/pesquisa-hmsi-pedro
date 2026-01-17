@@ -221,6 +221,8 @@ class MetricaController extends Controller
                     DB::raw('ROUND(AVG(satisfacao.cod - 10), 2) AS media')
                 )
                 ->groupBy('perguntas_descricao.cod', 'perguntas_descricao.descricao')
+                ->orderByRaw('CASE WHEN perguntas_descricao.ordem IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('perguntas_descricao.ordem', 'asc')
                 ->orderBy('perguntas_descricao.cod')
                 ->get();
 

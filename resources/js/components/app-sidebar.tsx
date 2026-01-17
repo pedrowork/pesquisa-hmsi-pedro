@@ -32,6 +32,7 @@ import {
     HelpCircle,
     FileText,
     UserCheck,
+    Instagram,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -51,23 +52,23 @@ export function AppSidebar() {
     const hasLeitosView = useHasPermission('leitos.view');
     const hasLeitosCreate = useHasPermission('leitos.create');
     const hasLeitosManage = hasLeitosView || hasLeitosCreate;
-    
+
     const hasSetoresView = useHasPermission('setores.view');
     const hasSetoresCreate = useHasPermission('setores.create');
     const hasSetoresManage = hasSetoresView || hasSetoresCreate;
-    
+
     const hasTiposConvenioView = useHasPermission('tipos-convenio.view');
     const hasTiposConvenioCreate = useHasPermission('tipos-convenio.create');
     const hasTiposConvenioManage = hasTiposConvenioView || hasTiposConvenioCreate;
-    
+
     const hasSetoresPesquisaView = useHasPermission('setores-pesquisa.view');
     const hasSetoresPesquisaCreate = useHasPermission('setores-pesquisa.create');
     const hasSetoresPesquisaManage = hasSetoresPesquisaView || hasSetoresPesquisaCreate;
-    
+
     const hasPerguntasView = useHasPermission('perguntas.view');
     const hasPerguntasCreate = useHasPermission('perguntas.create');
     const hasPerguntasManage = hasPerguntasView || hasPerguntasCreate;
-    
+
     const hasSatisfacaoView = useHasPermission('satisfacao.view');
     const hasSatisfacaoCreate = useHasPermission('satisfacao.create');
     const hasSatisfacaoManage = hasSatisfacaoView || hasSatisfacaoCreate;
@@ -184,14 +185,14 @@ export function AppSidebar() {
 
     const footerNavItems: NavItem[] = [
         {
-            title: 'Repository',
-            href: 'https://github.com/laravel/react-starter-kit',
-            icon: Folder,
+            title: '👉 @pedrohrs23🚀',
+            href: 'https://instagram.com/pedrohrs23',
+            icon: Instagram,
         },
         {
-            title: 'Documentation',
-            href: 'https://laravel.com/docs/starter-kits#react',
-            icon: BookOpen,
+            title: 'Portfolio',
+            href: 'https://pedrohrsdev-portfolio.netlify.app/',
+            icon: BarChart3, // <- Or replace with a valid icon import; Portfolio is not defined
         },
     ];
 

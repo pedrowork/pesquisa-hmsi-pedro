@@ -338,6 +338,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('perguntas/{pergunta}', [\App\Http\Controllers\PerguntaController::class, 'destroy'])
         ->middleware('permission:perguntas.delete')
         ->name('perguntas.destroy');
+    Route::post('perguntas/update-order', [\App\Http\Controllers\PerguntaController::class, 'updateOrder'])
+        ->middleware('permission:perguntas.order')
+        ->name('perguntas.update-order');
 
     // Satisfação
     // Rotas específicas devem vir antes das rotas com parâmetros
@@ -386,5 +389,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('account-recovery', [\App\Http\Controllers\AccountRecoveryController::class, 'show'])->name('account-recovery.show');
     Route::post('account-recovery', [\App\Http\Controllers\AccountRecoveryController::class, 'recover'])->name('account-recovery.recover');
 });
+
+// Verificação de email (sem autenticação necessária - segurança via assinatura de URL)
+Route::get('email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerifyEmailController::class, '__invoke'])
+    ->middleware(['signed'])
+    ->name('verification.verify');
 
 require __DIR__.'/settings.php';

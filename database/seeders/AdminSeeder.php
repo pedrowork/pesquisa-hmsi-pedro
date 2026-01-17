@@ -212,6 +212,7 @@ class AdminSeeder extends Seeder
             'perguntas.create',
             'perguntas.edit',
             'perguntas.delete',
+            'perguntas.order',
             // Satisfação (granulares)
             'satisfacao.view',
             'satisfacao.create',

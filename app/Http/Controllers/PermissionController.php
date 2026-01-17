@@ -56,6 +56,10 @@ class PermissionController extends Controller
      */
     public function matrix(Request $request): Response
     {
+        // Garantir que Admin e Master tenham suas permissões corretas
+        $this->syncAdminPermissions();
+        $this->syncMasterPerguntasOrder();
+
         $viewType = $request->get('view', 'roles'); // 'roles' ou 'users'
         $search = $request->get('search', '');
 
@@ -108,11 +112,11 @@ class PermissionController extends Controller
         foreach ($permissions as $permission) {
             $parts = explode('.', $permission->slug);
             $context = count($parts) > 1 ? $parts[0] : 'outros';
-            
+
             if (!isset($groupedPermissions[$context])) {
                 $groupedPermissions[$context] = [];
             }
-            
+
             $groupedPermissions[$context][] = $permission;
         }
 
@@ -184,7 +188,7 @@ class PermissionController extends Controller
             'description' => ['nullable', 'string'],
         ]);
 
-        DB::table('permissions')->insert([
+        $permissionId = DB::table('permissions')->insertGetId([
             'name' => $validated['name'],
             'slug' => $validated['slug'],
             'description' => $validated['description'] ?? null,
@@ -192,6 +196,9 @@ class PermissionController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        // Garantir que Admin sempre tenha a nova permissão
+        $this->syncAdminPermissions();
 
         return redirect()->route('permissions.index')
             ->with('success', 'Permissão criada com sucesso!');
@@ -235,6 +242,9 @@ class PermissionController extends Controller
                 'updated_at' => now(),
             ]);
 
+        // Garantir que Admin sempre tenha a permissão atualizada
+        $this->syncAdminPermissions();
+
         return redirect()->route('permissions.index')
             ->with('success', 'Permissão atualizada com sucesso!');
     }
@@ -268,11 +278,34 @@ class PermissionController extends Controller
             'permissions.*' => ['integer', 'exists:permissions,id'],
         ]);
 
+        // Verificar se é o role Admin
+        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+        $isAdminRole = $adminRole && $adminRole->id === $roleId;
+
+        // Se for Admin, garantir que tenha TODAS as permissões
+        if ($isAdminRole) {
+            $this->syncAdminPermissions();
+            return redirect()->back()
+                ->with('success', 'Permissões do Admin atualizadas. Admin sempre tem todas as permissões.');
+        }
+
+        // Verificar se é o role Master
+        $masterRole = DB::table('roles')->where('slug', 'master')->first();
+        $isMasterRole = $masterRole && $masterRole->id === $roleId;
+
+        $perguntasOrderPermission = DB::table('permissions')->where('slug', 'perguntas.order')->first();
+
+        // Garantir que Master sempre tenha perguntas.order
+        $permissionsToAdd = $validated['permissions'];
+        if ($isMasterRole && $perguntasOrderPermission && !in_array($perguntasOrderPermission->id, $permissionsToAdd)) {
+            $permissionsToAdd[] = $perguntasOrderPermission->id;
+        }
+
         // Remover todas as permissões atuais da role
         DB::table('role_permissions')->where('role_id', $roleId)->delete();
 
         // Adicionar novas permissões
-        if (!empty($validated['permissions'])) {
+        if (!empty($permissionsToAdd)) {
             $insertData = array_map(function ($permissionId) use ($roleId) {
                 return [
                     'role_id' => $roleId,
@@ -280,10 +313,18 @@ class PermissionController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-            }, $validated['permissions']);
+            }, $permissionsToAdd);
 
             DB::table('role_permissions')->insert($insertData);
         }
+
+        // Se for Master, garantir que perguntas.order está presente
+        if ($isMasterRole) {
+            $this->syncMasterPerguntasOrder();
+        }
+
+        // Limpar cache de permissões de todos os usuários que têm esta role
+        $this->clearUsersPermissionCacheByRole($roleId);
 
         return redirect()->back()
             ->with('success', 'Permissões da role atualizadas com sucesso!');
@@ -298,6 +339,32 @@ class PermissionController extends Controller
             'permissions' => ['required', 'array'],
             'permissions.*' => ['integer', 'exists:permissions,id'],
         ]);
+
+        // Proteger permissões do primeiro Master e primeiro Admin
+        $firstMasterId = $this->getFirstMasterUserId();
+        $adminId = $this->getAdminUserId();
+        $currentUser = $request->user();
+        $isCurrentUserFirstMaster = $currentUser && $firstMasterId && $currentUser->id === $firstMasterId;
+        $isEditingSelf = $currentUser && $userId == $currentUser->id;
+        
+        // Prevenir auto-elevação: usuários não podem alterar suas próprias permissões (exceto primeiro Master)
+        if ($isEditingSelf && !$isCurrentUserFirstMaster) {
+            return redirect()->back()->withErrors([
+                'permissions' => 'Você não pode alterar suas próprias permissões. Isso previne elevação de privilégios não autorizada.',
+            ]);
+        }
+        
+        if ($userId == $firstMasterId && !$isCurrentUserFirstMaster) {
+            return redirect()->back()->withErrors([
+                'permissions' => 'Você não tem permissão para alterar as permissões do primeiro Master.',
+            ]);
+        }
+        
+        if ($adminId && $userId == $adminId && !$isCurrentUserFirstMaster) {
+            return redirect()->back()->withErrors([
+                'permissions' => 'Apenas o primeiro Master pode alterar as permissões do Administrador.',
+            ]);
+        }
 
         // Remover todas as permissões diretas do usuário
         DB::table('user_permissions')->where('user_id', $userId)->delete();
@@ -322,9 +389,37 @@ class PermissionController extends Controller
 
     /**
      * Toggle a single permission for a role.
+     * Admin sempre mantém todas as permissões.
      */
     public function toggleRolePermission(Request $request, int $roleId, int $permissionId): \Illuminate\Http\JsonResponse
     {
+        // Verificar se é o role Admin
+        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+        $isAdminRole = $adminRole && $adminRole->id === $roleId;
+
+        // Se for Admin, sempre garantir que tenha a permissão (não permitir remover)
+        if ($isAdminRole) {
+            $exists = DB::table('role_permissions')
+                ->where('role_id', $roleId)
+                ->where('permission_id', $permissionId)
+                ->exists();
+
+            if (!$exists) {
+                DB::table('role_permissions')->insert([
+                    'role_id' => $roleId,
+                    'permission_id' => $permissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Limpar cache de permissões dos usuários desta role
+            $this->clearUsersPermissionCacheByRole($roleId);
+
+            // Sempre retornar true para Admin (nunca pode remover)
+            return response()->json(['granted' => true, 'message' => 'Admin sempre tem todas as permissões']);
+        }
+
         $exists = DB::table('role_permissions')
             ->where('role_id', $roleId)
             ->where('permission_id', $permissionId)
@@ -335,7 +430,32 @@ class PermissionController extends Controller
                 ->where('role_id', $roleId)
                 ->where('permission_id', $permissionId)
                 ->delete();
-            
+
+            // Se for Master e a permissão for perguntas.order, garantir que ela seja adicionada novamente
+            $masterRole = DB::table('roles')->where('slug', 'master')->first();
+            $permission = DB::table('permissions')->where('id', $permissionId)->first();
+
+            $isMasterRole = $masterRole && $masterRole->id === $roleId;
+            $isPerguntasOrder = $permission && $permission->slug === 'perguntas.order';
+
+            if ($isMasterRole && $isPerguntasOrder) {
+                // Re-adicionar perguntas.order ao Master (não pode ser removida)
+                DB::table('role_permissions')->insert([
+                    'role_id' => $roleId,
+                    'permission_id' => $permissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Limpar cache de permissões dos usuários desta role
+                $this->clearUsersPermissionCacheByRole($roleId);
+
+                return response()->json(['granted' => true, 'message' => 'A permissão perguntas.order não pode ser removida do Master']);
+            }
+
+            // Limpar cache de permissões dos usuários desta role
+            $this->clearUsersPermissionCacheByRole($roleId);
+
             return response()->json(['granted' => false]);
         } else {
             DB::table('role_permissions')->insert([
@@ -344,8 +464,141 @@ class PermissionController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            
+
+            // Limpar cache de permissões dos usuários desta role
+            $this->clearUsersPermissionCacheByRole($roleId);
+
             return response()->json(['granted' => true]);
+        }
+    }
+
+    /**
+     * Garante que o role Admin sempre tem todas as permissões.
+     */
+    protected function syncAdminPermissions(): void
+    {
+        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+        if (!$adminRole) {
+            return;
+        }
+
+        // Buscar todas as permissões do sistema
+        $allPermissions = DB::table('permissions')->pluck('id');
+
+        // Buscar permissões atuais do Admin
+        $adminPermissions = DB::table('role_permissions')
+            ->where('role_id', $adminRole->id)
+            ->pluck('permission_id')
+            ->toArray();
+
+        // Adicionar permissões que o Admin não tem
+        $missingPermissions = array_diff($allPermissions->toArray(), $adminPermissions);
+        if (!empty($missingPermissions)) {
+            $insertData = array_map(function ($permissionId) use ($adminRole) {
+                return [
+                    'role_id' => $adminRole->id,
+                    'permission_id' => $permissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }, $missingPermissions);
+
+            DB::table('role_permissions')->insert($insertData);
+
+            // Limpar cache de permissões dos usuários Admin
+            $this->clearUsersPermissionCacheByRole($adminRole->id);
+        }
+    }
+
+    /**
+     * Garante que o role Master sempre tem perguntas.order.
+     */
+    protected function syncMasterPerguntasOrder(): void
+    {
+        $masterRole = DB::table('roles')->where('slug', 'master')->first();
+        if (!$masterRole) {
+            return;
+        }
+
+        $perguntasOrderPermission = DB::table('permissions')->where('slug', 'perguntas.order')->first();
+        if (!$perguntasOrderPermission) {
+            return;
+        }
+
+        // Verificar se Master já tem a permissão
+        $exists = DB::table('role_permissions')
+            ->where('role_id', $masterRole->id)
+            ->where('permission_id', $perguntasOrderPermission->id)
+            ->exists();
+
+        if (!$exists) {
+            DB::table('role_permissions')->insert([
+                'role_id' => $masterRole->id,
+                'permission_id' => $perguntasOrderPermission->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Limpar cache de permissões dos usuários Master
+            $this->clearUsersPermissionCacheByRole($masterRole->id);
+        }
+    }
+
+    /**
+     * Limpa o cache de permissões de todos os usuários que têm uma role específica.
+     */
+    /**
+     * Obtém o ID do primeiro Master criado (protegido).
+     */
+    protected function getFirstMasterUserId(): ?int
+    {
+        $masterRole = DB::table('roles')->where('slug', 'master')->first();
+        
+        if (!$masterRole) {
+            return null;
+        }
+
+        $firstMaster = DB::table('user_roles')
+            ->join('users', 'user_roles.user_id', '=', 'users.id')
+            ->where('user_roles.role_id', $masterRole->id)
+            ->orderBy('users.created_at', 'asc')
+            ->orderBy('users.id', 'asc')
+            ->select('users.id')
+            ->first();
+
+        return $firstMaster ? (int) $firstMaster->id : null;
+    }
+
+    /**
+     * Obtém o ID do usuário admin (com role 'admin').
+     */
+    protected function getAdminUserId(): ?int
+    {
+        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
+        
+        if (!$adminRole) {
+            return null;
+        }
+
+        $adminUser = DB::table('user_roles')
+            ->where('role_id', $adminRole->id)
+            ->first();
+
+        return $adminUser ? (int) $adminUser->user_id : null;
+    }
+
+    protected function clearUsersPermissionCacheByRole(int $roleId): void
+    {
+        $userIds = DB::table('user_roles')
+            ->where('role_id', $roleId)
+            ->pluck('user_id')
+            ->toArray();
+
+        foreach ($userIds as $userId) {
+            $user = \App\Models\User::find($userId);
+            if ($user) {
+                $user->clearPermissionsCache();
+            }
         }
     }
 
@@ -354,6 +607,35 @@ class PermissionController extends Controller
      */
     public function toggleUserPermission(Request $request, int $userId, int $permissionId): \Illuminate\Http\JsonResponse
     {
+        // Proteger permissões do primeiro Master e primeiro Admin
+        $firstMasterId = $this->getFirstMasterUserId();
+        $adminId = $this->getAdminUserId();
+        $currentUser = $request->user();
+        $isCurrentUserFirstMaster = $currentUser && $firstMasterId && $currentUser->id === $firstMasterId;
+        $isEditingSelf = $currentUser && $userId == $currentUser->id;
+        
+        // Prevenir auto-elevação: usuários não podem alterar suas próprias permissões (exceto primeiro Master)
+        if ($isEditingSelf && !$isCurrentUserFirstMaster) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não pode alterar suas próprias permissões. Isso previne elevação de privilégios não autorizada.',
+            ], 403);
+        }
+        
+        if ($userId == $firstMasterId && !$isCurrentUserFirstMaster) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você não tem permissão para alterar as permissões do primeiro Master.',
+            ], 403);
+        }
+        
+        if ($adminId && $userId == $adminId && !$isCurrentUserFirstMaster) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Apenas o primeiro Master pode alterar as permissões do Administrador.',
+            ], 403);
+        }
+
         $exists = DB::table('user_permissions')
             ->where('user_id', $userId)
             ->where('permission_id', $permissionId)
@@ -364,7 +646,7 @@ class PermissionController extends Controller
                 ->where('user_id', $userId)
                 ->where('permission_id', $permissionId)
                 ->delete();
-            
+
             return response()->json(['granted' => false]);
         } else {
             DB::table('user_permissions')->insert([
@@ -373,7 +655,7 @@ class PermissionController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            
+
             return response()->json(['granted' => true]);
         }
     }

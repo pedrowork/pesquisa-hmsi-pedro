@@ -15,8 +15,17 @@ class ForceHttps
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Forçar HTTPS apenas em produção
-        if (app()->environment('production') && !$request->secure()) {
+        // Forçar HTTPS apenas em produção e quando não estiver usando php artisan serve
+        // O php artisan serve não suporta HTTPS, então não força HTTPS em localhost/127.0.0.1
+        $isLocalDevelopment = in_array($request->getHost(), ['localhost', '127.0.0.1', '::1']) 
+            || app()->environment(['local', 'testing']);
+        
+        // Se estiver em desenvolvimento local, desabilitar cookies seguros temporariamente
+        if ($isLocalDevelopment && !$request->secure()) {
+            config(['session.secure' => false]);
+        }
+        
+        if (app()->environment('production') && !$request->secure() && !$isLocalDevelopment) {
             return redirect()->secure($request->getRequestUri());
         }
 

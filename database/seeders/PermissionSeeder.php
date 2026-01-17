@@ -253,6 +253,11 @@ class PermissionSeeder extends Seeder
                 'slug' => 'perguntas.delete',
                 'description' => 'Permite excluir perguntas do sistema',
             ],
+            [
+                'name' => 'Ordenar Perguntas',
+                'slug' => 'perguntas.order',
+                'description' => 'Permite definir a ordem customizada das perguntas (apenas admin e master)',
+            ],
 
             // Pesquisa - Satisfação (permissões granulares)
             [
