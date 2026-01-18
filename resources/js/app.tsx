@@ -16,7 +16,7 @@ let setPermissionErrorGlobal: ((error: { open: boolean; permission?: string; mes
 // Componente wrapper para interceptar erros
 function AppWithErrorHandling({ Component, props }: any) {
     console.log('[DEBUG] AppWithErrorHandling: Componente iniciado', Component?.name || 'Unknown');
-    
+
     const [permissionError, setPermissionError] = useState<{
         open: boolean;
         permission?: string;
@@ -24,7 +24,7 @@ function AppWithErrorHandling({ Component, props }: any) {
     }>({
         open: false,
     });
-    
+
     console.log('[DEBUG] AppWithErrorHandling: useState chamado');
 
     useEffect(() => {

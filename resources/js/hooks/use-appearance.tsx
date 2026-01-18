@@ -62,7 +62,7 @@ export function initializeTheme() {
 
 export function useAppearance() {
     console.log('[DEBUG] useAppearance: Hook iniciado');
-    
+
     // Sempre inicializar com 'system' para evitar diferença server/client
     console.log('[DEBUG] useAppearance: Antes de useState');
     const [appearance, setAppearance] = useState<Appearance>('system');

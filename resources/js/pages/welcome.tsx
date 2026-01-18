@@ -6,11 +6,11 @@ import { Moon, Sun, ClipboardList, BarChart3, Shield, Zap } from 'lucide-react';
 
 export default function Welcome() {
     console.log('[DEBUG] Welcome: Componente iniciado');
-    
+
     console.log('[DEBUG] Welcome: Antes de usePage');
     const { auth } = usePage<SharedData>().props;
     console.log('[DEBUG] Welcome: usePage executado');
-    
+
     console.log('[DEBUG] Welcome: Antes de useAppearance');
     const { appearance, updateAppearance } = useAppearance();
     console.log('[DEBUG] Welcome: useAppearance executado');
