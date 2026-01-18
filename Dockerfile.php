@@ -56,6 +56,9 @@ RUN rm -rf resources/js/routes resources/js/actions resources/js/wayfinder && \
     find . -type d -name "routes" -path "*/resources/js/routes" -exec rm -rf {} + 2>/dev/null || true && \
     find . -type d -name "actions" -path "*/resources/js/actions" -exec rm -rf {} + 2>/dev/null || true
 
+# ARG para variáveis de ambiente do Vite (durante build)
+ARG VITE_APP_NAME=pesquisa-hmsi-pedro
+
 # Instalar dependências Node.js
 RUN npm install
 
@@ -68,7 +71,8 @@ RUN chmod +x /tmp/fix-wayfinder-duplicates.sh && \
     /tmp/fix-wayfinder-duplicates.sh && \
     rm /tmp/fix-wayfinder-duplicates.sh
 
-# Build dos assets
+# Build dos assets com variáveis de ambiente do Vite
+ENV VITE_APP_NAME=${VITE_APP_NAME}
 RUN npm run build
 
 # Backup do conteúdo original (para copiar para volumes na inicialização)
