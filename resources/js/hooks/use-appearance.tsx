@@ -20,6 +20,11 @@ const setCookie = (name: string, value: string, days = 365) => {
 };
 
 const applyTheme = (appearance: Appearance) => {
+    // Proteger contra SSR - só executar no cliente
+    if (typeof document === 'undefined') {
+        return;
+    }
+
     const isDark =
         appearance === 'dark' || (appearance === 'system' && prefersDark());
 
