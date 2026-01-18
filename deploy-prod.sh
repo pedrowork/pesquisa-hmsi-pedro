@@ -102,7 +102,7 @@ echo
 if [[ ! $REPLY =~ ^[Nn]$ ]]; then
     docker-compose exec -T php php artisan migrate --force
     echo -e "${GREEN}✓ Migrations executadas${NC}"
-    
+
     # Criar usuário admin
     read -p "Deseja criar o usuário admin? (S/n): " -n 1 -r
     echo
