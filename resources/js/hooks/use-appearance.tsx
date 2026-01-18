@@ -41,6 +41,11 @@ const handleSystemThemeChange = () => {
 };
 
 export function initializeTheme() {
+    // Proteger contra SSR - só executar no cliente
+    if (typeof window === 'undefined') {
+        return;
+    }
+
     const savedAppearance =
         (localStorage.getItem('appearance') as Appearance) || 'system';
 

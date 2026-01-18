@@ -120,5 +120,13 @@ createInertiaApp({
     },
 });
 
-// This will set light / dark mode on load...
-initializeTheme();
+// Initialize theme only on client side (after DOM is ready)
+if (typeof window !== 'undefined') {
+    // Wait for DOM to be ready before initializing theme
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeTheme);
+    } else {
+        // DOM is already ready
+        initializeTheme();
+    }
+}
