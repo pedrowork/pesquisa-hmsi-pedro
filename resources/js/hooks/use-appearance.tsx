@@ -56,14 +56,8 @@ export function initializeTheme() {
 }
 
 export function useAppearance() {
-    const [appearance, setAppearance] = useState<Appearance>(() => {
-        // Inicializar apenas no cliente (não durante SSR)
-        if (typeof window === 'undefined') {
-            return 'system';
-        }
-        const saved = localStorage.getItem('appearance') as Appearance | null;
-        return saved || 'system';
-    });
+    // Sempre inicializar com 'system' para evitar diferença server/client
+    const [appearance, setAppearance] = useState<Appearance>('system');
 
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
@@ -80,7 +74,7 @@ export function useAppearance() {
     }, []);
 
     useEffect(() => {
-        // Apenas executar no cliente
+        // Apenas executar no cliente - ler do localStorage após hidratação
         if (typeof window === 'undefined') {
             return;
         }
@@ -89,15 +83,22 @@ export function useAppearance() {
             'appearance',
         ) as Appearance | null;
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        updateAppearance(savedAppearance || 'system');
+        const finalAppearance = savedAppearance || 'system';
+        setAppearance(finalAppearance);
+        applyTheme(finalAppearance);
 
-        return () =>
-            mediaQuery()?.removeEventListener(
-                'change',
-                handleSystemThemeChange,
-            );
-    }, [updateAppearance]);
+        // Setup system theme change listener
+        const mediaQueryInstance = mediaQuery();
+        if (mediaQueryInstance) {
+            mediaQueryInstance.addEventListener('change', handleSystemThemeChange);
+        }
+
+        return () => {
+            if (mediaQueryInstance) {
+                mediaQueryInstance.removeEventListener('change', handleSystemThemeChange);
+            }
+        };
+    }, []);
 
     return { appearance, updateAppearance } as const;
 }
