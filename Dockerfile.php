@@ -62,8 +62,11 @@ RUN npm install
 # Gerar arquivos wayfinder manualmente (plugin desabilitado no vite.config.ts)
 RUN php artisan wayfinder:generate --with-form
 
-# Remover duplicação do 'export const update' (bug do wayfinder)
-RUN sed -i '7,72d' resources/js/routes/user-password/index.ts || true
+# Copiar e executar script para corrigir duplicações do wayfinder
+COPY fix-wayfinder-duplicates.sh /tmp/
+RUN chmod +x /tmp/fix-wayfinder-duplicates.sh && \
+    /tmp/fix-wayfinder-duplicates.sh && \
+    rm /tmp/fix-wayfinder-duplicates.sh
 
 # Build dos assets
 RUN npm run build
