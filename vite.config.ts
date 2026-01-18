@@ -25,6 +25,24 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'react-vendor': ['react', 'react-dom'],
+                },
+            },
+        },
+        commonjsOptions: {
+            transformMixedEsModules: true,
+        },
+    },
+    resolve: {
+        dedupe: ['react', 'react-dom'],
+    },
+    optimizeDeps: {
+        include: ['react', 'react-dom'],
+    },
     server: {
         host: '127.0.0.1', // Força IPv4 para evitar problemas com CSP e IPv6
         port: 5173,
