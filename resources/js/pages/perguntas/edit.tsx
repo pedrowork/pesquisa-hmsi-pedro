@@ -26,6 +26,7 @@ interface Pergunta {
     cod_setor_pesquis: number | null;
     cod_tipo_pergunta: number | null;
     ativo: boolean;
+    obrigatoria: boolean;
 }
 
 interface PerguntasEditProps {
@@ -39,6 +40,7 @@ export default function PerguntasEdit({ pergunta, setoresPesquisa }: PerguntasEd
         cod_setor_pesquis: pergunta.cod_setor_pesquis?.toString() || '',
         cod_tipo_pergunta: pergunta.cod_tipo_pergunta?.toString() || '',
         ativo: pergunta.ativo ?? true,
+        obrigatoria: pergunta.obrigatoria ?? false,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -132,6 +134,16 @@ export default function PerguntasEdit({ pergunta, setoresPesquisa }: PerguntasEd
                                 />
                                 <Label htmlFor="ativo" className="cursor-pointer">
                                     Pergunta ativa
+                                </Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="obrigatoria"
+                                    checked={data.obrigatoria}
+                                    onCheckedChange={(checked) => setData('obrigatoria', checked === true)}
+                                />
+                                <Label htmlFor="obrigatoria" className="cursor-pointer">
+                                    Pergunta obrigatória
                                 </Label>
                             </div>
                             <div className="flex items-center gap-4">

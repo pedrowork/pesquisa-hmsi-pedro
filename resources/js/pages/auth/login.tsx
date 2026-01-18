@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register, home } from '@/routes';
+import { home } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { Form, Head, Link } from '@inertiajs/react';
@@ -15,13 +15,11 @@ import { Moon, Sun, Mail } from 'lucide-react';
 interface LoginProps {
     status?: string;
     canResetPassword: boolean;
-    canRegister: boolean;
 }
 
 export default function Login({
     status,
     canResetPassword,
-    canRegister,
 }: LoginProps) {
     const { appearance, updateAppearance } = useAppearance();
 
@@ -197,18 +195,6 @@ export default function Login({
                             </Button>
                         </div>
 
-                        {canRegister && (
-                                            <div className="text-center text-sm text-slate-600 dark:text-slate-400">
-                                                Não tem uma conta?{' '}
-                                                <TextLink
-                                                    href={register()}
-                                                    className="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
-                                                    tabIndex={5}
-                                                >
-                                                    Criar conta
-                                </TextLink>
-                            </div>
-                        )}
                     </>
                 )}
             </Form>

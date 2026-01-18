@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,14 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
 
@@ -28,6 +36,7 @@ interface Pergunta {
     descricao: string;
     cod_setor_pesquis: number | null;
     cod_tipo_pergunta: number | null;
+    obrigatoria: boolean;
 }
 
 interface Satisfacao {
@@ -93,6 +102,8 @@ export default function QuestionariosCreate({
 }: QuestionariosCreateProps) {
     const [respostas, setRespostas] = useState<Record<number, number>>({});
     const [respostasTexto, setRespostasTexto] = useState<Record<number, string>>({});
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
     const { data, setData, post, processing, errors } = useForm({
         // Dados do paciente
@@ -177,8 +188,35 @@ export default function QuestionariosCreate({
             });
         });
 
+        // Validar se há pelo menos uma resposta
         if (respostasArray.length === 0) {
-            alert('Por favor, responda pelo menos uma pergunta.');
+            setModalMessage('Por favor, responda pelo menos uma pergunta.');
+            setShowModal(true);
+            return;
+        }
+
+        // Validar perguntas obrigatórias não respondidas
+        const perguntasObrigatoriasNaoRespondidas: string[] = [];
+
+        perguntas.forEach((pergunta) => {
+            const isObrigatoria = pergunta.obrigatoria === true || pergunta.obrigatoria === 1;
+
+            if (isObrigatoria) {
+                const temResposta = respostasArray.some(
+                    (resposta) => resposta.cod_pergunta === pergunta.cod
+                );
+
+                if (!temResposta) {
+                    perguntasObrigatoriasNaoRespondidas.push(pergunta.descricao);
+                }
+            }
+        });
+
+        if (perguntasObrigatoriasNaoRespondidas.length > 0) {
+            setModalMessage(
+                `Por favor, responda as seguintes perguntas obrigatórias:\n\n${perguntasObrigatoriasNaoRespondidas.map((p, i) => `${i + 1}. ${p}`).join('\n')}`
+            );
+            setShowModal(true);
             return;
         }
 
@@ -489,7 +527,7 @@ export default function QuestionariosCreate({
                                                     htmlFor={`pergunta-texto-${pergunta.cod}`}
                                                     className="text-sm sm:text-base"
                                                 >
-                                                    {pergunta.descricao} <span className="text-red-500">*</span>
+                                                    {pergunta.descricao} {pergunta.obrigatoria === true || pergunta.obrigatoria === 1 ? <span className="text-red-500">*</span> : null}
                                                 </Label>
                                                 <textarea
                                                     id={`pergunta-texto-${pergunta.cod}`}
@@ -504,7 +542,7 @@ export default function QuestionariosCreate({
                                                     }
                                                     className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm sm:text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                                     maxLength={1000}
-                                                    required
+                                                    required={pergunta.obrigatoria === true || pergunta.obrigatoria === 1}
                                                 />
                                             </div>
                                         );
@@ -559,7 +597,7 @@ export default function QuestionariosCreate({
                                                 htmlFor={`pergunta-${pergunta.cod}`}
                                                 className="text-sm sm:text-base break-words"
                                             >
-                                                {pergunta.descricao} <span className="text-red-500">*</span>
+                                                {pergunta.descricao} {pergunta.obrigatoria === true || pergunta.obrigatoria === 1 ? <span className="text-red-500">*</span> : null}
                                             </Label>
                                                 {satisfacoesFiltradas.length === 0 ? (
                                                     <p className="text-sm text-muted-foreground">
@@ -626,6 +664,30 @@ export default function QuestionariosCreate({
                         </Link>
                     </div>
                 </form>
+
+                {/* Modal de Validação */}
+                <Dialog open={showModal} onOpenChange={setShowModal}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <div className="flex items-center justify-center mb-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                                    <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                </div>
+                            </div>
+                            <DialogTitle className="text-center">
+                                Atenção
+                            </DialogTitle>
+                            <DialogDescription className="text-center whitespace-pre-line">
+                                {modalMessage}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="sm:justify-center">
+                            <Button onClick={() => setShowModal(false)}>
+                                Entendi
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AppLayout>
     );

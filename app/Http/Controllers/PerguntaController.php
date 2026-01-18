@@ -21,7 +21,7 @@ class PerguntaController extends Controller
                 'perguntas_descricao.*',
                 DB::raw('COUNT(DISTINCT questionario.id) as total_pesquisas')
             )
-            ->groupBy('perguntas_descricao.cod', 'perguntas_descricao.descricao', 'perguntas_descricao.cod_setor_pesquis', 'perguntas_descricao.cod_tipo_pergunta', 'perguntas_descricao.ativo', 'perguntas_descricao.ordem');
+            ->groupBy('perguntas_descricao.cod', 'perguntas_descricao.descricao', 'perguntas_descricao.cod_setor_pesquis', 'perguntas_descricao.cod_tipo_pergunta', 'perguntas_descricao.ativo', 'perguntas_descricao.obrigatoria', 'perguntas_descricao.ordem');
 
         // Search
         if ($request->has('search') && $request->search) {
@@ -99,6 +99,7 @@ class PerguntaController extends Controller
             'cod_setor_pesquis' => ['nullable', 'exists:setor_pesquis,cod'],
             'cod_tipo_pergunta' => ['nullable', 'integer'],
             'ativo' => ['nullable', 'boolean'],
+            'obrigatoria' => ['nullable', 'boolean'],
         ]);
 
         DB::table('perguntas_descricao')->insert([
@@ -106,6 +107,7 @@ class PerguntaController extends Controller
             'cod_setor_pesquis' => $validated['cod_setor_pesquis'] ?? null,
             'cod_tipo_pergunta' => $validated['cod_tipo_pergunta'] ?? null,
             'ativo' => $validated['ativo'] ?? true,
+            'obrigatoria' => $validated['obrigatoria'] ?? false,
         ]);
 
         return redirect()->route('perguntas.index')
@@ -145,6 +147,7 @@ class PerguntaController extends Controller
             'cod_setor_pesquis' => ['nullable', 'exists:setor_pesquis,cod'],
             'cod_tipo_pergunta' => ['nullable', 'integer'],
             'ativo' => ['nullable', 'boolean'],
+            'obrigatoria' => ['nullable', 'boolean'],
         ]);
 
         DB::table('perguntas_descricao')
@@ -154,6 +157,7 @@ class PerguntaController extends Controller
                 'cod_setor_pesquis' => $validated['cod_setor_pesquis'] ?? null,
                 'cod_tipo_pergunta' => $validated['cod_tipo_pergunta'] ?? null,
                 'ativo' => $validated['ativo'] ?? true,
+                'obrigatoria' => $validated['obrigatoria'] ?? false,
             ]);
 
         return redirect()->route('perguntas.index')

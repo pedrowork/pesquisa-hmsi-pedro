@@ -30,6 +30,7 @@ interface Pergunta {
     cod_setor_pesquis: number | null;
     cod_tipo_pergunta: number | null;
     ativo: boolean;
+    obrigatoria: boolean;
     total_pesquisas: number;
     ordem: number | null;
 }
@@ -56,6 +57,7 @@ export default function PerguntasIndex({
 }: PerguntasIndexProps) {
     const { t } = useTranslation();
     const [search, setSearch] = useState(filters.search || '');
+    const [debouncedSearch, setDebouncedSearch] = useState(filters.search || '');
     const [isOrdering, setIsOrdering] = useState(false);
     const [orderValues, setOrderValues] = useState<Record<number, number>>({});
     const { flash } = usePage().props as { flash?: { success?: string; warning?: string; error?: string } };
@@ -78,20 +80,38 @@ export default function PerguntasIndex({
     // Inicializar valores de ordem quando perguntas mudarem
     useEffect(() => {
         if (isOrdering) {
-            const initialOrder: Record<number, number> = {};
-            perguntas.data.forEach((p, index) => {
-                initialOrder[p.cod] = p.ordem ?? index + 1;
-            });
-            setOrderValues(initialOrder);
+        const initialOrder: Record<number, number> = {};
+        perguntas.data.forEach((p, index) => {
+            initialOrder[p.cod] = p.ordem ?? index + 1;
+        });
+        setOrderValues(initialOrder);
         }
     }, [perguntas.data, isOrdering]);
 
+    // Debounce da busca - atualiza debouncedSearch após 300ms de inatividade
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Busca automática quando debouncedSearch mudar
+    useEffect(() => {
+        if (debouncedSearch !== filters.search) {
+            router.get('/perguntas', { search: debouncedSearch }, {
+                preserveState: true,
+                replace: true,
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedSearch]);
+
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/perguntas', { search }, {
-            preserveState: true,
-            replace: true,
-        });
+        // Forçar busca imediata quando o botão é clicado
+        setDebouncedSearch(search);
     };
 
     const handleMoveUp = (index: number) => {
@@ -281,30 +301,30 @@ export default function PerguntasIndex({
                                         </tr>
                                     ) : (
                                         perguntas.data.map((pergunta) => (
-                                            <tr 
-                                                key={pergunta.cod} 
+                                            <tr
+                                                key={pergunta.cod}
                                                 className={`border-b hover:bg-muted/50 ${
-                                                    pergunta.ativo === false || pergunta.ativo === 0 
-                                                        ? 'bg-red-50/50 dark:bg-red-950/20' 
+                                                    pergunta.ativo === false || pergunta.ativo === 0
+                                                        ? 'bg-red-50/50 dark:bg-red-950/20'
                                                         : ''
                                                 }`}
                                             >
                                                 {canOrder && isOrdering && (
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center gap-2">
-                                                            <Input
-                                                                type="number"
-                                                                min="1"
-                                                                className="w-20"
-                                                                value={orderValues[pergunta.cod] ?? pergunta.ordem ?? ''}
-                                                                onChange={(e) => {
-                                                                    const value = parseInt(e.target.value) || 1;
-                                                                    setOrderValues({
-                                                                        ...orderValues,
-                                                                        [pergunta.cod]: value,
-                                                                    });
-                                                                }}
-                                                            />
+                                                        <Input
+                                                            type="number"
+                                                            min="1"
+                                                            className="w-20"
+                                                            value={orderValues[pergunta.cod] ?? pergunta.ordem ?? ''}
+                                                            onChange={(e) => {
+                                                                const value = parseInt(e.target.value) || 1;
+                                                                setOrderValues({
+                                                                    ...orderValues,
+                                                                    [pergunta.cod]: value,
+                                                                });
+                                                            }}
+                                                        />
                                                             <div className="flex flex-col gap-1">
                                                                 <Button
                                                                     type="button"
@@ -340,22 +360,29 @@ export default function PerguntasIndex({
                                                 )}
                                                 <td className="px-4 py-3 font-medium">#{pergunta.cod}</td>
                                                 <td className={`px-4 py-3 ${
-                                                    pergunta.ativo === false || pergunta.ativo === 0 
-                                                        ? 'text-red-600 dark:text-red-400' 
+                                                    pergunta.ativo === false || pergunta.ativo === 0
+                                                        ? 'text-red-600 dark:text-red-400'
                                                         : ''
                                                 }`}>
                                                     {pergunta.descricao}
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    {pergunta.ativo === false || pergunta.ativo === 0 ? (
-                                                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                                                            {t('questions.deactivated')}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                                            {t('questions.activated')}
-                                                        </span>
-                                                    )}
+                                                    <div className="flex flex-col gap-1">
+                                                        {pergunta.ativo === false || pergunta.ativo === 0 ? (
+                                                            <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                                                {t('questions.deactivated')}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                                                {t('questions.activated')}
+                                                            </span>
+                                                        )}
+                                                        {pergunta.obrigatoria === true || pergunta.obrigatoria === 1 ? (
+                                                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                                                Obrigatória
+                                                            </span>
+                                                        ) : null}
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
                                                     {pergunta.total_pesquisas || 0} {t('questions.surveysCount')}

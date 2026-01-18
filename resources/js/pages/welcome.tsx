@@ -1,14 +1,10 @@
-import { dashboard, login, register, home } from '@/routes';
+import { dashboard, login, home } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useAppearance } from '@/hooks/use-appearance';
 import { Moon, Sun, ClipboardList, BarChart3, Shield, Zap } from 'lucide-react';
 
-export default function Welcome({
-    canRegister = true,
-}: {
-    canRegister?: boolean;
-}) {
+export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
     const { appearance, updateAppearance } = useAppearance();
 
@@ -105,22 +101,12 @@ export default function Welcome({
                                 Dashboard
                             </Link>
                         ) : (
-                            <>
-                                <Link
-                                    href={login()}
-                                            className="inline-flex items-center gap-2 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/50 px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-white hover:shadow-md dark:bg-slate-800/80 dark:border-slate-700/50 dark:text-slate-200 dark:hover:bg-slate-800"
-                                >
-                                            Entrar
-                                </Link>
-                                {canRegister && (
-                                    <Link
-                                        href={register()}
-                                                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 dark:shadow-teal-500/10"
-                                    >
-                                                Registrar
-                                    </Link>
-                                )}
-                            </>
+                            <Link
+                                href={login()}
+                                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 dark:shadow-teal-500/10"
+                            >
+                                        Entrar
+                            </Link>
                         )}
                             </div>
                     </nav>
@@ -156,14 +142,6 @@ export default function Welcome({
                                         <span className="relative z-10">Começar Agora</span>
                                         <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-emerald-600 opacity-0 transition-opacity group-hover:opacity-100" />
                                     </Link>
-                                    {!auth.user && canRegister && (
-                                        <Link
-                                            href={register()}
-                                            className="inline-flex items-center gap-2 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/50 px-8 py-4 text-base font-semibold text-slate-700 shadow-sm transition-all hover:bg-white hover:shadow-md dark:bg-slate-800/80 dark:border-slate-700/50 dark:text-slate-200 dark:hover:bg-slate-800"
-                                        >
-                                            Criar Conta
-                                        </Link>
-                                    )}
                                 </div>
                             </div>
 

@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
+    return Inertia::render('welcome');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -24,137 +24,135 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $researchStats = [];
 
         // Métricas de evolução - sempre disponíveis para todos os colaboradores autenticados
-        // Questionários do dia (hoje)
-        $questionariosHoje = \Illuminate\Support\Facades\DB::table('questionario')
-            ->whereDate('data_questionario', now()->toDateString())
-            ->select('cod_paciente')
-            ->distinct()
-            ->count('cod_paciente');
-        $researchStats['questionariosHoje'] = $questionariosHoje;
+        // Cache de 5 minutos para métricas básicas de evolução
+        $researchStats = \Illuminate\Support\Facades\Cache::remember('dashboard.research_stats.evolution', 300, function () {
+            $anoAtual = now()->year;
+            $anoPassado = $anoAtual - 1;
 
-        // Questionários da semana (últimos 7 dias)
-        $questionariosSemana = \Illuminate\Support\Facades\DB::table('questionario')
-            ->whereBetween('data_questionario', [
-                now()->subDays(6)->startOfDay()->toDateString(),
-                now()->endOfDay()->toDateString()
-            ])
-            ->select('cod_paciente')
-            ->distinct()
-            ->count('cod_paciente');
-        $researchStats['questionariosSemana'] = $questionariosSemana;
-
-        // Questionários do mês (mês atual)
-        $questionariosMesAtual = \Illuminate\Support\Facades\DB::table('questionario')
-            ->whereMonth('data_questionario', now()->month)
-            ->whereYear('data_questionario', now()->year)
-            ->select('cod_paciente')
-            ->distinct()
-            ->count('cod_paciente');
-        $researchStats['questionariosMesAtual'] = $questionariosMesAtual;
-
-        // Comparação com o ano passado
-        $anoAtual = now()->year;
-        $anoPassado = $anoAtual - 1;
-
-        // Questionários do mesmo dia do ano passado
-        $mesmoDiaAnoPassado = \Illuminate\Support\Facades\DB::table('questionario')
-            ->whereDate('data_questionario', now()->subYear()->toDateString())
-            ->select('cod_paciente')
-            ->distinct()
-            ->count('cod_paciente');
-        $researchStats['questionariosMesmoDiaAnoPassado'] = $mesmoDiaAnoPassado;
-
-        // Questionários da mesma semana do ano passado (mesmos dias da semana)
-        $inicioSemanaAnoPassado = now()->subYear()->startOfWeek()->toDateString();
-        $fimSemanaAnoPassado = now()->subYear()->endOfWeek()->toDateString();
-        $mesmaSemanaAnoPassado = \Illuminate\Support\Facades\DB::table('questionario')
-            ->whereBetween('data_questionario', [$inicioSemanaAnoPassado, $fimSemanaAnoPassado])
-            ->select('cod_paciente')
-            ->distinct()
-            ->count('cod_paciente');
-        $researchStats['questionariosMesmaSemanaAnoPassado'] = $mesmaSemanaAnoPassado;
-
-        // Questionários do mesmo mês do ano passado
-        $mesmoMesAnoPassado = \Illuminate\Support\Facades\DB::table('questionario')
-            ->whereMonth('data_questionario', now()->month)
-            ->whereYear('data_questionario', $anoPassado)
-            ->select('cod_paciente')
-            ->distinct()
-            ->count('cod_paciente');
-        $researchStats['questionariosMesmoMesAnoPassado'] = $mesmoMesAnoPassado;
+            return [
+                'questionariosHoje' => \Illuminate\Support\Facades\DB::table('questionario')
+                    ->whereDate('data_questionario', now()->toDateString())
+                    ->select('cod_paciente')
+                    ->distinct()
+                    ->count('cod_paciente'),
+                'questionariosSemana' => \Illuminate\Support\Facades\DB::table('questionario')
+                    ->whereBetween('data_questionario', [
+                        now()->subDays(6)->startOfDay()->toDateString(),
+                        now()->endOfDay()->toDateString()
+                    ])
+                    ->select('cod_paciente')
+                    ->distinct()
+                    ->count('cod_paciente'),
+                'questionariosMesAtual' => \Illuminate\Support\Facades\DB::table('questionario')
+                    ->whereMonth('data_questionario', now()->month)
+                    ->whereYear('data_questionario', now()->year)
+                    ->select('cod_paciente')
+                    ->distinct()
+                    ->count('cod_paciente'),
+                'questionariosMesmoDiaAnoPassado' => \Illuminate\Support\Facades\DB::table('questionario')
+                    ->whereDate('data_questionario', now()->subYear()->toDateString())
+                    ->select('cod_paciente')
+                    ->distinct()
+                    ->count('cod_paciente'),
+                'questionariosMesmaSemanaAnoPassado' => \Illuminate\Support\Facades\DB::table('questionario')
+                    ->whereBetween('data_questionario', [
+                        now()->subYear()->startOfWeek()->toDateString(),
+                        now()->subYear()->endOfWeek()->toDateString()
+                    ])
+                    ->select('cod_paciente')
+                    ->distinct()
+                    ->count('cod_paciente'),
+                'questionariosMesmoMesAnoPassado' => \Illuminate\Support\Facades\DB::table('questionario')
+                    ->whereMonth('data_questionario', now()->month)
+                    ->whereYear('data_questionario', $anoPassado)
+                    ->select('cod_paciente')
+                    ->distinct()
+                    ->count('cod_paciente'),
+            ];
+        });
 
         // Calcular estatísticas de gerenciamento apenas se tiver permissão
         if ($isAdmin || $user->hasPermission('dashboard.stats.management')) {
-            $stats = [
-                'totalUsers' => \App\Models\User::count(),
-                'activeUsers' => \App\Models\User::where('status', 1)->count(),
-                'totalRoles' => \Illuminate\Support\Facades\DB::table('roles')->count(),
-                'totalPermissions' => \Illuminate\Support\Facades\DB::table('permissions')->count(),
-            ];
+            $stats = \Illuminate\Support\Facades\Cache::remember('dashboard.stats', 300, function () {
+                return [
+                    'totalUsers' => \App\Models\User::count(),
+                    'activeUsers' => \App\Models\User::where('status', 1)->count(),
+                    'totalRoles' => \Illuminate\Support\Facades\DB::table('roles')->count(),
+                    'totalPermissions' => \Illuminate\Support\Facades\DB::table('permissions')->count(),
+                ];
+            });
         }
 
         // Calcular métricas principais de pesquisa apenas se tiver permissão
         if ($isAdmin || $user->hasPermission('dashboard.research.metrics')) {
-            $researchStats['totalQuestionarios'] = \Illuminate\Support\Facades\DB::table('questionario')
-                ->select('cod_paciente')
-                ->distinct()
-                ->count('cod_paciente');
-            $researchStats['totalPacientes'] = \Illuminate\Support\Facades\DB::table('dados_do_paciente')->count();
-            $researchStats['questionariosMes'] = \Illuminate\Support\Facades\DB::table('questionario')
-                ->whereMonth('data_questionario', now()->month)
-                ->whereYear('data_questionario', now()->year)
-                ->select('cod_paciente')
-                ->distinct()
-                ->count('cod_paciente');
+            $metricsData = \Illuminate\Support\Facades\Cache::remember('dashboard.research_stats.metrics', 300, function () {
+                $satisfacaoMedia = \Illuminate\Support\Facades\DB::table('questionario')
+                    ->join('satisfacao', 'questionario.resposta', '=', 'satisfacao.cod')
+                    ->join('perguntas_descricao', 'questionario.cod_pergunta', '=', 'perguntas_descricao.cod')
+                    ->where('perguntas_descricao.cod_tipo_pergunta', 3)
+                    ->whereBetween('satisfacao.cod', [10, 20])
+                    ->selectRaw('AVG(satisfacao.cod - 10) as media')
+                    ->value('media');
 
-            // Calcular taxa de satisfação média (apenas perguntas tipo 3 -> escala 0 a 10)
-            // Mapeia os códigos 10..20 para valores 0..10 e ignora NA (cod=7)
-            $satisfacaoMedia = \Illuminate\Support\Facades\DB::table('questionario')
-                ->join('satisfacao', 'questionario.resposta', '=', 'satisfacao.cod')
-                ->join('perguntas_descricao', 'questionario.cod_pergunta', '=', 'perguntas_descricao.cod')
-                ->where('perguntas_descricao.cod_tipo_pergunta', 3)
-                ->whereBetween('satisfacao.cod', [10, 20]) // somente valores 0..10
-                ->selectRaw('AVG(satisfacao.cod - 10) as media') // normaliza para 0..10
-                ->value('media');
+                return [
+                    'totalQuestionarios' => \Illuminate\Support\Facades\DB::table('questionario')
+                        ->select('cod_paciente')
+                        ->distinct()
+                        ->count('cod_paciente'),
+                    'totalPacientes' => \Illuminate\Support\Facades\DB::table('dados_do_paciente')->count(),
+                    'questionariosMes' => \Illuminate\Support\Facades\DB::table('questionario')
+                        ->whereMonth('data_questionario', now()->month)
+                        ->whereYear('data_questionario', now()->year)
+                        ->select('cod_paciente')
+                        ->distinct()
+                        ->count('cod_paciente'),
+                    'satisfacaoMedia' => $satisfacaoMedia !== null ? round($satisfacaoMedia, 2) : 0,
+                ];
+            });
 
-            $researchStats['satisfacaoMedia'] = $satisfacaoMedia !== null ? round($satisfacaoMedia, 2) : 0;
+            $researchStats = array_merge($researchStats, $metricsData);
         }
 
         // Calcular métricas secundárias apenas se tiver permissão
         if ($isAdmin || $user->hasPermission('dashboard.research.secondary')) {
-            $researchStats['totalRespostas'] = \Illuminate\Support\Facades\DB::table('questionario')->count();
-            $researchStats['pacientesMes'] = \Illuminate\Support\Facades\DB::table('questionario')
-                ->join('dados_do_paciente', 'questionario.cod_paciente', '=', 'dados_do_paciente.id')
-                ->whereMonth('questionario.data_questionario', now()->month)
-                ->whereYear('questionario.data_questionario', now()->year)
-                ->select('questionario.cod_paciente')
-                ->distinct()
-                ->count('questionario.cod_paciente');
+            $secondaryData = \Illuminate\Support\Facades\Cache::remember('dashboard.research_stats.secondary', 300, function () {
+                return [
+                    'totalRespostas' => \Illuminate\Support\Facades\DB::table('questionario')->count(),
+                    'pacientesMes' => \Illuminate\Support\Facades\DB::table('questionario')
+                        ->join('dados_do_paciente', 'questionario.cod_paciente', '=', 'dados_do_paciente.id')
+                        ->whereMonth('questionario.data_questionario', now()->month)
+                        ->whereYear('questionario.data_questionario', now()->year)
+                        ->select('questionario.cod_paciente')
+                        ->distinct()
+                        ->count('questionario.cod_paciente'),
+                ];
+            });
+
+            $researchStats = array_merge($researchStats, $secondaryData);
         }
 
         // Calcular análises apenas se tiver permissão
         if ($isAdmin || $user->hasPermission('dashboard.research.analysis')) {
-            // Top setores pesquisados
-            $topSetores = \Illuminate\Support\Facades\DB::table('dados_do_paciente')
-                ->select('setor', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
-                ->whereNotNull('setor')
-                ->groupBy('setor')
-                ->orderByDesc('total')
-                ->limit(5)
-                ->get()
-                ->toArray();
+            $analysisData = \Illuminate\Support\Facades\Cache::remember('dashboard.research_stats.analysis', 300, function () {
+                return [
+                    'topSetores' => \Illuminate\Support\Facades\DB::table('dados_do_paciente')
+                        ->select('setor', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
+                        ->whereNotNull('setor')
+                        ->groupBy('setor')
+                        ->orderByDesc('total')
+                        ->limit(5)
+                        ->get()
+                        ->toArray(),
+                    'tipoPaciente' => \Illuminate\Support\Facades\DB::table('dados_do_paciente')
+                        ->select('tipo_paciente', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
+                        ->whereNotNull('tipo_paciente')
+                        ->groupBy('tipo_paciente')
+                        ->get()
+                        ->toArray(),
+                ];
+            });
 
-            $researchStats['topSetores'] = $topSetores;
-
-            // Distribuição por tipo de paciente
-            $tipoPaciente = \Illuminate\Support\Facades\DB::table('dados_do_paciente')
-                ->select('tipo_paciente', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
-                ->whereNotNull('tipo_paciente')
-                ->groupBy('tipo_paciente')
-                ->get()
-                ->toArray();
-
-            $researchStats['tipoPaciente'] = $tipoPaciente;
+            $researchStats = array_merge($researchStats, $analysisData);
         }
 
         return Inertia::render('dashboard', [

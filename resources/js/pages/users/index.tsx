@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select } from '@/components/ui/select';
 import Can from '@/components/Can';
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -76,9 +76,9 @@ interface UsersIndexProps {
     canModifyFirstMaster?: boolean;
 }
 
-export default function UsersIndex({ 
-    users, 
-    filters, 
+export default function UsersIndex({
+    users,
+    filters,
     firstMasterId = null,
     currentUserId = null,
     canModifyFirstMaster = false,
@@ -86,17 +86,47 @@ export default function UsersIndex({
     const { auth } = usePage<SharedData>().props;
     const isAdmin = auth?.isAdmin || false;
     const [search, setSearch] = useState(filters.search || '');
+    const [debouncedSearch, setDebouncedSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [userToDelete, setUserToDelete] = useState<number | null>(null);
     const [deleteError, setDeleteError] = useState<string | null>(null);
 
+    // Debounce da busca - atualiza debouncedSearch após 300ms de inatividade
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Busca automática quando debouncedSearch mudar
+    useEffect(() => {
+        if (debouncedSearch !== filters.search) {
+            router.get('/users', { search: debouncedSearch, status }, {
+                preserveState: true,
+                replace: true,
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedSearch]);
+
+    // Busca automática quando status mudar (busca imediata, sem debounce)
+    useEffect(() => {
+        if (status !== filters.status) {
+            router.get('/users', { search: debouncedSearch, status }, {
+                preserveState: true,
+                replace: true,
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [status]);
+
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/users', { search, status }, {
-            preserveState: true,
-            replace: true,
-        });
+        // Forçar busca imediata quando o botão é clicado
+        setDebouncedSearch(search);
     };
 
     const handleDeleteClick = (userId: number) => {
@@ -310,7 +340,7 @@ export default function UsersIndex({
                                                             const isCurrentUserAdmin = currentUserId && user.id === currentUserId;
                                                             // Não pode desativar: próprio admin
                                                             const canToggle = !isCurrentUserAdmin;
-                                                            
+
                                                             return (
                                                                 <Button
                                                                     variant="outline"
@@ -322,7 +352,7 @@ export default function UsersIndex({
                                                                             ? 'Você não pode desativar sua própria conta'
                                                                             : (user.status === 1 ? 'Desativar usuário' : 'Ativar usuário')
                                                                     }
-                                                                    className={user.status === 1 
+                                                                    className={user.status === 1
                                                                         ? 'text-yellow-600 hover:text-yellow-700 dark:text-yellow-400'
                                                                         : 'text-green-600 hover:text-green-700 dark:text-green-400'
                                                                     }
@@ -355,21 +385,21 @@ export default function UsersIndex({
                                                             const isFirstMaster = firstMasterId && user.id === firstMasterId;
                                                             const canEdit = !isFirstMaster || canModifyFirstMaster;
                                                             const canDelete = !isFirstMaster; // Primeiro Master nunca pode ser deletado
-                                                            
+
                                                             return (
                                                                 <>
-                                                                    <Can permission="users.edit">
+                                                        <Can permission="users.edit">
                                                                         {canEdit ? (
-                                                                            <Link
-                                                                                href={`/users/${user.id}/edit`}
-                                                                            >
-                                                                                <Button
-                                                                                    variant="outline"
-                                                                                    size="sm"
-                                                                                >
-                                                                                    <Edit className="h-4 w-4" />
-                                                                                </Button>
-                                                                            </Link>
+                                                            <Link
+                                                                href={`/users/${user.id}/edit`}
+                                                            >
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
                                                                         ) : (
                                                                             <Button
                                                                                 variant="outline"
@@ -380,19 +410,19 @@ export default function UsersIndex({
                                                                                 <Edit className="h-4 w-4 opacity-50" />
                                                                             </Button>
                                                                         )}
-                                                                    </Can>
-                                                                    <Can permission="users.delete">
+                                                        </Can>
+                                                        <Can permission="users.delete">
                                                                         {canDelete ? (
-                                                                            <Button
-                                                                                variant="outline"
-                                                                                size="sm"
-                                                                                onClick={() =>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() =>
                                                                                     handleDeleteClick(user.id)
-                                                                                }
-                                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                                            >
-                                                                                <Trash2 className="h-4 w-4" />
-                                                                            </Button>
+                                                                }
+                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
                                                                         ) : (
                                                                             <Button
                                                                                 variant="outline"
@@ -404,7 +434,7 @@ export default function UsersIndex({
                                                                                 <Trash2 className="h-4 w-4" />
                                                                             </Button>
                                                                         )}
-                                                                    </Can>
+                                                        </Can>
                                                                 </>
                                                             );
                                                         })()}

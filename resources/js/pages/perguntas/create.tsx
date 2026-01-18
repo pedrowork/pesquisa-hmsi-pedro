@@ -30,6 +30,7 @@ export default function PerguntasCreate({ setoresPesquisa }: PerguntasCreateProp
         cod_setor_pesquis: '',
         cod_tipo_pergunta: '',
         ativo: true,
+        obrigatoria: false,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -123,6 +124,16 @@ export default function PerguntasCreate({ setoresPesquisa }: PerguntasCreateProp
                                 />
                                 <Label htmlFor="ativo" className="cursor-pointer">
                                     Pergunta ativa
+                                </Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="obrigatoria"
+                                    checked={data.obrigatoria}
+                                    onCheckedChange={(checked) => setData('obrigatoria', checked === true)}
+                                />
+                                <Label htmlFor="obrigatoria" className="cursor-pointer">
+                                    Pergunta obrigatória
                                 </Label>
                             </div>
                             <div className="flex items-center gap-4">

@@ -72,7 +72,7 @@ class QuestionarioController extends Controller
                     ->orWhere('ativo', true)
                     ->orWhereNull('ativo'); // Incluir registros antigos que podem não ter o campo
             })
-            ->select('cod', 'descricao', 'cod_setor_pesquis', 'cod_tipo_pergunta')
+            ->select('cod', 'descricao', 'cod_setor_pesquis', 'cod_tipo_pergunta', 'obrigatoria')
             ->orderByRaw('CASE WHEN ordem IS NULL THEN 1 ELSE 0 END')
             ->orderBy('ordem', 'asc')
             ->orderBy('cod', 'asc')
@@ -120,6 +120,7 @@ class QuestionarioController extends Controller
                     'descricao' => $pergunta->descricao,
                     'cod_setor_pesquis' => $pergunta->cod_setor_pesquis ?? null,
                     'cod_tipo_pergunta' => $pergunta->cod_tipo_pergunta ?? null,
+                    'obrigatoria' => $pergunta->obrigatoria ?? false,
                 ];
             }),
             'satisfacoes' => $satisfacoes->map(function ($satisfacao) {
@@ -232,7 +233,7 @@ class QuestionarioController extends Controller
 
             $perguntasData = DB::table('perguntas_descricao')
                 ->whereIn('cod', $perguntasIds)
-                ->select('cod', 'cod_setor_pesquis', 'cod_tipo_pergunta')
+                ->select('cod', 'cod_setor_pesquis', 'cod_tipo_pergunta', 'obrigatoria')
                 ->get()
                 ->keyBy('cod');
 
@@ -255,19 +256,30 @@ class QuestionarioController extends Controller
                 $respostaCod = null;
                 $observacaoTexto = null;
 
+                // Verificar se a pergunta é obrigatória
+                $isObrigatoria = $perguntaData->obrigatoria === true || $perguntaData->obrigatoria === 1;
+
                 if ($isTipoLivre) {
                     // Pergunta tipo 4: usar resposta_texto em observacao
                     $observacaoTexto = $resposta['resposta_texto'] ?? null;
-                    if (empty($observacaoTexto)) {
-                        throw new \Exception("Resposta de texto obrigatória para pergunta tipo livre (código {$codPergunta})");
+                    if ($isObrigatoria && empty($observacaoTexto)) {
+                        throw new \Exception("Esta pergunta é obrigatória. Por favor, forneça uma resposta.");
+                    }
+                    // Se não é obrigatória e não há resposta, pular esta pergunta
+                    if (!$isObrigatoria && empty($observacaoTexto)) {
+                        continue;
                     }
                     // Criar uma resposta padrão para satisfação tipo 4 (cod=9 conforme seed.MD)
                     $respostaCod = 9; // "Observação" da satisfação tipo 4
                 } else {
                     // Perguntas tipo 1, 2, 3: usar resposta normal
                     $respostaCod = isset($resposta['resposta']) ? (int) $resposta['resposta'] : null;
-                    if (!$respostaCod) {
-                        throw new \Exception("Resposta obrigatória para pergunta {$codPergunta}");
+                    if ($isObrigatoria && !$respostaCod) {
+                        throw new \Exception("Esta pergunta é obrigatória. Por favor, selecione uma resposta.");
+                    }
+                    // Se não é obrigatória e não há resposta, pular esta pergunta
+                    if (!$isObrigatoria && !$respostaCod) {
+                        continue;
                     }
                 }
 

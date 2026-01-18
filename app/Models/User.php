@@ -145,6 +145,15 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Relacionamento many-to-many com roles.
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles')
+            ->select('roles.id', 'roles.name', 'roles.slug');
+    }
+
+    /**
      * Limpar cache de permissões ao fazer refresh.
      */
     public function refresh(): static

@@ -41,7 +41,7 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
-        
+
         // Custom authentication with security checks
         Fortify::authenticateUsing(function (Request $request) {
             $authenticator = app(AuthenticateUser::class);
@@ -61,10 +61,9 @@ class FortifyServiceProvider extends ServiceProvider
             if ($sessionError && str_contains($sessionError, 'desconectado porque fez login')) {
                 $request->session()->forget('error');
             }
-            
+
             return Inertia::render('auth/login', [
                 'canResetPassword' => Features::enabled(Features::resetPasswords()),
-                'canRegister' => Features::enabled(Features::registration()),
                 'status' => $request->session()->get('status'),
             ]);
         });
