@@ -36,7 +36,7 @@ services:
     restart: always
     working_dir: /var/www/html
     volumes:
-      - ./.env:/var/www/html/.env:ro
+      - ./.env:/var/www/html/.env
       - app_storage:/var/www/html/storage
       - app_cache:/var/www/html/bootstrap/cache
       - app_public:/var/www/html/public
@@ -115,7 +115,7 @@ services:
     restart: always
     working_dir: /var/www/html
     volumes:
-      - ./.env:/var/www/html/.env:ro
+      - ./.env:/var/www/html/.env
       - app_storage:/var/www/html/storage
     environment:
       - APP_ENV=${APP_ENV:-production}
