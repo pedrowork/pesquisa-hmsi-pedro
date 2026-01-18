@@ -30,6 +30,8 @@ class AdminSeeder extends Seeder
         }
 
         // Criar role master
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         $masterRole = DB::table('roles')->where('slug', 'master')->first();
         if (!$masterRole) {
             $masterRoleId = DB::table('roles')->insertGetId([
@@ -49,8 +51,11 @@ class AdminSeeder extends Seeder
             ]);
             $masterRole = DB::table('roles')->where('id', $masterRole->id)->first();
         }
+        */
 
         // Criar role colaborador
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         $colaboradorRole = DB::table('roles')->where('slug', 'colaborador')->first();
         if (!$colaboradorRole) {
             $colaboradorRoleId = DB::table('roles')->insertGetId([
@@ -70,6 +75,7 @@ class AdminSeeder extends Seeder
             ]);
             $colaboradorRole = DB::table('roles')->where('id', $colaboradorRole->id)->first();
         }
+        */
 
         // Criar usuário admin
         $adminUser = User::firstOrCreate(
@@ -94,6 +100,8 @@ class AdminSeeder extends Seeder
         }
 
         // usuário master
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         $masterUser = User::firstOrCreate(
             ['email' => 'm@l.com'],
             [
@@ -114,8 +122,11 @@ class AdminSeeder extends Seeder
                 'approved_at' => now(),
             ]);
         }
+        */
 
         // usuário colaborador
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         $userUser = User::firstOrCreate(
             ['email' => 'c@l.com'],
             [
@@ -136,8 +147,11 @@ class AdminSeeder extends Seeder
                 'approved_at' => now(),
             ]);
         }
+        */
 
         // Associar role master ao usuário master (remover outras roles primeiro)
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         DB::table('user_roles')->where('user_id', $masterUser->id)->delete();
         DB::table('user_roles')->updateOrInsert(
             [
@@ -149,8 +163,11 @@ class AdminSeeder extends Seeder
                 'updated_at' => now(),
             ]
         );
+        */
 
         // Associar role colaborador ao usuário colaborador (remover outras roles primeiro)
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         DB::table('user_roles')->where('user_id', $userUser->id)->delete();
         DB::table('user_roles')->updateOrInsert(
             [
@@ -162,6 +179,7 @@ class AdminSeeder extends Seeder
                 'updated_at' => now(),
             ]
         );
+        */
 
         // Associar role admin ao usuário admin
         $userRoleExists = DB::table('user_roles')
@@ -198,6 +216,8 @@ class AdminSeeder extends Seeder
         }
 
         // Associar permissões ao role Master
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         $masterPermissions = [
             'questionarios.create',
             'users.create',
@@ -266,8 +286,11 @@ class AdminSeeder extends Seeder
                 );
             }
         }
+        */
 
         // Associar permissões ao role Colaborador
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         $colaboradorPermissions = [
             'questionarios.create',
             'questionarios.show',
@@ -295,11 +318,15 @@ class AdminSeeder extends Seeder
                 );
             }
         }
+        */
 
         $this->command->info('Perfil admin criado com sucesso!');
         $this->command->info('Email: p@h.com');
         $this->command->info('Senha: password');
+        $this->command->info('Todas as permissões foram associadas ao role admin.');
 
+        // Comentado temporariamente - será reativado posteriormente
+        /*
         $this->command->info('Perfil master criado com sucesso!');
         $this->command->info('Email: m@l.com');
         $this->command->info('Senha: password');
@@ -309,8 +336,7 @@ class AdminSeeder extends Seeder
         $this->command->info('Email: c@l.com');
         $this->command->info('Senha: password');
         $this->command->info('Permissões Colaborador associadas: ' . count($colaboradorPermissions));
-
-        $this->command->info('Todas as permissões foram associadas ao role admin.');
+        */
     }
 }
 

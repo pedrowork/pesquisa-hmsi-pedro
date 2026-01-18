@@ -206,7 +206,7 @@ export default function Welcome() {
                     {/* Footer */}
                     <footer className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                         <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-                            <p>© {new Date().getFullYear()} HMSI Pesquisa. Todos os direitos reservados.</p>
+                            <p><a href="https://www.linkedin.com/in/pedrohrsdev/" target="_blank" rel="noopener noreferrer">© {new Date().getFullYear()} Pedro H. R. S. Todos os direitos reservados.</a></p>
                         </div>
                     </footer>
                 </div>

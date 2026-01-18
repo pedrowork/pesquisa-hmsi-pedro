@@ -190,7 +190,7 @@ export function AppSidebar() {
             icon: Instagram,
         },
         {
-            title: 'Portfolio',
+            title: 'Portfolio PH',
             href: 'https://pedrohrsdev-portfolio.netlify.app/',
             icon: BarChart3, // <- Or replace with a valid icon import; Portfolio is not defined
         },
