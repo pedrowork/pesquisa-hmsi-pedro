@@ -17,9 +17,10 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        // wayfinder desabilitado - gerar manualmente antes do build
+        // wayfinder({
+        //     formVariants: true,
+        // }),
     ],
     esbuild: {
         jsx: 'automatic',

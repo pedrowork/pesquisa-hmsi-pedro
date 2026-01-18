@@ -22,3 +22,7 @@ yarn-error.log
 .nova
 .fleet
 
+# Arquivos gerados pelo wayfinder (serão gerados durante o build)
+resources/js/routes
+resources/js/actions
+resources/js/wayfinder
