@@ -153,8 +153,8 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
                 {/* Header */}
                 <div>
-                    <h1 className="text-3xl font-bold">Dashboard</h1>
-                    <p className="text-muted-foreground mt-1">
+                    <h1 className="text-2xl font-bold sm:text-3xl">Dashboard</h1>
+                    <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                         Visão geral e estatísticas do sistema.
                     </p>
                 </div>
@@ -221,7 +221,7 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                 <Can permission="dashboard.quick-actions">
                     {quickActions.length > 0 && (
                         <div>
-                            <h2 className="text-xl font-semibold mb-4">Ações Rápidas</h2>
+                            <h2 className="text-lg font-semibold mb-4 sm:text-xl">Ações Rápidas</h2>
                             <div className="grid gap-4 md:grid-cols-3">
                                 {quickActions.map((action) => {
                                     const Icon = action.icon;
@@ -258,7 +258,7 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                 <Can permission="dashboard.management-links">
                     {managementLinks.length > 0 && (
                         <div>
-                            <h2 className="text-xl font-semibold mb-4">
+                            <h2 className="text-lg font-semibold mb-4 sm:text-xl">
                                 Gerenciamento
                             </h2>
                             <div className="grid gap-4 md:grid-cols-3">

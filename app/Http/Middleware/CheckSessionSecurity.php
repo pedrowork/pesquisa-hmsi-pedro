@@ -58,19 +58,8 @@ class CheckSessionSecurity
                 // Ignorar erros para não quebrar a requisição
             }
 
-            // Verificar se a sessão é válida (para sessão única)
-            try {
-                if (!$this->sessionSecurityService->isSessionValid($user)) {
-                    Auth::logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-
-                    return redirect()->route('login')
-                        ->withErrors(['email' => 'Sua sessão foi invalidada. Faça login novamente.']);
-                }
-            } catch (\Exception $e) {
-                // Ignorar erros para não quebrar a requisição
-            }
+            // Verificação de sessão única foi movida para o middleware SingleSession
+            // para evitar conflitos e garantir dados atualizados do banco
 
             // Verificar inatividade
             try {

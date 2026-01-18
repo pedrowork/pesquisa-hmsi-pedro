@@ -120,14 +120,20 @@ class UserController extends Controller
     {
         $query = User::query();
 
-        // Excluir admin da listagem - ninguém pode ver o admin
-        $this->excludeAdminFromQuery($query);
-        
-        // Excluir primeiro Master da listagem - apenas ele pode ver a si mesmo
         $currentUser = $request->user();
-        $firstMasterId = $this->getFirstMasterUserId();
-        if ($firstMasterId && (!$currentUser || $currentUser->id !== $firstMasterId)) {
-            $this->excludeFirstMasterFromQuery($query);
+        $isAdmin = $currentUser && $currentUser->isAdmin();
+        
+        // Apenas admin pode ver TODOS os usuários (incluindo admin e primeiro Master)
+        // Outros usuários não veem admin e primeiro Master
+        if (!$isAdmin) {
+            // Excluir admin da listagem - ninguém pode ver o admin (exceto admin)
+            $this->excludeAdminFromQuery($query);
+            
+            // Excluir primeiro Master da listagem - apenas ele ou admin pode ver
+            $firstMasterId = $this->getFirstMasterUserId();
+            if ($firstMasterId && (!$currentUser || $currentUser->id !== $firstMasterId)) {
+                $this->excludeFirstMasterFromQuery($query);
+            }
         }
 
         // Search
@@ -591,6 +597,17 @@ class UserController extends Controller
             abort(403, 'Acesso negado: o primeiro Master não pode ser removido.');
         }
 
+        // Verificar se o usuário possui questionários associados
+        $questionariosCount = DB::table('questionario')
+            ->where('cod_usuario', $user->id)
+            ->count();
+
+        if ($questionariosCount > 0) {
+            return back()->withErrors([
+                'user' => "Este usuário não pode ser excluído porque possui {$questionariosCount} questionário(s) associado(s). Para manter o histórico, desative o usuário ao invés de excluí-lo.",
+            ])->withInput();
+        }
+
         $deletedData = $user->toArray();
         
         // Registrar antes de deletar (o observer também registrará)
@@ -604,6 +621,39 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', 'Usuário excluído com sucesso!');
+    }
+
+    /**
+     * Toggle user status (activate/deactivate)
+     * Only admins can toggle user status
+     */
+    public function toggleStatus(User $user, Request $request): RedirectResponse
+    {
+        // Apenas admin pode alterar status de usuários
+        $currentUser = $request->user();
+        if (!$currentUser || !$currentUser->isAdmin()) {
+            abort(403, 'Acesso negado: apenas administradores podem alterar o status de usuários.');
+        }
+
+        // Proteger admin - não pode ser desativado (incluindo o próprio admin)
+        $this->preventAdminAccess($user);
+
+        // Proteger o próprio admin - não pode desativar a si mesmo
+        $adminId = $this->getAdminUserId();
+        if ($adminId && $currentUser->id === $user->id && $user->id === $adminId) {
+            abort(403, 'Acesso negado: você não pode desativar sua própria conta de administrador.');
+        }
+
+        // O admin pode desativar qualquer Master (exceto ele mesmo, que já está protegido acima)
+
+        // Alternar status
+        $newStatus = $user->status === 1 ? 0 : 1;
+        $user->update(['status' => $newStatus]);
+
+        $statusMessage = $newStatus === 1 ? 'ativado' : 'desativado';
+
+        return redirect()->route('users.index')
+            ->with('success', "Usuário {$statusMessage} com sucesso!");
     }
 }
 

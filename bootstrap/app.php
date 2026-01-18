@@ -6,6 +6,7 @@ use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SingleSession;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             CheckSessionSecurity::class, // Verificação de segurança de sessão
+            // SingleSession::class, // Sessão única por usuário - DESABILITADO para permitir múltiplos navegadores
             \App\Http\Middleware\RequireApproval::class, // Verificação de aprovação
         ]);
 

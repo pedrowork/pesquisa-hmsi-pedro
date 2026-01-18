@@ -124,33 +124,18 @@ class AuthenticateUser
             // Ignorar erros para não quebrar o login
         }
 
-        // Registrar sessão de forma simplificada (sem múltiplos updates)
+        // Regenerar ID da sessão para prevenir session fixation (segurança básica)
         try {
-            $sessionService = app(\App\Services\SessionSecurityService::class);
-            $sessionId = \Illuminate\Support\Facades\Session::getId();
+            \Illuminate\Support\Facades\Session::regenerate(true);
             
-            // Update direto no banco para evitar loops
+            // Atualizar last_activity para rastreamento (opcional)
             \Illuminate\Support\Facades\DB::table('users')
                 ->where('id', $user->id)
                 ->update([
-                    'current_session_id' => $sessionId,
                     'last_activity' => now(),
                 ]);
             
-            // Atualizar modelo em memória
-            $user->current_session_id = $sessionId;
             $user->last_activity = now();
-            
-            // Regenerar ID da sessão para prevenir session fixation
-            \Illuminate\Support\Facades\Session::regenerate(true);
-            
-            // Atualizar com novo ID de sessão
-            $newSessionId = \Illuminate\Support\Facades\Session::getId();
-            \Illuminate\Support\Facades\DB::table('users')
-                ->where('id', $user->id)
-                ->update(['current_session_id' => $newSessionId]);
-            
-            $user->current_session_id = $newSessionId;
         } catch (\Exception $e) {
             // Ignorar erros para não quebrar o login
         }

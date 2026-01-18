@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2, Filter, UserCheck } from 'lucide-react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Plus, Search, Edit, Trash2, Filter, UserCheck, Power } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,9 +12,18 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Select } from '@/components/ui/select';
 import Can from '@/components/Can';
 import { useState, FormEvent } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -74,8 +83,13 @@ export default function UsersIndex({
     currentUserId = null,
     canModifyFirstMaster = false,
 }: UsersIndexProps) {
+    const { auth } = usePage<SharedData>().props;
+    const isAdmin = auth?.isAdmin || false;
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<number | null>(null);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
@@ -85,12 +99,37 @@ export default function UsersIndex({
         });
     };
 
-    const handleDelete = (userId: number) => {
-        if (confirm('Tem certeza que deseja excluir este usuário?')) {
-            router.delete(`/users/${userId}`, {
+    const handleDeleteClick = (userId: number) => {
+        setUserToDelete(userId);
+        setDeleteError(null);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        if (userToDelete) {
+            router.delete(`/users/${userToDelete}`, {
                 preserveScroll: true,
+                onSuccess: () => {
+                    setShowDeleteModal(false);
+                    setUserToDelete(null);
+                    setDeleteError(null);
+                },
+                onError: (errors) => {
+                    // Capturar erros de validação ou outros erros
+                    const errorMessage = errors.user || errors.message || 'Erro ao excluir usuário. Tente novamente.';
+                    setDeleteError(errorMessage);
+                },
             });
         }
+    };
+
+    const handleToggleStatus = (userId: number) => {
+        router.post(`/users/${userId}/toggle-status`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ['users'] });
+            },
+        });
     };
 
     const getStatusBadge = (status: number) => {
@@ -109,14 +148,14 @@ export default function UsersIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Usuários" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Gerenciamento de Usuários</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-2xl font-bold sm:text-3xl">Gerenciamento de Usuários</h1>
+                        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                             Cadastre e gerencie usuários do sistema
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         <Can permission="users.approve">
                             <Link href="/admin/users/pending-approval">
                                 <Button variant="outline">
@@ -143,7 +182,7 @@ export default function UsersIndex({
                         <CardDescription>Busque e filtre usuários</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSearch} className="flex gap-4">
+                        <form onSubmit={handleSearch} className="flex flex-col gap-4 sm:flex-row">
                             <div className="flex-1">
                                 <Label htmlFor="search" className="sr-only">
                                     Buscar
@@ -156,7 +195,7 @@ export default function UsersIndex({
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            <div className="w-48">
+                            <div className="w-full sm:w-48">
                                 <Label htmlFor="status" className="sr-only">
                                     Status
                                 </Label>
@@ -171,7 +210,7 @@ export default function UsersIndex({
                                     <option value="0">Inativo</option>
                                 </select>
                             </div>
-                            <Button type="submit" variant="outline">
+                            <Button type="submit" variant="outline" className="w-full sm:w-auto">
                                 <Search className="mr-2 h-4 w-4" />
                                 Buscar
                             </Button>
@@ -204,6 +243,11 @@ export default function UsersIndex({
                                         <th className="px-4 py-3 text-left text-sm font-medium">
                                             Status
                                         </th>
+                                        {isAdmin && (
+                                            <th className="px-4 py-3 text-left text-sm font-medium">
+                                                Ativar/Desativar
+                                            </th>
+                                        )}
                                         <th className="px-4 py-3 text-left text-sm font-medium">
                                             Verificado
                                         </th>
@@ -219,7 +263,7 @@ export default function UsersIndex({
                                     {users.data.length === 0 ? (
                                         <tr>
                                             <td
-                                                colSpan={7}
+                                                colSpan={isAdmin ? 8 : 7}
                                                 className="px-4 py-8 text-center text-muted-foreground"
                                             >
                                                 Nenhum usuário encontrado
@@ -258,6 +302,37 @@ export default function UsersIndex({
                                                 <td className="px-4 py-3">
                                                     {getStatusBadge(user.status)}
                                                 </td>
+                                                {isAdmin && (
+                                                    <td className="px-4 py-3">
+                                                        {(() => {
+                                                            // Verificar se é o próprio admin (não pode desativar a si mesmo)
+                                                            const adminId = user.roles?.some((role: Role) => role.slug === 'admin');
+                                                            const isCurrentUserAdmin = currentUserId && user.id === currentUserId;
+                                                            // Não pode desativar: próprio admin
+                                                            const canToggle = !isCurrentUserAdmin;
+                                                            
+                                                            return (
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handleToggleStatus(user.id)}
+                                                                    disabled={!canToggle}
+                                                                    title={
+                                                                        isCurrentUserAdmin
+                                                                            ? 'Você não pode desativar sua própria conta'
+                                                                            : (user.status === 1 ? 'Desativar usuário' : 'Ativar usuário')
+                                                                    }
+                                                                    className={user.status === 1 
+                                                                        ? 'text-yellow-600 hover:text-yellow-700 dark:text-yellow-400'
+                                                                        : 'text-green-600 hover:text-green-700 dark:text-green-400'
+                                                                    }
+                                                                >
+                                                                    <Power className={`h-4 w-4 ${user.status === 1 ? '' : 'opacity-50'}`} />
+                                                                </Button>
+                                                            );
+                                                        })()}
+                                                    </td>
+                                                )}
                                                 <td className="px-4 py-3">
                                                     {user.email_verified_at ? (
                                                         <span className="text-green-600 dark:text-green-400">
@@ -312,7 +387,7 @@ export default function UsersIndex({
                                                                                 variant="outline"
                                                                                 size="sm"
                                                                                 onClick={() =>
-                                                                                    handleDelete(user.id)
+                                                                                    handleDeleteClick(user.id)
                                                                                 }
                                                                                 className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                                             >
@@ -384,6 +459,51 @@ export default function UsersIndex({
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Modal de Confirmação de Exclusão */}
+            <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <div className="flex items-center justify-center mb-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                                <AlertTriangle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                            </div>
+                        </div>
+                        <DialogTitle className="text-center">
+                            Confirmar Exclusão
+                        </DialogTitle>
+                        <DialogDescription className="text-center">
+                            {deleteError ? (
+                                <span className="text-red-600 dark:text-red-400 font-medium">
+                                    {deleteError}
+                                </span>
+                            ) : (
+                                'Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.'
+                            )}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="sm:justify-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setShowDeleteModal(false);
+                                setUserToDelete(null);
+                                setDeleteError(null);
+                            }}
+                        >
+                            {deleteError ? 'Fechar' : 'Cancelar'}
+                        </Button>
+                        {!deleteError && (
+                            <Button
+                                variant="destructive"
+                                onClick={handleDeleteConfirm}
+                            >
+                                Excluir
+                            </Button>
+                        )}
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

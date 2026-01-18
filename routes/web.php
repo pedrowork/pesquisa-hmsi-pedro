@@ -182,6 +182,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:users.delete')
         ->name('users.destroy');
 
+    // Toggle user status (admin only)
+    Route::post('users/{user}/toggle-status', [\App\Http\Controllers\UserController::class, 'toggleStatus'])
+        ->middleware('permission:users.edit')
+        ->name('users.toggle-status');
+
     // Gerenciamento de Roles
     Route::middleware('permission:roles.view')->group(function () {
         Route::get('roles', [\App\Http\Controllers\RoleController::class, 'index'])->name('roles.index');

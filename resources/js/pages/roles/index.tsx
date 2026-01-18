@@ -80,16 +80,16 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Roles" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Gerenciamento de Roles</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-2xl font-bold sm:text-3xl">Gerenciamento de Roles</h1>
+                        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                             Cadastre e gerencie roles (grupos de usuários) do sistema
                         </p>
                     </div>
                     <Can permission="roles.create">
                         <Link href="/roles/create">
-                            <Button>
+                            <Button className="w-full md:w-auto">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Nova Role
                             </Button>
@@ -104,7 +104,7 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                         <CardDescription>Busque roles</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSearch} className="flex gap-4">
+                        <form onSubmit={handleSearch} className="flex flex-col gap-4 sm:flex-row">
                             <div className="flex-1">
                                 <Label htmlFor="search" className="sr-only">
                                     Buscar
@@ -117,7 +117,7 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            <Button type="submit" variant="outline">
+                            <Button type="submit" variant="outline" className="w-full sm:w-auto">
                                 <Search className="mr-2 h-4 w-4" />
                                 Buscar
                             </Button>

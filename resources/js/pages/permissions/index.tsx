@@ -83,14 +83,14 @@ export default function PermissionsIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Permissões" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Gerenciamento de Permissões</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-2xl font-bold sm:text-3xl">Gerenciamento de Permissões</h1>
+                        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                             Visualize e gerencie as permissões do sistema
                         </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <Button 
                             variant="outline"
                             onClick={() => router.get('/permissions', { matrix: 'true', view: 'roles' })}
@@ -116,7 +116,7 @@ export default function PermissionsIndex({
                         <CardDescription>Busque permissões</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSearch} className="flex gap-4">
+                        <form onSubmit={handleSearch} className="flex flex-col gap-4 sm:flex-row">
                             <div className="flex-1">
                                 <Label htmlFor="search" className="sr-only">
                                     Buscar
@@ -129,7 +129,7 @@ export default function PermissionsIndex({
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            <Button type="submit" variant="outline">
+                            <Button type="submit" variant="outline" className="w-full sm:w-auto">
                                 <Search className="mr-2 h-4 w-4" />
                                 Buscar
                             </Button>

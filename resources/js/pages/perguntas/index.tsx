@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2, AlertCircle, ArrowUpDown, Save, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, AlertCircle, ArrowUpDown, Save, ChevronUp, ChevronDown, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,13 +12,17 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import Can from '@/components/Can';
 import { useState, FormEvent, useEffect } from 'react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Perguntas', href: '/perguntas' },
-];
+import { useTranslation } from '@/hooks/use-translation';
 
 interface Pergunta {
     cod: number;
@@ -50,10 +54,19 @@ export default function PerguntasIndex({
     filters,
     canOrder = false,
 }: PerguntasIndexProps) {
+    const { t } = useTranslation();
     const [search, setSearch] = useState(filters.search || '');
     const [isOrdering, setIsOrdering] = useState(false);
     const [orderValues, setOrderValues] = useState<Record<number, number>>({});
     const { flash } = usePage().props as { flash?: { success?: string; warning?: string; error?: string } };
+    const [showModal, setShowModal] = useState(false);
+    const [modalType, setModalType] = useState<'success' | 'warning' | 'error'>('success');
+    const [modalMessage, setModalMessage] = useState('');
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: t('dashboard.title'), href: '/dashboard' },
+        { title: t('questions.title'), href: '/perguntas' },
+    ];
 
     // Debug: verificar valor de canOrder (remover em produção)
     useEffect(() => {
@@ -119,10 +132,15 @@ export default function PerguntasIndex({
             {
                 onSuccess: () => {
                     setIsOrdering(false);
+                    setModalType('success');
+                    setModalMessage(t('messages.orderUpdated'));
+                    setShowModal(true);
                     router.reload({ only: ['perguntas'] });
                 },
                 onError: (errors) => {
-                    alert('Erro ao salvar ordem: ' + JSON.stringify(errors));
+                    setModalType('error');
+                    setModalMessage(t('messages.orderError') + ': ' + (errors.message || JSON.stringify(errors)));
+                    setShowModal(true);
                 },
             }
         );
@@ -130,14 +148,14 @@ export default function PerguntasIndex({
 
     const handleDelete = (perguntaId: number, totalPesquisas: number) => {
         if (totalPesquisas > 0) {
-            const message = `Esta pergunta possui ${totalPesquisas} pesquisa(s) associada(s). Para manter o histórico, a pergunta será apenas desativada ao invés de excluída. Deseja continuar?`;
+            const message = t('messages.deleteQuestionWithSurveys', { count: totalPesquisas });
             if (confirm(message)) {
                 router.delete(`/perguntas/${perguntaId}`, {
                     preserveScroll: true,
                 });
             }
         } else {
-            if (confirm('Tem certeza que deseja excluir esta pergunta?')) {
+            if (confirm(t('messages.deleteConfirm'))) {
                 router.delete(`/perguntas/${perguntaId}`, {
                     preserveScroll: true,
                 });
@@ -148,23 +166,29 @@ export default function PerguntasIndex({
     // Exibir mensagens flash
     useEffect(() => {
         if (flash?.success) {
-            alert(flash.success);
+            setModalType('success');
+            setModalMessage(flash.success);
+            setShowModal(true);
         } else if (flash?.warning) {
-            alert(flash.warning);
+            setModalType('warning');
+            setModalMessage(flash.warning);
+            setShowModal(true);
         } else if (flash?.error) {
-            alert(flash.error);
+            setModalType('error');
+            setModalMessage(flash.error);
+            setShowModal(true);
         }
     }, [flash]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Perguntas" />
+            <Head title={t('questions.title')} />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Gerenciamento de Perguntas</h1>
+                        <h1 className="text-3xl font-bold">{t('questions.title')}</h1>
                         <p className="text-muted-foreground mt-1">
-                            Cadastre e gerencie perguntas do sistema
+                            {t('questions.description')}
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -182,12 +206,12 @@ export default function PerguntasIndex({
                                 {isOrdering ? (
                                     <>
                                         <Save className="mr-2 h-4 w-4" />
-                                        Salvar Ordem
+                                        {t('questions.saveOrder')}
                                     </>
                                 ) : (
                                     <>
                                         <ArrowUpDown className="mr-2 h-4 w-4" />
-                                        Ordenar
+                                        {t('questions.order')}
                                     </>
                                 )}
                             </Button>
@@ -196,7 +220,7 @@ export default function PerguntasIndex({
                             <Link href="/perguntas/create">
                                 <Button>
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Nova Pergunta
+                                    {t('questions.newQuestion')}
                                 </Button>
                             </Link>
                         </Can>
@@ -205,24 +229,24 @@ export default function PerguntasIndex({
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Filtros</CardTitle>
-                        <CardDescription>Busque perguntas</CardDescription>
+                        <CardTitle>{t('questions.filters')}</CardTitle>
+                        <CardDescription>{t('questions.searchQuestions')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSearch} className="flex gap-4">
                             <div className="flex-1">
-                                <Label htmlFor="search" className="sr-only">Buscar</Label>
+                                <Label htmlFor="search" className="sr-only">{t('common.search')}</Label>
                                 <Input
                                     id="search"
                                     type="text"
-                                    placeholder="Buscar por descrição..."
+                                    placeholder={t('questions.searchPlaceholder')}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
                             <Button type="submit" variant="outline">
                                 <Search className="mr-2 h-4 w-4" />
-                                Buscar
+                                {t('common.search')}
                             </Button>
                         </form>
                     </CardContent>
@@ -230,8 +254,8 @@ export default function PerguntasIndex({
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Lista de Perguntas</CardTitle>
-                        <CardDescription>Total: {perguntas.total} pergunta(s)</CardDescription>
+                        <CardTitle>{t('questions.list')}</CardTitle>
+                        <CardDescription>{t('common.total')}: {perguntas.total} {t('questions.surveysCount')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="overflow-x-auto">
@@ -239,20 +263,20 @@ export default function PerguntasIndex({
                                 <thead>
                                     <tr className="border-b">
                                         {canOrder && isOrdering && (
-                                            <th className="px-4 py-3 text-left text-sm font-medium">Ordem</th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium">{t('questions.orderColumn')}</th>
                                         )}
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Código</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Descrição</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Pesquisas</th>
-                                        <th className="px-4 py-3 text-right text-sm font-medium">Ações</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">{t('questions.code')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">{t('questions.description')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">{t('common.status')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">{t('questions.surveys')}</th>
+                                        <th className="px-4 py-3 text-right text-sm font-medium">{t('common.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {perguntas.data.length === 0 ? (
                                         <tr>
                                             <td colSpan={canOrder && isOrdering ? 6 : 5} className="px-4 py-8 text-center text-muted-foreground">
-                                                Nenhuma pergunta encontrada
+                                                {t('questions.notFound')}
                                             </td>
                                         </tr>
                                     ) : (
@@ -292,7 +316,7 @@ export default function PerguntasIndex({
                                                                         handleMoveUp(currentIndex);
                                                                     }}
                                                                     disabled={perguntas.data.findIndex(p => p.cod === pergunta.cod) === 0}
-                                                                    title="Mover para cima"
+                                                                    title={t('questions.moveUp')}
                                                                 >
                                                                     <ChevronUp className="h-3 w-3" />
                                                                 </Button>
@@ -306,7 +330,7 @@ export default function PerguntasIndex({
                                                                         handleMoveDown(currentIndex);
                                                                     }}
                                                                     disabled={perguntas.data.findIndex(p => p.cod === pergunta.cod) === perguntas.data.length - 1}
-                                                                    title="Mover para baixo"
+                                                                    title={t('questions.moveDown')}
                                                                 >
                                                                     <ChevronDown className="h-3 w-3" />
                                                                 </Button>
@@ -325,16 +349,16 @@ export default function PerguntasIndex({
                                                 <td className="px-4 py-3">
                                                     {pergunta.ativo === false || pergunta.ativo === 0 ? (
                                                         <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                                                            Desativada
+                                                            {t('questions.deactivated')}
                                                         </span>
                                                     ) : (
                                                         <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                                            Ativa
+                                                            {t('questions.activated')}
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                    {pergunta.total_pesquisas || 0} pesquisa(s)
+                                                    {pergunta.total_pesquisas || 0} {t('questions.surveysCount')}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
@@ -366,7 +390,7 @@ export default function PerguntasIndex({
                         {perguntas.last_page > 1 && (
                             <div className="mt-4 flex items-center justify-between">
                                 <div className="text-sm text-muted-foreground">
-                                    Página {perguntas.current_page} de {perguntas.last_page}
+                                    {t('common.page')} {perguntas.current_page} {t('common.of')} {perguntas.last_page}
                                 </div>
                                 <div className="flex gap-2">
                                     {perguntas.links.map((link, index) => {
@@ -398,6 +422,44 @@ export default function PerguntasIndex({
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Modal de Mensagem */}
+            <Dialog open={showModal} onOpenChange={setShowModal}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <div className="flex items-center justify-center mb-4">
+                            {modalType === 'success' && (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                                    <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+                                </div>
+                            )}
+                            {modalType === 'warning' && (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+                                    <AlertTriangle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                                </div>
+                            )}
+                            {modalType === 'error' && (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                                    <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                </div>
+                            )}
+                        </div>
+                        <DialogTitle className="text-center">
+                            {modalType === 'success' && t('messages.success')}
+                            {modalType === 'warning' && t('messages.warning')}
+                            {modalType === 'error' && t('messages.error')}
+                        </DialogTitle>
+                        <DialogDescription className="text-center">
+                            {modalMessage}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="sm:justify-center">
+                        <Button onClick={() => setShowModal(false)}>
+                            {t('common.confirm')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
