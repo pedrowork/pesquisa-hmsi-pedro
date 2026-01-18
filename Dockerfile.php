@@ -68,6 +68,14 @@ RUN sed -i '7,72d' resources/js/routes/user-password/index.ts || true
 # Build dos assets
 RUN npm run build
 
+# Backup do conteúdo original (para copiar para volumes na inicialização)
+RUN mkdir -p /var/www/html-original && \
+    cp -r /var/www/html/public /var/www/html-original/
+
+# Copiar e configurar entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Ajustar permissões
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
@@ -75,6 +83,9 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Expor porta PHP-FPM
 EXPOSE 9000
+
+# Configurar entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Comando padrão
 CMD ["php-fpm"]
