@@ -13,7 +13,8 @@ export default defineConfig({
         }),
         react({
             babel: {
-                plugins: ['babel-plugin-react-compiler'],
+                // React Compiler desabilitado em produção (causa erro useMemoCache)
+                // plugins: ['babel-plugin-react-compiler'],
             },
         }),
         tailwindcss(),
