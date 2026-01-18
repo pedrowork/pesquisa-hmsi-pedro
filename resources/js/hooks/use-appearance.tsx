@@ -51,13 +51,22 @@ export function initializeTheme() {
 }
 
 export function useAppearance() {
-    const [appearance, setAppearance] = useState<Appearance>('system');
+    const [appearance, setAppearance] = useState<Appearance>(() => {
+        // Inicializar apenas no cliente (não durante SSR)
+        if (typeof window === 'undefined') {
+            return 'system';
+        }
+        const saved = localStorage.getItem('appearance') as Appearance | null;
+        return saved || 'system';
+    });
 
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
 
         // Store in localStorage for client-side persistence...
-        localStorage.setItem('appearance', mode);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('appearance', mode);
+        }
 
         // Store in cookie for SSR...
         setCookie('appearance', mode);
@@ -66,6 +75,11 @@ export function useAppearance() {
     }, []);
 
     useEffect(() => {
+        // Apenas executar no cliente
+        if (typeof window === 'undefined') {
+            return;
+        }
+
         const savedAppearance = localStorage.getItem(
             'appearance',
         ) as Appearance | null;
