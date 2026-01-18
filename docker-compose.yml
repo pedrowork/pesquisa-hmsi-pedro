@@ -5,14 +5,14 @@ services:
     container_name: pesquisa-hmsi-nginx
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"   # Porta 80 já está em uso pelo Nginx do host
+      - "8443:443"  # Porta 443 já está em uso pelo Nginx do host
     volumes:
-      - ./public:/var/www/html/public:ro
+      - app_public:/var/www/html/public:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./nginx/logs:/var/log/nginx
+      - nginx_logs:/var/log/nginx
     depends_on:
       php:
         condition: service_healthy
@@ -34,9 +34,11 @@ services:
     restart: always
     working_dir: /var/www/html
     volumes:
-      - .:/var/www/html
-      - ./storage:/var/www/html/storage
-      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+      # Volumes nomeados para persistir dados em produção
+      - app_storage:/var/www/html/storage
+      - app_cache:/var/www/html/bootstrap/cache
+      - app_public:/var/www/html/public
+      # .env será copiado manualmente ou via secrets
     environment:
       - APP_ENV=${APP_ENV:-production}
       - APP_DEBUG=${APP_DEBUG:-false}
@@ -77,8 +79,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/backups:/backups
-    ports:
-      - "5432:5432"
+    # Portas removidas para não expor externamente (mais seguro)
+    # Se precisar acessar externamente, descomente e mude a porta:
+    # ports:
+    #   - "5433:5432"
     networks:
       - pesquisa-network
     healthcheck:
@@ -93,8 +97,10 @@ services:
     image: redis:7-alpine
     container_name: pesquisa-hmsi-redis
     restart: always
-    ports:
-      - "6379:6379"
+    # Portas removidas para não expor externamente (mais seguro)
+    # Se precisar acessar externamente, descomente e mude a porta:
+    # ports:
+    #   - "6380:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -116,8 +122,8 @@ services:
     restart: always
     working_dir: /var/www/html
     volumes:
-      - .:/var/www/html
-      - ./storage:/var/www/html/storage
+      # Volumes nomeados compartilhados com o container PHP
+      - app_storage:/var/www/html/storage
     environment:
       - APP_ENV=${APP_ENV:-production}
       - DB_CONNECTION=pgsql
@@ -162,6 +168,14 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  app_storage:
+    driver: local
+  app_cache:
+    driver: local
+  app_public:
+    driver: local
+  nginx_logs:
     driver: local
 
 networks:
