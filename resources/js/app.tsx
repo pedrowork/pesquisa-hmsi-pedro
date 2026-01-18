@@ -15,6 +15,8 @@ let setPermissionErrorGlobal: ((error: { open: boolean; permission?: string; mes
 
 // Componente wrapper para interceptar erros
 function AppWithErrorHandling({ Component, props }: any) {
+    console.log('[DEBUG] AppWithErrorHandling: Componente iniciado', Component?.name || 'Unknown');
+    
     const [permissionError, setPermissionError] = useState<{
         open: boolean;
         permission?: string;
@@ -22,8 +24,11 @@ function AppWithErrorHandling({ Component, props }: any) {
     }>({
         open: false,
     });
+    
+    console.log('[DEBUG] AppWithErrorHandling: useState chamado');
 
     useEffect(() => {
+        console.log('[DEBUG] AppWithErrorHandling: useEffect iniciado');
         // Expor setPermissionError globalmente para o onError do Inertia
         setPermissionErrorGlobal = setPermissionError;
 
@@ -80,13 +85,16 @@ createInertiaApp({
             import.meta.glob('./pages/**/*.tsx'),
         ),
     setup({ el, App, props }) {
+        console.log('[DEBUG] app.tsx setup: Iniciando renderização', App?.name || 'Unknown');
         const root = createRoot(el);
 
+        console.log('[DEBUG] app.tsx setup: createRoot executado');
         root.render(
             <StrictMode>
                 <AppWithErrorHandling Component={App} props={props} />
             </StrictMode>,
         );
+        console.log('[DEBUG] app.tsx setup: root.render executado');
     },
     progress: {
         color: '#4B5563',

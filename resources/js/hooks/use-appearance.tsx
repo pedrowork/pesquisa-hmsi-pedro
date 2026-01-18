@@ -61,9 +61,14 @@ export function initializeTheme() {
 }
 
 export function useAppearance() {
+    console.log('[DEBUG] useAppearance: Hook iniciado');
+    
     // Sempre inicializar com 'system' para evitar diferença server/client
+    console.log('[DEBUG] useAppearance: Antes de useState');
     const [appearance, setAppearance] = useState<Appearance>('system');
+    console.log('[DEBUG] useAppearance: useState executado');
 
+    console.log('[DEBUG] useAppearance: Antes de useCallback');
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
 
@@ -78,11 +83,15 @@ export function useAppearance() {
         applyTheme(mode);
     }, []);
 
+    console.log('[DEBUG] useAppearance: Antes de useEffect');
     useEffect(() => {
+        console.log('[DEBUG] useAppearance: useEffect executado (dentro do callback)');
         // Apenas executar no cliente - ler do localStorage após hidratação
         if (typeof window === 'undefined') {
+            console.log('[DEBUG] useAppearance: useEffect - SSR detectado, saindo');
             return;
         }
+        console.log('[DEBUG] useAppearance: useEffect - Cliente detectado, continuando');
 
         const savedAppearance = localStorage.getItem(
             'appearance',
