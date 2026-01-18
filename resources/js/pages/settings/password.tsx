@@ -11,7 +11,9 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { edit } from '@/routes/user-password';
+
+// Função para obter URL da rota de password (compatível com wayfinder)
+const edit = () => ({ url: '/settings/password' });
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
