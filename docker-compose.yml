@@ -5,8 +5,10 @@ services:
     container_name: pesquisa-hmsi-nginx
     restart: always
     ports:
-      - "8080:80"   # Porta 80 já está em uso pelo Nginx do host
-      - "8443:443"  # Porta 443 já está em uso pelo Nginx do host
+      # Porta 80 já está em uso pelo Nginx do host
+      - "8080:80"
+      # Porta 443 já está em uso pelo Nginx do host
+      - "8443:443"
     volumes:
       - app_public:/var/www/html/public:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -34,11 +36,9 @@ services:
     restart: always
     working_dir: /var/www/html
     volumes:
-      # Volumes nomeados para persistir dados em produção
       - app_storage:/var/www/html/storage
       - app_cache:/var/www/html/bootstrap/cache
       - app_public:/var/www/html/public
-      # .env será copiado manualmente ou via secrets
     environment:
       - APP_ENV=${APP_ENV:-production}
       - APP_DEBUG=${APP_DEBUG:-false}
@@ -79,10 +79,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/backups:/backups
-    # Portas removidas para não expor externamente (mais seguro)
-    # Se precisar acessar externamente, descomente e mude a porta:
-    # ports:
-    #   - "5433:5432"
     networks:
       - pesquisa-network
     healthcheck:
@@ -97,10 +93,6 @@ services:
     image: redis:7-alpine
     container_name: pesquisa-hmsi-redis
     restart: always
-    # Portas removidas para não expor externamente (mais seguro)
-    # Se precisar acessar externamente, descomente e mude a porta:
-    # ports:
-    #   - "6380:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -122,7 +114,6 @@ services:
     restart: always
     working_dir: /var/www/html
     volumes:
-      # Volumes nomeados compartilhados com o container PHP
       - app_storage:/var/www/html/storage
     environment:
       - APP_ENV=${APP_ENV:-production}
