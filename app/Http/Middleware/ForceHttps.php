@@ -20,12 +20,16 @@ class ForceHttps
         $isLocalDevelopment = in_array($request->getHost(), ['localhost', '127.0.0.1', '::1']) 
             || app()->environment(['local', 'testing']);
         
+        // Verificar se já está via HTTPS (via X-Forwarded-Proto quando atrás de proxy)
+        $isSecure = $request->secure() || $request->header('X-Forwarded-Proto') === 'https';
+        
         // Se estiver em desenvolvimento local, desabilitar cookies seguros temporariamente
-        if ($isLocalDevelopment && !$request->secure()) {
+        if ($isLocalDevelopment && !$isSecure) {
             config(['session.secure' => false]);
         }
         
-        if (app()->environment('production') && !$request->secure() && !$isLocalDevelopment) {
+        // Forçar HTTPS apenas se não estiver já seguro e não for desenvolvimento local
+        if (app()->environment('production') && !$isSecure && !$isLocalDevelopment) {
             return redirect()->secure($request->getRequestUri());
         }
 
