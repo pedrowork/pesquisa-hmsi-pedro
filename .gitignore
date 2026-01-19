@@ -1,96 +1,44 @@
-
-
-# ============================================
-# Laravel Framework
-# ============================================
 /.phpunit.cache
-/bootstrap/ssr
-/bootstrap/cache/*.tmp
-/bootstrap/cache/packages.php
-/bootstrap/cache/services.php
-/vendor
-.phpactor.json
-.phpunit.result.cache
-
-# ============================================
-# Node.js / Frontend
-# ============================================
 /node_modules
 /public/build
+/bootstrap/ssr
 /public/hot
-/resources/js/actions
-/resources/js/routes
-/resources/js/wayfinder
-npm-debug.log
-yarn-error.log
-pnpm-lock.yaml
-
-# ============================================
-# Environment & Config
-# ============================================
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
 .env
 .env.backup
 .env.production
+.phpactor.json
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
 /auth.json
-
-# ============================================
-# Storage & Logs
-# ============================================
-/storage/*.key
-/storage/pail
-/storage/logs/*.log
-/storage/logs/*.txt
-/public/storage
-
-# ============================================
-# Database
-# ============================================
-/database/database.sqlite
-/database/database.sqlite-journal
-/database/backups/*
-/database/backups/**/*
-
-# ============================================
-# Nginx Logs
-# ============================================
-/nginx/logs/*.log
-/nginx/logs/**/*.log
-
-# ============================================
-# Docker & SSL
-# ============================================
-/nginx/ssl/*
-/nginx/ssl/**/*
-
-# ============================================
-# Arquivos Duplicados / Desnecessários
-# ============================================
-# logomarca.png na raiz (já existe em public/)
-# /logomarca.png
-
-# ============================================
-# Documentação de Desenvolvimento Local
-# ============================================
-# Documentação local que não precisa no Git
-/database/docs/*.txt
-/database/docs/*.csv
-/docs/sidebar-exemplo.txt
-
-# ============================================
-# IDEs & Editors
-# ============================================
-.DS_Store
 /.fleet
 /.idea
 /.nova
-/.vscode
 /.zed
+/.cursor
+/.playwright-mcp
+boost.json
 
-# ============================================
-# Homestead
-# ============================================
-Homestead.json
-Homestead.yaml
+# Scribe (API docs)
+/public/vendor/scribe/
+/resources/views/scribe/
+/.scribe/
+/storage/app/private/scribe/
+/.serena
 
+# Wayfinder (generated TypeScript routes)
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
 
-/descarte
+# Taskmaster
+.taskmaster
+
+# Rector
+/storage/rector
