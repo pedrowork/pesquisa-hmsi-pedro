@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -13,6 +7,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -40,9 +40,7 @@ interface PermissionsEditProps {
     permission: Permission;
 }
 
-export default function PermissionsEdit({
-    permission,
-}: PermissionsEditProps) {
+export default function PermissionsEdit({ permission }: PermissionsEditProps) {
     const { data, setData, put, processing, errors } = useForm({
         name: permission.name || '',
         slug: permission.slug || '',
@@ -69,7 +67,7 @@ export default function PermissionsEdit({
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold">Editar Permissão</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Edite os dados da permissão {permission.name}
                         </p>
                     </div>
@@ -118,15 +116,14 @@ export default function PermissionsEdit({
                                     placeholder="Ex: users.create"
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Identificador único (sem espaços, use hífens ou pontos)
+                                    Identificador único (sem espaços, use hífens
+                                    ou pontos)
                                 </p>
                                 <InputError message={errors.slug} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="description">
-                                    Descrição
-                                </Label>
+                                <Label htmlFor="description">Descrição</Label>
                                 <textarea
                                     id="description"
                                     name="description"
@@ -135,7 +132,7 @@ export default function PermissionsEdit({
                                     onChange={(e) =>
                                         setData('description', e.target.value)
                                     }
-                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                     placeholder="Descrição da permissão..."
                                 />
                                 <InputError message={errors.description} />
@@ -160,4 +157,3 @@ export default function PermissionsEdit({
         </AppLayout>
     );
 }
-

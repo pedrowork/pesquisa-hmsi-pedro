@@ -1,10 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -12,8 +7,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import Can from '@/components/Can';
-import { useState, FormEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -57,10 +57,14 @@ export default function LeitosIndex({ leitos, filters }: LeitosIndexProps) {
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/leitos', { search }, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            '/leitos',
+            { search },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
     const handleDelete = (leitoId: number) => {
@@ -77,8 +81,10 @@ export default function LeitosIndex({ leitos, filters }: LeitosIndexProps) {
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Gerenciamento de Leitos</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-3xl font-bold">
+                            Gerenciamento de Leitos
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
                             Cadastre e gerencie leitos do sistema
                         </p>
                     </div>
@@ -191,7 +197,9 @@ export default function LeitosIndex({ leitos, filters }: LeitosIndexProps) {
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() =>
-                                                                    handleDelete(leito.cod)
+                                                                    handleDelete(
+                                                                        leito.cod,
+                                                                    )
                                                                 }
                                                                 className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                             >
@@ -232,7 +240,7 @@ export default function LeitosIndex({ leitos, filters }: LeitosIndexProps) {
                                             <Link
                                                 key={index}
                                                 href={link.url}
-                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                className={`rounded-md px-3 py-1 text-sm ${
                                                     link.active
                                                         ? 'bg-primary text-primary-foreground'
                                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -252,4 +260,3 @@ export default function LeitosIndex({ leitos, filters }: LeitosIndexProps) {
         </AppLayout>
     );
 }
-

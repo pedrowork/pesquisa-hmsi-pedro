@@ -1,11 +1,6 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -14,14 +9,25 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useEffect, useState, useMemo } from 'react';
-import { Search, CheckSquare, Square, ChevronDown, ChevronRight } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import {
+    ArrowLeft,
+    CheckSquare,
+    ChevronDown,
+    ChevronRight,
+    Search,
+    Square,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -66,7 +72,9 @@ export default function RolesEdit({
     rolePermissions,
 }: RolesEditProps) {
     const [search, setSearch] = useState('');
-    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+    const [expandedGroups, setExpandedGroups] = useState<
+        Record<string, boolean>
+    >({});
     const { data, setData, put, processing, errors } = useForm({
         name: role.name || '',
         slug: role.slug || '',
@@ -85,7 +93,7 @@ export default function RolesEdit({
         if (currentPermissions.includes(permissionId)) {
             setData(
                 'permissions',
-                currentPermissions.filter((id) => id !== permissionId)
+                currentPermissions.filter((id) => id !== permissionId),
             );
         } else {
             setData('permissions', [...currentPermissions, permissionId]);
@@ -94,16 +102,21 @@ export default function RolesEdit({
 
     const handleGroupToggle = (groupPermissions: Permission[]) => {
         const currentPermissions = data.permissions || [];
-        const groupIds = groupPermissions.map(p => p.id);
-        const allSelected = groupIds.every(id => currentPermissions.includes(id));
-        
+        const groupIds = groupPermissions.map((p) => p.id);
+        const allSelected = groupIds.every((id) =>
+            currentPermissions.includes(id),
+        );
+
         if (allSelected) {
             // Desmarcar todas do grupo
-            setData('permissions', currentPermissions.filter(id => !groupIds.includes(id)));
+            setData(
+                'permissions',
+                currentPermissions.filter((id) => !groupIds.includes(id)),
+            );
         } else {
             // Marcar todas do grupo
             const newPermissions = [...currentPermissions];
-            groupIds.forEach(id => {
+            groupIds.forEach((id) => {
                 if (!newPermissions.includes(id)) {
                     newPermissions.push(id);
                 }
@@ -113,38 +126,41 @@ export default function RolesEdit({
     };
 
     const toggleGroup = (groupName: string) => {
-        setExpandedGroups(prev => ({
+        setExpandedGroups((prev) => ({
             ...prev,
-            [groupName]: !prev[groupName]
+            [groupName]: !prev[groupName],
         }));
     };
 
     // Filtrar permissões baseado na busca
     const filteredGroupedPermissions = useMemo(() => {
         if (!search) return groupedPermissions;
-        
+
         const lowerSearch = search.toLowerCase();
         const filtered: Record<string, Permission[]> = {};
-        
+
         Object.entries(groupedPermissions).forEach(([group, perms]) => {
-            const filteredPerms = perms.filter(p => 
-                p.name.toLowerCase().includes(lowerSearch) ||
-                p.slug.toLowerCase().includes(lowerSearch) ||
-                (p.description && p.description.toLowerCase().includes(lowerSearch))
+            const filteredPerms = perms.filter(
+                (p) =>
+                    p.name.toLowerCase().includes(lowerSearch) ||
+                    p.slug.toLowerCase().includes(lowerSearch) ||
+                    (p.description &&
+                        p.description.toLowerCase().includes(lowerSearch)),
             );
-            
+
             if (filteredPerms.length > 0) {
                 filtered[group] = filteredPerms;
             }
         });
-        
+
         return filtered;
     }, [groupedPermissions, search]);
 
     // Contar permissões selecionadas por grupo
     const getGroupSelectionCount = (groupPermissions: Permission[]) => {
         const currentPermissions = data.permissions || [];
-        return groupPermissions.filter(p => currentPermissions.includes(p.id)).length;
+        return groupPermissions.filter((p) => currentPermissions.includes(p.id))
+            .length;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -174,7 +190,7 @@ export default function RolesEdit({
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold">Editar Role</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Edite os dados da role {role.name}
                         </p>
                     </div>
@@ -223,15 +239,14 @@ export default function RolesEdit({
                                     placeholder="Ex: admin"
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Identificador único (sem espaços, use hífens ou underscores)
+                                    Identificador único (sem espaços, use hífens
+                                    ou underscores)
                                 </p>
                                 <InputError message={errors.slug} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="description">
-                                    Descrição
-                                </Label>
+                                <Label htmlFor="description">Descrição</Label>
                                 <textarea
                                     id="description"
                                     name="description"
@@ -240,7 +255,7 @@ export default function RolesEdit({
                                     onChange={(e) =>
                                         setData('description', e.target.value)
                                     }
-                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                     placeholder="Descrição da role..."
                                 />
                                 <InputError message={errors.description} />
@@ -251,137 +266,206 @@ export default function RolesEdit({
                                     <Label className="text-base font-semibold">
                                         Permissões
                                         <span className="ml-2 text-sm font-normal text-muted-foreground">
-                                            ({data.permissions?.length || 0} de {permissions.length} selecionadas)
+                                            ({data.permissions?.length || 0} de{' '}
+                                            {permissions.length} selecionadas)
                                         </span>
                                     </Label>
                                 </div>
-                                
+
                                 {/* Busca */}
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         type="text"
                                         placeholder="Buscar permissões por nome, slug ou descrição..."
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) =>
+                                            setSearch(e.target.value)
+                                        }
                                         className="pl-9"
                                     />
                                 </div>
 
                                 {/* Lista de permissões agrupadas */}
-                                <div className="rounded-lg border border-input p-4 max-h-[600px] overflow-y-auto space-y-4">
-                                    {Object.keys(filteredGroupedPermissions).length === 0 ? (
-                                        <p className="text-sm text-muted-foreground text-center py-8">
-                                            {search ? 'Nenhuma permissão encontrada.' : 'Nenhuma permissão cadastrada.'}
+                                <div className="max-h-[600px] space-y-4 overflow-y-auto rounded-lg border border-input p-4">
+                                    {Object.keys(filteredGroupedPermissions)
+                                        .length === 0 ? (
+                                        <p className="py-8 text-center text-sm text-muted-foreground">
+                                            {search
+                                                ? 'Nenhuma permissão encontrada.'
+                                                : 'Nenhuma permissão cadastrada.'}
                                         </p>
                                     ) : (
-                                        Object.entries(filteredGroupedPermissions).map(([groupName, groupPermissions]) => {
-                                            const isExpanded = expandedGroups[groupName] !== false; // Por padrão expandido
-                                            const selectedCount = getGroupSelectionCount(groupPermissions);
-                                            const allSelected = selectedCount === groupPermissions.length;
-                                            const someSelected = selectedCount > 0 && selectedCount < groupPermissions.length;
+                                        Object.entries(
+                                            filteredGroupedPermissions,
+                                        ).map(
+                                            ([groupName, groupPermissions]) => {
+                                                const isExpanded =
+                                                    expandedGroups[
+                                                        groupName
+                                                    ] !== false; // Por padrão expandido
+                                                const selectedCount =
+                                                    getGroupSelectionCount(
+                                                        groupPermissions,
+                                                    );
+                                                const allSelected =
+                                                    selectedCount ===
+                                                    groupPermissions.length;
+                                                const someSelected =
+                                                    selectedCount > 0 &&
+                                                    selectedCount <
+                                                        groupPermissions.length;
 
-                                            return (
-                                                <Collapsible
-                                                    key={groupName}
-                                                    open={isExpanded}
-                                                    onOpenChange={() => toggleGroup(groupName)}
-                                                    className="border rounded-lg"
-                                                >
-                                                    <CollapsibleTrigger className="w-full">
-                                                        <div className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
-                                                            <div className="flex items-center gap-3 flex-1">
-                                                                {isExpanded ? (
-                                                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                                                ) : (
-                                                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                                                )}
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="font-semibold text-sm uppercase text-foreground">
-                                                                        {groupName}
-                                                                    </span>
-                                                                    <Badge variant="secondary" className="text-xs">
-                                                                        {selectedCount}/{groupPermissions.length}
-                                                                    </Badge>
-                                                                </div>
-                                                            </div>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleGroupToggle(groupPermissions);
-                                                                }}
-                                                                className="h-7 px-2"
-                                                            >
-                                                                {allSelected ? (
-                                                                    <>
-                                                                        <CheckSquare className="h-3.5 w-3.5 mr-1" />
-                                                                        Desmarcar todas
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <Square className="h-3.5 w-3.5 mr-1" />
-                                                                        Selecionar todas
-                                                                    </>
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                    </CollapsibleTrigger>
-                                                    <CollapsibleContent>
-                                                        <div className="px-3 pb-3 space-y-2 border-t pt-3">
-                                                            {groupPermissions.map((permission) => {
-                                                                const isSelected = (data.permissions || []).includes(permission.id);
-                                                                
-                                                                return (
-                                                                    <div
-                                                                        key={permission.id}
-                                                                        className={`flex items-start space-x-3 p-2 rounded-md transition-colors ${
-                                                                            isSelected ? 'bg-primary/5 border border-primary/20' : 'hover:bg-muted/30'
-                                                                        }`}
-                                                >
-                                                    <Checkbox
-                                                        id={`permission-${permission.id}`}
-                                                                            checked={isSelected}
-                                                        onCheckedChange={() =>
-                                                                                handlePermissionToggle(permission.id)
+                                                return (
+                                                    <Collapsible
+                                                        key={groupName}
+                                                        open={isExpanded}
+                                                        onOpenChange={() =>
+                                                            toggleGroup(
+                                                                groupName,
+                                                            )
                                                         }
-                                                                            className="mt-0.5"
-                                                    />
-                                                    <label
-                                                        htmlFor={`permission-${permission.id}`}
-                                                                            className="flex-1 cursor-pointer"
+                                                        className="rounded-lg border"
                                                     >
-                                                                            <div className="flex items-start justify-between gap-2">
-                                                                                <div className="flex-1">
-                                                                                    <div className="text-sm font-medium leading-none">
-                                                        {permission.name}
-                                                                                    </div>
-                                                                                    <div className="mt-1 text-xs font-mono text-muted-foreground">
-                                                                                        {permission.slug}
-                                                                                    </div>
-                                                        {permission.description && (
-                                                                                        <div className="mt-1 text-xs text-muted-foreground">
-                                                                {permission.description}
+                                                        <CollapsibleTrigger className="w-full">
+                                                            <div className="flex items-center justify-between p-3 transition-colors hover:bg-muted/50">
+                                                                <div className="flex flex-1 items-center gap-3">
+                                                                    {isExpanded ? (
+                                                                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                                                    ) : (
+                                                                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                                                    )}
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm font-semibold text-foreground uppercase">
+                                                                            {
+                                                                                groupName
+                                                                            }
+                                                                        </span>
+                                                                        <Badge
+                                                                            variant="secondary"
+                                                                            className="text-xs"
+                                                                        >
+                                                                            {
+                                                                                selectedCount
+                                                                            }
+                                                                            /
+                                                                            {
+                                                                                groupPermissions.length
+                                                                            }
+                                                                        </Badge>
+                                                                    </div>
+                                                                </div>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        handleGroupToggle(
+                                                                            groupPermissions,
+                                                                        );
+                                                                    }}
+                                                                    className="h-7 px-2"
+                                                                >
+                                                                    {allSelected ? (
+                                                                        <>
+                                                                            <CheckSquare className="mr-1 h-3.5 w-3.5" />
+                                                                            Desmarcar
+                                                                            todas
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Square className="mr-1 h-3.5 w-3.5" />
+                                                                            Selecionar
+                                                                            todas
+                                                                        </>
+                                                                    )}
+                                                                </Button>
+                                                            </div>
+                                                        </CollapsibleTrigger>
+                                                        <CollapsibleContent>
+                                                            <div className="space-y-2 border-t px-3 pt-3 pb-3">
+                                                                {groupPermissions.map(
+                                                                    (
+                                                                        permission,
+                                                                    ) => {
+                                                                        const isSelected =
+                                                                            (
+                                                                                data.permissions ||
+                                                                                []
+                                                                            ).includes(
+                                                                                permission.id,
+                                                                            );
+
+                                                                        return (
+                                                                            <div
+                                                                                key={
+                                                                                    permission.id
+                                                                                }
+                                                                                className={`flex items-start space-x-3 rounded-md p-2 transition-colors ${
+                                                                                    isSelected
+                                                                                        ? 'border border-primary/20 bg-primary/5'
+                                                                                        : 'hover:bg-muted/30'
+                                                                                }`}
+                                                                            >
+                                                                                <Checkbox
+                                                                                    id={`permission-${permission.id}`}
+                                                                                    checked={
+                                                                                        isSelected
+                                                                                    }
+                                                                                    onCheckedChange={() =>
+                                                                                        handlePermissionToggle(
+                                                                                            permission.id,
+                                                                                        )
+                                                                                    }
+                                                                                    className="mt-0.5"
+                                                                                />
+                                                                                <label
+                                                                                    htmlFor={`permission-${permission.id}`}
+                                                                                    className="flex-1 cursor-pointer"
+                                                                                >
+                                                                                    <div className="flex items-start justify-between gap-2">
+                                                                                        <div className="flex-1">
+                                                                                            <div className="text-sm leading-none font-medium">
+                                                                                                {
+                                                                                                    permission.name
+                                                                                                }
+                                                                                            </div>
+                                                                                            <div className="mt-1 font-mono text-xs text-muted-foreground">
+                                                                                                {
+                                                                                                    permission.slug
+                                                                                                }
+                                                                                            </div>
+                                                                                            {permission.description && (
+                                                                                                <div className="mt-1 text-xs text-muted-foreground">
+                                                                                                    {
+                                                                                                        permission.description
+                                                                                                    }
+                                                                                                </div>
+                                                                                            )}
                                                                                         </div>
-                                                                                    )}
-                                                                                </div>
-                                                                                {isSelected && (
-                                                                                    <Badge variant="default" className="text-xs">
-                                                                                        Selecionada
-                                                                                    </Badge>
-                                                                                )}
+                                                                                        {isSelected && (
+                                                                                            <Badge
+                                                                                                variant="default"
+                                                                                                className="text-xs"
+                                                                                            >
+                                                                                                Selecionada
+                                                                                            </Badge>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </label>
                                                                             </div>
-                                                    </label>
-                                                </div>
-                                                                );
-                                                            })}
-                                        </div>
-                                                    </CollapsibleContent>
-                                                </Collapsible>
-                                            );
-                                        })
+                                                                        );
+                                                                    },
+                                                                )}
+                                                            </div>
+                                                        </CollapsibleContent>
+                                                    </Collapsible>
+                                                );
+                                            },
+                                        )
                                     )}
                                 </div>
                                 <InputError message={errors.permissions} />

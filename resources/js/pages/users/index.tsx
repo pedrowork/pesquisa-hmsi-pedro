@@ -1,10 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2, Filter, UserCheck, Power } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -20,10 +15,21 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Select } from '@/components/ui/select';
-import Can from '@/components/Can';
-import { useState, FormEvent, useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import {
+    AlertTriangle,
+    Edit,
+    Plus,
+    Power,
+    Search,
+    Trash2,
+    UserCheck,
+} from 'lucide-react';
+import { FormEvent, useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -86,7 +92,9 @@ export default function UsersIndex({
     const { auth } = usePage<SharedData>().props;
     const isAdmin = auth?.isAdmin || false;
     const [search, setSearch] = useState(filters.search || '');
-    const [debouncedSearch, setDebouncedSearch] = useState(filters.search || '');
+    const [debouncedSearch, setDebouncedSearch] = useState(
+        filters.search || '',
+    );
     const [status, setStatus] = useState(filters.status || '');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [userToDelete, setUserToDelete] = useState<number | null>(null);
@@ -104,10 +112,14 @@ export default function UsersIndex({
     // Busca automática quando debouncedSearch mudar
     useEffect(() => {
         if (debouncedSearch !== filters.search) {
-            router.get('/users', { search: debouncedSearch, status }, {
-                preserveState: true,
-                replace: true,
-            });
+            router.get(
+                '/users',
+                { search: debouncedSearch, status },
+                {
+                    preserveState: true,
+                    replace: true,
+                },
+            );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedSearch]);
@@ -115,10 +127,14 @@ export default function UsersIndex({
     // Busca automática quando status mudar (busca imediata, sem debounce)
     useEffect(() => {
         if (status !== filters.status) {
-            router.get('/users', { search: debouncedSearch, status }, {
-                preserveState: true,
-                replace: true,
-            });
+            router.get(
+                '/users',
+                { search: debouncedSearch, status },
+                {
+                    preserveState: true,
+                    replace: true,
+                },
+            );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
@@ -146,7 +162,10 @@ export default function UsersIndex({
                 },
                 onError: (errors) => {
                     // Capturar erros de validação ou outros erros
-                    const errorMessage = errors.user || errors.message || 'Erro ao excluir usuário. Tente novamente.';
+                    const errorMessage =
+                        errors.user ||
+                        errors.message ||
+                        'Erro ao excluir usuário. Tente novamente.';
                     setDeleteError(errorMessage);
                 },
             });
@@ -154,12 +173,16 @@ export default function UsersIndex({
     };
 
     const handleToggleStatus = (userId: number) => {
-        router.post(`/users/${userId}/toggle-status`, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                router.reload({ only: ['users'] });
+        router.post(
+            `/users/${userId}/toggle-status`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    router.reload({ only: ['users'] });
+                },
             },
-        });
+        );
     };
 
     const getStatusBadge = (status: number) => {
@@ -180,8 +203,10 @@ export default function UsersIndex({
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold sm:text-3xl">Gerenciamento de Usuários</h1>
-                        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                        <h1 className="text-2xl font-bold sm:text-3xl">
+                            Gerenciamento de Usuários
+                        </h1>
+                        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
                             Cadastre e gerencie usuários do sistema
                         </p>
                     </div>
@@ -194,14 +219,14 @@ export default function UsersIndex({
                                 </Button>
                             </Link>
                         </Can>
-                    <Can permission="users.create">
-                        <Link href="/users/create">
-                            <Button>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Novo Usuário
-                            </Button>
-                        </Link>
-                    </Can>
+                        <Can permission="users.create">
+                            <Link href="/users/create">
+                                <Button>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Novo Usuário
+                                </Button>
+                            </Link>
+                        </Can>
                     </div>
                 </div>
 
@@ -209,10 +234,15 @@ export default function UsersIndex({
                 <Card>
                     <CardHeader>
                         <CardTitle>Filtros</CardTitle>
-                        <CardDescription>Busque e filtre usuários</CardDescription>
+                        <CardDescription>
+                            Busque e filtre usuários
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSearch} className="flex flex-col gap-4 sm:flex-row">
+                        <form
+                            onSubmit={handleSearch}
+                            className="flex flex-col gap-4 sm:flex-row"
+                        >
                             <div className="flex-1">
                                 <Label htmlFor="search" className="sr-only">
                                     Buscar
@@ -231,7 +261,7 @@ export default function UsersIndex({
                                 </Label>
                                 <select
                                     id="status"
-                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value)}
                                 >
@@ -240,7 +270,11 @@ export default function UsersIndex({
                                     <option value="0">Inativo</option>
                                 </select>
                             </div>
-                            <Button type="submit" variant="outline" className="w-full sm:w-auto">
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className="w-full sm:w-auto"
+                            >
                                 <Search className="mr-2 h-4 w-4" />
                                 Buscar
                             </Button>
@@ -312,52 +346,88 @@ export default function UsersIndex({
                                                     {user.email}
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    {user.roles && user.roles.length > 0 ? (
+                                                    {user.roles &&
+                                                    user.roles.length > 0 ? (
                                                         <div className="flex flex-wrap gap-1">
-                                                            {user.roles.map((role, index) => (
-                                                                <span
-                                                                    key={index}
-                                                                    className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                                                >
-                                                                    {role.name}
-                                                                </span>
-                                                            ))}
+                                                            {user.roles.map(
+                                                                (
+                                                                    role,
+                                                                    index,
+                                                                ) => (
+                                                                    <span
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                                                    >
+                                                                        {
+                                                                            role.name
+                                                                        }
+                                                                    </span>
+                                                                ),
+                                                            )}
                                                         </div>
                                                     ) : (
-                                                        <span className="text-muted-foreground text-sm">
+                                                        <span className="text-sm text-muted-foreground">
                                                             Sem cargo
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    {getStatusBadge(user.status)}
+                                                    {getStatusBadge(
+                                                        user.status,
+                                                    )}
                                                 </td>
                                                 {isAdmin && (
                                                     <td className="px-4 py-3">
                                                         {(() => {
                                                             // Verificar se é o próprio admin (não pode desativar a si mesmo)
-                                                            const adminId = user.roles?.some((role: Role) => role.slug === 'admin');
-                                                            const isCurrentUserAdmin = currentUserId && user.id === currentUserId;
+                                                            const adminId =
+                                                                user.roles?.some(
+                                                                    (
+                                                                        role: Role,
+                                                                    ) =>
+                                                                        role.slug ===
+                                                                        'admin',
+                                                                );
+                                                            const isCurrentUserAdmin =
+                                                                currentUserId &&
+                                                                user.id ===
+                                                                    currentUserId;
                                                             // Não pode desativar: próprio admin
-                                                            const canToggle = !isCurrentUserAdmin;
+                                                            const canToggle =
+                                                                !isCurrentUserAdmin;
 
                                                             return (
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
-                                                                    onClick={() => handleToggleStatus(user.id)}
-                                                                    disabled={!canToggle}
+                                                                    onClick={() =>
+                                                                        handleToggleStatus(
+                                                                            user.id,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        !canToggle
+                                                                    }
                                                                     title={
                                                                         isCurrentUserAdmin
                                                                             ? 'Você não pode desativar sua própria conta'
-                                                                            : (user.status === 1 ? 'Desativar usuário' : 'Ativar usuário')
+                                                                            : user.status ===
+                                                                                1
+                                                                              ? 'Desativar usuário'
+                                                                              : 'Ativar usuário'
                                                                     }
-                                                                    className={user.status === 1
-                                                                        ? 'text-yellow-600 hover:text-yellow-700 dark:text-yellow-400'
-                                                                        : 'text-green-600 hover:text-green-700 dark:text-green-400'
+                                                                    className={
+                                                                        user.status ===
+                                                                        1
+                                                                            ? 'text-yellow-600 hover:text-yellow-700 dark:text-yellow-400'
+                                                                            : 'text-green-600 hover:text-green-700 dark:text-green-400'
                                                                     }
                                                                 >
-                                                                    <Power className={`h-4 w-4 ${user.status === 1 ? '' : 'opacity-50'}`} />
+                                                                    <Power
+                                                                        className={`h-4 w-4 ${user.status === 1 ? '' : 'opacity-50'}`}
+                                                                    />
                                                                 </Button>
                                                             );
                                                         })()}
@@ -377,29 +447,37 @@ export default function UsersIndex({
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
                                                     {new Date(
                                                         user.created_at,
-                                                    ).toLocaleDateString('pt-BR')}
+                                                    ).toLocaleDateString(
+                                                        'pt-BR',
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
                                                         {(() => {
-                                                            const isFirstMaster = firstMasterId && user.id === firstMasterId;
-                                                            const canEdit = !isFirstMaster || canModifyFirstMaster;
-                                                            const canDelete = !isFirstMaster; // Primeiro Master nunca pode ser deletado
+                                                            const isFirstMaster =
+                                                                firstMasterId &&
+                                                                user.id ===
+                                                                    firstMasterId;
+                                                            const canEdit =
+                                                                !isFirstMaster ||
+                                                                canModifyFirstMaster;
+                                                            const canDelete =
+                                                                !isFirstMaster; // Primeiro Master nunca pode ser deletado
 
                                                             return (
                                                                 <>
-                                                        <Can permission="users.edit">
+                                                                    <Can permission="users.edit">
                                                                         {canEdit ? (
-                                                            <Link
-                                                                href={`/users/${user.id}/edit`}
-                                                            >
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                >
-                                                                    <Edit className="h-4 w-4" />
-                                                                </Button>
-                                                            </Link>
+                                                                            <Link
+                                                                                href={`/users/${user.id}/edit`}
+                                                                            >
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="sm"
+                                                                                >
+                                                                                    <Edit className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </Link>
                                                                         ) : (
                                                                             <Button
                                                                                 variant="outline"
@@ -410,19 +488,21 @@ export default function UsersIndex({
                                                                                 <Edit className="h-4 w-4 opacity-50" />
                                                                             </Button>
                                                                         )}
-                                                        </Can>
-                                                        <Can permission="users.delete">
+                                                                    </Can>
+                                                                    <Can permission="users.delete">
                                                                         {canDelete ? (
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                                    handleDeleteClick(user.id)
-                                                                }
-                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() =>
+                                                                                    handleDeleteClick(
+                                                                                        user.id,
+                                                                                    )
+                                                                                }
+                                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
                                                                         ) : (
                                                                             <Button
                                                                                 variant="outline"
@@ -434,7 +514,7 @@ export default function UsersIndex({
                                                                                 <Trash2 className="h-4 w-4" />
                                                                             </Button>
                                                                         )}
-                                                        </Can>
+                                                                    </Can>
                                                                 </>
                                                             );
                                                         })()}
@@ -472,7 +552,7 @@ export default function UsersIndex({
                                             <Link
                                                 key={index}
                                                 href={link.url}
-                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                className={`rounded-md px-3 py-1 text-sm ${
                                                     link.active
                                                         ? 'bg-primary text-primary-foreground'
                                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -494,7 +574,7 @@ export default function UsersIndex({
             <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <div className="flex items-center justify-center mb-4">
+                        <div className="mb-4 flex items-center justify-center">
                             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
                                 <AlertTriangle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                             </div>
@@ -504,7 +584,7 @@ export default function UsersIndex({
                         </DialogTitle>
                         <DialogDescription className="text-center">
                             {deleteError ? (
-                                <span className="text-red-600 dark:text-red-400 font-medium">
+                                <span className="font-medium text-red-600 dark:text-red-400">
                                     {deleteError}
                                 </span>
                             ) : (
@@ -512,7 +592,7 @@ export default function UsersIndex({
                             )}
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="sm:justify-center gap-2">
+                    <DialogFooter className="gap-2 sm:justify-center">
                         <Button
                             variant="outline"
                             onClick={() => {

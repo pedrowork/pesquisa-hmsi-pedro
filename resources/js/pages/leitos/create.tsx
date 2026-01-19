@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -13,6 +7,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -67,7 +67,7 @@ export default function LeitosCreate({ setores }: LeitosCreateProps) {
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold">Novo Leito</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Preencha os dados para criar um novo leito
                         </p>
                     </div>
@@ -84,7 +84,8 @@ export default function LeitosCreate({ setores }: LeitosCreateProps) {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="descricao">
-                                    Descrição <span className="text-red-500">*</span>
+                                    Descrição{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="descricao"
@@ -101,9 +102,7 @@ export default function LeitosCreate({ setores }: LeitosCreateProps) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="cod_setor">
-                                    Setor
-                                </Label>
+                                <Label htmlFor="cod_setor">Setor</Label>
                                 <select
                                     id="cod_setor"
                                     name="cod_setor"
@@ -111,11 +110,14 @@ export default function LeitosCreate({ setores }: LeitosCreateProps) {
                                     onChange={(e) =>
                                         setData('cod_setor', e.target.value)
                                     }
-                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <option value="">Selecione um setor</option>
                                     {setores.map((setor) => (
-                                        <option key={setor.cod} value={setor.cod}>
+                                        <option
+                                            key={setor.cod}
+                                            value={setor.cod}
+                                        >
                                             {setor.descricao}
                                         </option>
                                     ))}
@@ -140,4 +142,3 @@ export default function LeitosCreate({ setores }: LeitosCreateProps) {
         </AppLayout>
     );
 }
-

@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -14,6 +8,12 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -98,7 +98,7 @@ export default function UsersEdit({
         if (currentPermissions.includes(permissionId)) {
             setData(
                 'permissions',
-                currentPermissions.filter((id) => id !== permissionId)
+                currentPermissions.filter((id) => id !== permissionId),
             );
         } else {
             setData('permissions', [...currentPermissions, permissionId]);
@@ -108,7 +108,10 @@ export default function UsersEdit({
     const handleRoleToggle = (roleId: number) => {
         const currentRoles = data.roles || [];
         if (currentRoles.includes(roleId)) {
-            setData('roles', currentRoles.filter((id) => id !== roleId));
+            setData(
+                'roles',
+                currentRoles.filter((id) => id !== roleId),
+            );
         } else {
             setData('roles', [...currentRoles, roleId]);
         }
@@ -137,7 +140,7 @@ export default function UsersEdit({
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold">Editar Usuário</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Edite os dados do usuário {user.name}
                         </p>
                     </div>
@@ -173,7 +176,8 @@ export default function UsersEdit({
 
                             <div className="grid gap-2">
                                 <Label htmlFor="email">
-                                    Email <span className="text-red-500">*</span>
+                                    Email{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="email"
@@ -193,7 +197,7 @@ export default function UsersEdit({
                             <div className="grid gap-2">
                                 <Label htmlFor="password">
                                     Nova Senha{' '}
-                                    <span className="text-muted-foreground text-xs">
+                                    <span className="text-xs text-muted-foreground">
                                         (deixe em branco para manter a atual)
                                     </span>
                                 </Label>
@@ -223,7 +227,7 @@ export default function UsersEdit({
                                     onChange={(e) =>
                                         setData(
                                             'password_confirmation',
-                                            e.target.value
+                                            e.target.value,
                                         )
                                     }
                                     autoComplete="new-password"
@@ -236,7 +240,8 @@ export default function UsersEdit({
 
                             <div className="grid gap-2">
                                 <Label htmlFor="status">
-                                    Status <span className="text-red-500">*</span>
+                                    Status{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <select
                                     id="status"
@@ -246,7 +251,7 @@ export default function UsersEdit({
                                     onChange={(e) =>
                                         setData('status', e.target.value)
                                     }
-                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <option value="1">Ativo</option>
                                     <option value="0">Inativo</option>
@@ -275,11 +280,12 @@ export default function UsersEdit({
                     <CardHeader>
                         <CardTitle>Roles (Grupos)</CardTitle>
                         <CardDescription>
-                            Atribua roles ao usuário. As permissões das roles serão aplicadas automaticamente.
+                            Atribua roles ao usuário. As permissões das roles
+                            serão aplicadas automaticamente.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-lg border border-input p-4 max-h-64 overflow-y-auto">
+                        <div className="max-h-64 overflow-y-auto rounded-lg border border-input p-4">
                             {roles.length === 0 ? (
                                 <p className="text-sm text-muted-foreground">
                                     Nenhuma role cadastrada.
@@ -287,10 +293,13 @@ export default function UsersEdit({
                             ) : (
                                 <div className="space-y-2">
                                     {roles.map((role) => {
-                                        const isAdminRole = role.slug === 'admin';
-                                        const canSelectAdmin = isAdmin || !isAdminRole;
-                                        const canModify = canModifyRoles && canSelectAdmin;
-                                        
+                                        const isAdminRole =
+                                            role.slug === 'admin';
+                                        const canSelectAdmin =
+                                            isAdmin || !isAdminRole;
+                                        const canModify =
+                                            canModifyRoles && canSelectAdmin;
+
                                         return (
                                             <div
                                                 key={role.id}
@@ -298,32 +307,48 @@ export default function UsersEdit({
                                             >
                                                 <Checkbox
                                                     id={`role-${role.id}`}
-                                                    checked={(data.roles || []).includes(role.id)}
+                                                    checked={(
+                                                        data.roles || []
+                                                    ).includes(role.id)}
                                                     onCheckedChange={() =>
-                                                        canModify && handleRoleToggle(role.id)
+                                                        canModify &&
+                                                        handleRoleToggle(
+                                                            role.id,
+                                                        )
                                                     }
                                                     disabled={!canModify}
                                                 />
                                                 <label
                                                     htmlFor={`role-${role.id}`}
-                                                    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canModify ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                                    className={`text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canModify ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                                                 >
                                                     {role.name}
                                                     {!canModifyRoles && (
                                                         <span className="block text-xs text-yellow-600 dark:text-yellow-400">
-                                                            Você não pode alterar suas próprias roles. Isso previne elevação de privilégios.
+                                                            Você não pode
+                                                            alterar suas
+                                                            próprias roles. Isso
+                                                            previne elevação de
+                                                            privilégios.
                                                         </span>
                                                     )}
-                                                    {!canSelectAdmin && canModifyRoles && (
-                                                        <span className="block text-xs text-yellow-600 dark:text-yellow-400">
-                                                            Apenas administradores podem atribuir este perfil
-                                                        </span>
-                                                    )}
-                                                    {role.description && canModify && (
-                                                        <span className="block text-xs text-muted-foreground">
-                                                            {role.description}
-                                                        </span>
-                                                    )}
+                                                    {!canSelectAdmin &&
+                                                        canModifyRoles && (
+                                                            <span className="block text-xs text-yellow-600 dark:text-yellow-400">
+                                                                Apenas
+                                                                administradores
+                                                                podem atribuir
+                                                                este perfil
+                                                            </span>
+                                                        )}
+                                                    {role.description &&
+                                                        canModify && (
+                                                            <span className="block text-xs text-muted-foreground">
+                                                                {
+                                                                    role.description
+                                                                }
+                                                            </span>
+                                                        )}
                                                 </label>
                                             </div>
                                         );
@@ -340,62 +365,97 @@ export default function UsersEdit({
                     <CardHeader>
                         <CardTitle>Permissões Diretas</CardTitle>
                         <CardDescription>
-                            Atribua permissões diretamente ao usuário. Estas permissões são adicionadas às permissões das roles.
+                            Atribua permissões diretamente ao usuário. Estas
+                            permissões são adicionadas às permissões das roles.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-6">
-                            {Object.entries(permissions).map(([category, categoryPermissions]) => (
-                                <div key={category}>
-                                    <h3 className="text-sm font-semibold mb-3 text-foreground">
-                                        {category}
-                                    </h3>
-                                    <div className="rounded-lg border border-input p-4 max-h-64 overflow-y-auto">
-                                        {categoryPermissions.length === 0 ? (
-                                            <p className="text-sm text-muted-foreground">
-                                                Nenhuma permissão nesta categoria.
-                                            </p>
-                                        ) : (
-                                            <div className="space-y-2">
-                                                {categoryPermissions.map((permission) => (
-                                                    <div
-                                                        key={permission.id}
-                                                        className={`flex items-center space-x-2 ${!canModifyPermissions ? 'opacity-50' : ''}`}
-                                                    >
-                                                        <Checkbox
-                                                            id={`permission-${permission.id}`}
-                                                            checked={(data.permissions || []).includes(permission.id)}
-                                                            onCheckedChange={() =>
-                                                                canModifyPermissions && handlePermissionToggle(permission.id)
-                                                            }
-                                                            disabled={!canModifyPermissions}
-                                                        />
-                                                        <label
-                                                            htmlFor={`permission-${permission.id}`}
-                                                            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canModifyPermissions ? 'cursor-pointer' : 'cursor-not-allowed'} flex-1`}
-                                                        >
-                                                            <span className="font-semibold">{permission.name}</span>
-                                                            <span className="block text-xs text-muted-foreground">
-                                                                {permission.slug}
-                                                            </span>
-                                                            {!canModifyPermissions && (
-                                                                <span className="block text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                                                                    Você não pode alterar as permissões deste usuário
-                                                                </span>
-                                                            )}
-                                                            {permission.description && canModifyPermissions && (
-                                                                <span className="block text-xs text-muted-foreground mt-1">
-                                                                    {permission.description}
-                                                                </span>
-                                                            )}
-                                                        </label>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                            {Object.entries(permissions).map(
+                                ([category, categoryPermissions]) => (
+                                    <div key={category}>
+                                        <h3 className="mb-3 text-sm font-semibold text-foreground">
+                                            {category}
+                                        </h3>
+                                        <div className="max-h-64 overflow-y-auto rounded-lg border border-input p-4">
+                                            {categoryPermissions.length ===
+                                            0 ? (
+                                                <p className="text-sm text-muted-foreground">
+                                                    Nenhuma permissão nesta
+                                                    categoria.
+                                                </p>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {categoryPermissions.map(
+                                                        (permission) => (
+                                                            <div
+                                                                key={
+                                                                    permission.id
+                                                                }
+                                                                className={`flex items-center space-x-2 ${!canModifyPermissions ? 'opacity-50' : ''}`}
+                                                            >
+                                                                <Checkbox
+                                                                    id={`permission-${permission.id}`}
+                                                                    checked={(
+                                                                        data.permissions ||
+                                                                        []
+                                                                    ).includes(
+                                                                        permission.id,
+                                                                    )}
+                                                                    onCheckedChange={() =>
+                                                                        canModifyPermissions &&
+                                                                        handlePermissionToggle(
+                                                                            permission.id,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        !canModifyPermissions
+                                                                    }
+                                                                />
+                                                                <label
+                                                                    htmlFor={`permission-${permission.id}`}
+                                                                    className={`text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canModifyPermissions ? 'cursor-pointer' : 'cursor-not-allowed'} flex-1`}
+                                                                >
+                                                                    <span className="font-semibold">
+                                                                        {
+                                                                            permission.name
+                                                                        }
+                                                                    </span>
+                                                                    <span className="block text-xs text-muted-foreground">
+                                                                        {
+                                                                            permission.slug
+                                                                        }
+                                                                    </span>
+                                                                    {!canModifyPermissions && (
+                                                                        <span className="mt-1 block text-xs text-yellow-600 dark:text-yellow-400">
+                                                                            Você
+                                                                            não
+                                                                            pode
+                                                                            alterar
+                                                                            as
+                                                                            permissões
+                                                                            deste
+                                                                            usuário
+                                                                        </span>
+                                                                    )}
+                                                                    {permission.description &&
+                                                                        canModifyPermissions && (
+                                                                            <span className="mt-1 block text-xs text-muted-foreground">
+                                                                                {
+                                                                                    permission.description
+                                                                                }
+                                                                            </span>
+                                                                        )}
+                                                                </label>
+                                                            </div>
+                                                        ),
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ),
+                            )}
                         </div>
                         <InputError message={errors.permissions} />
                     </CardContent>

@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -13,6 +7,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -67,7 +67,7 @@ export default function TiposConvenioEdit({
                         <h1 className="text-3xl font-bold">
                             Editar Tipo de Convênio
                         </h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Edite os dados do tipo de convênio
                         </p>
                     </div>
@@ -84,7 +84,8 @@ export default function TiposConvenioEdit({
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="tipo_descricao">
-                                    Descrição <span className="text-red-500">*</span>
+                                    Descrição{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="tipo_descricao"
@@ -93,7 +94,10 @@ export default function TiposConvenioEdit({
                                     required
                                     value={data.tipo_descricao}
                                     onChange={(e) =>
-                                        setData('tipo_descricao', e.target.value)
+                                        setData(
+                                            'tipo_descricao',
+                                            e.target.value,
+                                        )
                                     }
                                     placeholder="Ex: Convênio Particular"
                                 />
@@ -119,4 +123,3 @@ export default function TiposConvenioEdit({
         </AppLayout>
     );
 }
-

@@ -1,0 +1,53 @@
+pesquisa.techsistema.com.br, www.pesquisa.techsistema.com.br {
+	# Reverse proxy to Docker container
+	reverse_proxy pesquisa:80 {
+		# Health check endpoint
+		health_uri /up
+		health_interval 30s
+		health_timeout 5s
+
+		# Long timeouts for Laravel
+		transport http {
+			read_timeout 180s
+			write_timeout 180s
+		}
+	}
+
+	# Max request body size
+	request_body {
+		max_size 25MB
+	}
+
+	# Static file caching for assets
+	@static {
+		path /build/* /assets/* /favicon.ico /robots.txt
+	}
+	header @static {
+		Cache-Control "public, max-age=604800, immutable"
+	}
+
+	# Security: Block direct access to .php files
+	@php_files {
+		path *.php
+	}
+	respond @php_files 404
+
+	# Logging
+	log {
+		output file /var/log/caddy/pesquisa.log
+		format json
+	}
+}
+
+// eco.pesquisa.techsistema.com.br {
+// 	reverse_proxy reverb:8080 {
+// 		transport http {
+// 			versions 1.1
+// 		}
+// 	}
+
+// 	log {
+// 		output file /var/log/caddy/reverb.log
+// 		format json
+// 	}
+// }

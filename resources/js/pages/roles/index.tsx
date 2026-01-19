@@ -1,10 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -12,8 +7,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import Can from '@/components/Can';
-import { useState, FormEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -62,14 +62,22 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/roles', { search }, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            '/roles',
+            { search },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
     const handleDelete = (roleId: number) => {
-        if (confirm('Tem certeza que deseja excluir esta role? Todos os relacionamentos serão removidos.')) {
+        if (
+            confirm(
+                'Tem certeza que deseja excluir esta role? Todos os relacionamentos serão removidos.',
+            )
+        ) {
             router.delete(`/roles/${roleId}`, {
                 preserveScroll: true,
             });
@@ -82,9 +90,12 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold sm:text-3xl">Gerenciamento de Roles</h1>
-                        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                            Cadastre e gerencie roles (grupos de usuários) do sistema
+                        <h1 className="text-2xl font-bold sm:text-3xl">
+                            Gerenciamento de Roles
+                        </h1>
+                        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+                            Cadastre e gerencie roles (grupos de usuários) do
+                            sistema
                         </p>
                     </div>
                     <Can permission="roles.create">
@@ -104,7 +115,10 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                         <CardDescription>Busque roles</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSearch} className="flex flex-col gap-4 sm:flex-row">
+                        <form
+                            onSubmit={handleSearch}
+                            className="flex flex-col gap-4 sm:flex-row"
+                        >
                             <div className="flex-1">
                                 <Label htmlFor="search" className="sr-only">
                                     Buscar
@@ -117,7 +131,11 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            <Button type="submit" variant="outline" className="w-full sm:w-auto">
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className="w-full sm:w-auto"
+                            >
                                 <Search className="mr-2 h-4 w-4" />
                                 Buscar
                             </Button>
@@ -181,7 +199,7 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                                                     {role.name}
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <code className="text-xs bg-muted px-2 py-1 rounded">
+                                                    <code className="rounded bg-muted px-2 py-1 text-xs">
                                                         {role.slug}
                                                     </code>
                                                 </td>
@@ -201,7 +219,9 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
                                                     {new Date(
                                                         role.created_at,
-                                                    ).toLocaleDateString('pt-BR')}
+                                                    ).toLocaleDateString(
+                                                        'pt-BR',
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
@@ -222,7 +242,9 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() =>
-                                                                    handleDelete(role.id)
+                                                                    handleDelete(
+                                                                        role.id,
+                                                                    )
                                                                 }
                                                                 className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                             >
@@ -263,7 +285,7 @@ export default function RolesIndex({ roles, filters }: RolesIndexProps) {
                                             <Link
                                                 key={index}
                                                 href={link.url}
-                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                className={`rounded-md px-3 py-1 text-sm ${
                                                     link.active
                                                         ? 'bg-primary text-primary-foreground'
                                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'

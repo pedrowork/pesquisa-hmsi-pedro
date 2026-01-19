@@ -1,7 +1,3 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -10,6 +6,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -65,8 +65,10 @@ export default function QuestionariosShow({
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-3xl font-bold">Detalhes do Questionário</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-3xl font-bold">
+                            Detalhes do Questionário
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
                             Visualização completa do questionário do paciente
                         </p>
                     </div>
@@ -83,44 +85,76 @@ export default function QuestionariosShow({
                     <CardContent>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Nome</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Nome
+                                </p>
                                 <p className="text-base">{paciente.nome}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Email</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Email
+                                </p>
                                 <p className="text-base">{paciente.email}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Telefone</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Telefone
+                                </p>
                                 <p className="text-base">{paciente.telefone}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Sexo</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Sexo
+                                </p>
                                 <p className="text-base">{paciente.sexo}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Idade</p>
-                                <p className="text-base">{paciente.idade} anos</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Idade
+                                </p>
+                                <p className="text-base">
+                                    {paciente.idade} anos
+                                </p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Tipo de Paciente</p>
-                                <p className="text-base">{paciente.tipo_paciente || '—'}</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Tipo de Paciente
+                                </p>
+                                <p className="text-base">
+                                    {paciente.tipo_paciente || '—'}
+                                </p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Leito</p>
-                                <p className="text-base">{paciente.leito || '—'}</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Leito
+                                </p>
+                                <p className="text-base">
+                                    {paciente.leito || '—'}
+                                </p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Setor</p>
-                                <p className="text-base">{paciente.setor || '—'}</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Setor
+                                </p>
+                                <p className="text-base">
+                                    {paciente.setor || '—'}
+                                </p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Renda</p>
-                                <p className="text-base">{paciente.renda || '—'}</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Renda
+                                </p>
+                                <p className="text-base">
+                                    {paciente.renda || '—'}
+                                </p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Tipo de Convênio</p>
-                                <p className="text-base">{paciente.tipo_descricao || '—'}</p>
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    Tipo de Convênio
+                                </p>
+                                <p className="text-base">
+                                    {paciente.tipo_descricao || '—'}
+                                </p>
                             </div>
                         </div>
                     </CardContent>
@@ -136,7 +170,7 @@ export default function QuestionariosShow({
                     </CardHeader>
                     <CardContent>
                         {respostas.length === 0 ? (
-                            <p className="text-muted-foreground text-center py-4">
+                            <p className="py-4 text-center text-muted-foreground">
                                 Nenhuma resposta encontrada
                             </p>
                         ) : (
@@ -144,7 +178,7 @@ export default function QuestionariosShow({
                                 {respostas.map((resposta) => (
                                     <div
                                         key={resposta.id}
-                                        className="rounded-lg border p-4 space-y-2"
+                                        className="space-y-2 rounded-lg border p-4"
                                     >
                                         <div>
                                             <p className="text-sm font-medium text-muted-foreground">
@@ -158,7 +192,9 @@ export default function QuestionariosShow({
                                             <p className="text-sm font-medium text-muted-foreground">
                                                 Resposta
                                             </p>
-                                            <p className="text-base">{resposta.resposta_descricao}</p>
+                                            <p className="text-base">
+                                                {resposta.resposta_descricao}
+                                            </p>
                                         </div>
                                         {resposta.observacao && (
                                             <div>
@@ -170,17 +206,21 @@ export default function QuestionariosShow({
                                                 </p>
                                             </div>
                                         )}
-                                        <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t">
+                                        <div className="flex items-center gap-4 border-t pt-2 text-xs text-muted-foreground">
                                             <span>
-                                                Registrado por: {resposta.usuario_nome}
+                                                Registrado por:{' '}
+                                                {resposta.usuario_nome}
                                             </span>
                                             {resposta.data_questionario && (
                                                 <span>
                                                     Data:{' '}
                                                     {new Date(
-                                                        resposta.data_questionario
-                                                    ).toLocaleDateString('pt-BR')}
-                                                    {resposta.hora_questionario && ` ${resposta.hora_questionario}`}
+                                                        resposta.data_questionario,
+                                                    ).toLocaleDateString(
+                                                        'pt-BR',
+                                                    )}
+                                                    {resposta.hora_questionario &&
+                                                        ` ${resposta.hora_questionario}`}
                                                 </span>
                                             )}
                                         </div>
@@ -194,4 +234,3 @@ export default function QuestionariosShow({
         </AppLayout>
     );
 }
-

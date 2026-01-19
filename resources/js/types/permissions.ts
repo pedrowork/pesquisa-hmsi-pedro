@@ -65,5 +65,3 @@ export interface SharedAuthData {
     permissions: PermissionName[];
     isAdmin: boolean;
 }
-
-

@@ -1,21 +1,29 @@
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { StrictMode, useState, useEffect } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { initializeTheme } from './hooks/use-appearance';
 import PermissionDeniedModal from './components/PermissionDeniedModal';
-import { router } from '@inertiajs/react';
+import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 // Variável global para controlar o modal de permissão
-let setPermissionErrorGlobal: ((error: { open: boolean; permission?: string; message?: string }) => void) | null = null;
+let setPermissionErrorGlobal:
+    | ((error: {
+          open: boolean;
+          permission?: string;
+          message?: string;
+      }) => void)
+    | null = null;
 
 // Componente wrapper para interceptar erros
 function AppWithErrorHandling({ Component, props }: any) {
-    console.log('[DEBUG] AppWithErrorHandling: Componente iniciado', Component?.name || 'Unknown');
+    console.log(
+        '[DEBUG] AppWithErrorHandling: Componente iniciado',
+        Component?.name || 'Unknown',
+    );
 
     const [permissionError, setPermissionError] = useState<{
         open: boolean;
@@ -45,7 +53,9 @@ function AppWithErrorHandling({ Component, props }: any) {
                         setPermissionError({
                             open: true,
                             permission: errors.permission,
-                            message: errors.message || 'Você não tem permissão para acessar esta página.',
+                            message:
+                                errors.message ||
+                                'Você não tem permissão para acessar esta página.',
                         });
                         return;
                     }
@@ -85,7 +95,10 @@ createInertiaApp({
             import.meta.glob('./pages/**/*.tsx'),
         ),
     setup({ el, App, props }) {
-        console.log('[DEBUG] app.tsx setup: Iniciando renderização', App?.name || 'Unknown');
+        console.log(
+            '[DEBUG] app.tsx setup: Iniciando renderização',
+            App?.name || 'Unknown',
+        );
         const root = createRoot(el);
 
         console.log('[DEBUG] app.tsx setup: createRoot executado');
@@ -122,7 +135,9 @@ createInertiaApp({
             setPermissionErrorGlobal({
                 open: true,
                 permission,
-                message: message || 'Você não tem permissão para acessar esta página.',
+                message:
+                    message ||
+                    'Você não tem permissão para acessar esta página.',
             });
         }
     },

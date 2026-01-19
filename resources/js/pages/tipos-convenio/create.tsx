@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -13,6 +7,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,8 +59,9 @@ export default function TiposConvenioCreate() {
                         <h1 className="text-3xl font-bold">
                             Novo Tipo de Convênio
                         </h1>
-                        <p className="text-muted-foreground mt-1">
-                            Preencha os dados para criar um novo tipo de convênio
+                        <p className="mt-1 text-muted-foreground">
+                            Preencha os dados para criar um novo tipo de
+                            convênio
                         </p>
                     </div>
                 </div>
@@ -69,14 +70,16 @@ export default function TiposConvenioCreate() {
                     <CardHeader>
                         <CardTitle>Dados do Tipo de Convênio</CardTitle>
                         <CardDescription>
-                            Informe os dados necessários para criar o tipo de convênio
+                            Informe os dados necessários para criar o tipo de
+                            convênio
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="tipo_descricao">
-                                    Descrição <span className="text-red-500">*</span>
+                                    Descrição{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="tipo_descricao"
@@ -85,7 +88,10 @@ export default function TiposConvenioCreate() {
                                     required
                                     value={data.tipo_descricao}
                                     onChange={(e) =>
-                                        setData('tipo_descricao', e.target.value)
+                                        setData(
+                                            'tipo_descricao',
+                                            e.target.value,
+                                        )
                                     }
                                     placeholder="Ex: Convênio Particular"
                                 />
@@ -111,4 +117,3 @@ export default function TiposConvenioCreate() {
         </AppLayout>
     );
 }
-

@@ -1,8 +1,8 @@
-import { dashboard, login, home } from '@/routes';
+import { useAppearance } from '@/hooks/use-appearance';
+import { dashboard, home, login } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useAppearance } from '@/hooks/use-appearance';
-import { Moon, Sun, ClipboardList, BarChart3, Shield, Zap } from 'lucide-react';
+import { BarChart3, ClipboardList, Moon, Shield, Sun, Zap } from 'lucide-react';
 
 export default function Welcome() {
     console.log('[DEBUG] Welcome: Componente iniciado');
@@ -29,22 +29,26 @@ export default function Welcome() {
         {
             icon: ClipboardList,
             title: 'Questionários Inteligentes',
-            description: 'Crie e gerencie pesquisas de satisfação de forma intuitiva e eficiente',
+            description:
+                'Crie e gerencie pesquisas de satisfação de forma intuitiva e eficiente',
         },
         {
             icon: BarChart3,
             title: 'Análise em Tempo Real',
-            description: 'Visualize métricas e insights instantâneos sobre a satisfação dos pacientes',
+            description:
+                'Visualize métricas e insights instantâneos sobre a satisfação dos pacientes',
         },
         {
             icon: Shield,
             title: 'Segurança Total',
-            description: 'Seus dados protegidos com criptografia de ponta e conformidade LGPD',
+            description:
+                'Seus dados protegidos com criptografia de ponta e conformidade LGPD',
         },
         {
             icon: Zap,
             title: 'Respostas Rápidas',
-            description: 'Interface otimizada para coleta rápida e precisa de feedback',
+            description:
+                'Interface otimizada para coleta rápida e precisa de feedback',
         },
     ];
 
@@ -60,9 +64,9 @@ export default function Welcome() {
             <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-teal-950">
                 {/* Background Effects */}
                 <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-br from-teal-400/20 to-cyan-600/20 blur-3xl dark:from-teal-500/10 dark:to-cyan-500/10 animate-pulse" />
-                    <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-600/20 blur-3xl dark:from-emerald-500/10 dark:to-teal-500/10 animate-pulse delay-1000" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-gradient-to-br from-teal-400/10 to-cyan-600/10 blur-3xl dark:from-teal-500/5 dark:to-cyan-500/5" />
+                    <div className="absolute -top-40 -right-40 h-80 w-80 animate-pulse rounded-full bg-gradient-to-br from-teal-400/20 to-cyan-600/20 blur-3xl dark:from-teal-500/10 dark:to-cyan-500/10" />
+                    <div className="absolute -bottom-40 -left-40 h-80 w-80 animate-pulse rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-600/20 blur-3xl delay-1000 dark:from-emerald-500/10 dark:to-teal-500/10" />
+                    <div className="absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-teal-400/10 to-cyan-600/10 blur-3xl dark:from-teal-500/5 dark:to-cyan-500/5" />
                 </div>
 
                 {/* Grid Pattern */}
@@ -82,11 +86,12 @@ export default function Welcome() {
                                     className="h-16 w-auto max-w-[600px] object-contain sm:h-35 lg:h-24"
                                     loading="eager"
                                     onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
+                                        const target =
+                                            e.target as HTMLImageElement;
                                         target.style.display = 'none';
                                     }}
                                 />
-                                <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent dark:from-teal-400 dark:to-cyan-400">
+                                <span className="bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-xl font-bold text-transparent dark:from-teal-400 dark:to-cyan-400">
                                     Pesquisa de Satisfação
                                 </span>
                             </Link>
@@ -94,39 +99,41 @@ export default function Welcome() {
                                 {/* Theme Toggle */}
                                 <button
                                     onClick={toggleTheme}
-                                        className="group relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-sm transition-all hover:bg-white hover:shadow-md dark:bg-slate-800/80 dark:border-slate-700/50 dark:hover:bg-slate-800"
-                                        aria-label="Alternar tema"
-                                    >
-                                        <Sun className="h-5 w-5 text-amber-500 transition-all group-hover:rotate-90 dark:hidden" />
-                                        <Moon className="hidden h-5 w-5 text-teal-400 transition-all group-hover:-rotate-12 dark:block" />
+                                    className="group relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/50 bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/80 dark:hover:bg-slate-800"
+                                    aria-label="Alternar tema"
+                                >
+                                    <Sun className="h-5 w-5 text-amber-500 transition-all group-hover:rotate-90 dark:hidden" />
+                                    <Moon className="hidden h-5 w-5 text-teal-400 transition-all group-hover:-rotate-12 dark:block" />
                                 </button>
-                        {auth.user ? (
-                            <Link
-                                href={dashboard()}
-                                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 dark:shadow-teal-500/10"
-                            >
-                                Dashboard
-                            </Link>
-                        ) : (
-                            <Link
-                                href={login()}
-                                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 dark:shadow-teal-500/10"
-                            >
+                                {auth.user ? (
+                                    <Link
+                                        href={dashboard()}
+                                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/30 dark:shadow-teal-500/10"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={login()}
+                                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/30 dark:shadow-teal-500/10"
+                                    >
                                         Entrar
-                            </Link>
-                        )}
+                                    </Link>
+                                )}
                             </div>
-                    </nav>
-                </header>
+                        </nav>
+                    </header>
 
                     {/* Main Content */}
                     <main className="container mx-auto flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
                         <div className="w-full max-w-6xl">
                             {/* Hero Section */}
-                            <div className="text-center mb-16">
+                            <div className="mb-16 text-center">
                                 <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-teal-500/10 px-4 py-1.5 text-sm font-medium text-teal-600 dark:bg-teal-500/20 dark:text-teal-400">
                                     <Zap className="h-4 w-4" />
-                                    <span>Sistema de Pesquisa de Satisfação</span>
+                                    <span>
+                                        Sistema de Pesquisa de Satisfação
+                                    </span>
                                 </div>
                                 <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
                                     <span className="bg-gradient-to-r from-slate-900 via-teal-800 to-cyan-800 bg-clip-text text-transparent dark:from-slate-100 dark:via-teal-200 dark:to-cyan-200">
@@ -137,16 +144,19 @@ export default function Welcome() {
                                         em Melhorias Reais
                                     </span>
                                 </h1>
-                                <p className="mx-auto mb-8 max-w-2xl text-lg text-slate-600 dark:text-slate-300 sm:text-xl">
-                                    Colete, analise e aja sobre o feedback dos pacientes com nossa plataforma
-                                    inteligente de pesquisa de satisfação hospitalar.
+                                <p className="mx-auto mb-8 max-w-2xl text-lg text-slate-600 sm:text-xl dark:text-slate-300">
+                                    Colete, analise e aja sobre o feedback dos
+                                    pacientes com nossa plataforma inteligente
+                                    de pesquisa de satisfação hospitalar.
                                 </p>
                                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                                     <Link
                                         href={auth.user ? dashboard() : login()}
-                                        className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 dark:shadow-teal-500/10"
+                                        className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-teal-500/30 dark:shadow-teal-500/10"
                                     >
-                                        <span className="relative z-10">Começar Agora</span>
+                                        <span className="relative z-10">
+                                            Começar Agora
+                                        </span>
                                         <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-emerald-600 opacity-0 transition-opacity group-hover:opacity-100" />
                                     </Link>
                                 </div>
@@ -159,7 +169,7 @@ export default function Welcome() {
                                     return (
                                         <div
                                             key={index}
-                                            className="group relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/50 p-6 shadow-sm transition-all hover:bg-white/80 hover:shadow-lg hover:scale-105 dark:bg-slate-800/60 dark:border-slate-700/50 dark:hover:bg-slate-800/80"
+                                            className="group relative overflow-hidden rounded-2xl border border-slate-200/50 bg-white/60 p-6 shadow-sm backdrop-blur-sm transition-all hover:scale-105 hover:bg-white/80 hover:shadow-lg dark:border-slate-700/50 dark:bg-slate-800/60 dark:hover:bg-slate-800/80"
                                         >
                                             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-indigo-500/0 to-purple-500/0 transition-all group-hover:from-blue-500/5 group-hover:via-indigo-500/5 group-hover:to-purple-500/5" />
                                             <div className="relative z-10">
@@ -179,7 +189,7 @@ export default function Welcome() {
                             </div>
 
                             {/* Stats Section */}
-                            <div className="mt-16 rounded-2xl bg-gradient-to-br from-teal-600/10 via-cyan-600/10 to-emerald-600/10 backdrop-blur-sm border border-teal-200/20 p-8 dark:from-teal-500/10 dark:via-cyan-500/10 dark:to-emerald-500/10 dark:border-teal-500/20">
+                            <div className="mt-16 rounded-2xl border border-teal-200/20 bg-gradient-to-br from-teal-600/10 via-cyan-600/10 to-emerald-600/10 p-8 backdrop-blur-sm dark:border-teal-500/20 dark:from-teal-500/10 dark:via-cyan-500/10 dark:to-emerald-500/10">
                                 <div className="grid gap-8 sm:grid-cols-3">
                                     <div className="text-center">
                                         <div className="mb-2 text-4xl font-bold text-teal-600 dark:text-teal-400">
@@ -206,14 +216,23 @@ export default function Welcome() {
                                         </div>
                                     </div>
                                 </div>
-                        </div>
+                            </div>
                         </div>
                     </main>
 
                     {/* Footer */}
                     <footer className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
                         <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-                            <p><a href="https://www.linkedin.com/in/pedrohrsdev/" target="_blank" rel="noopener noreferrer">© {new Date().getFullYear()} Pedro H. R. S. Todos os direitos reservados.</a></p>
+                            <p>
+                                <a
+                                    href="https://www.linkedin.com/in/pedrohrsdev/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    © {new Date().getFullYear()} Pedro H. R. S.
+                                    Todos os direitos reservados.
+                                </a>
+                            </p>
                         </div>
                     </footer>
                 </div>

@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -22,8 +16,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import { useState, useEffect, useMemo } from 'react';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -101,7 +101,9 @@ export default function QuestionariosCreate({
     setoresPesquisa,
 }: QuestionariosCreateProps) {
     const [respostas, setRespostas] = useState<Record<number, number>>({});
-    const [respostasTexto, setRespostasTexto] = useState<Record<number, string>>({});
+    const [respostasTexto, setRespostasTexto] = useState<
+        Record<number, string>
+    >({});
     const [showModal, setShowModal] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
 
@@ -120,7 +122,11 @@ export default function QuestionariosCreate({
         // Dados do questionário
         data_isretroativa: false,
         data_retroativa: '',
-        respostas: [] as Array<{ cod_pergunta: number; resposta: number | null; resposta_texto: string | null }>,
+        respostas: [] as Array<{
+            cod_pergunta: number;
+            resposta: number | null;
+            resposta_texto: string | null;
+        }>,
     });
 
     // Filtrar leitos por setor selecionado
@@ -128,7 +134,9 @@ export default function QuestionariosCreate({
         if (!data.cod_setor) {
             return [];
         }
-        return leitos.filter((leito) => leito.cod_setor === Number(data.cod_setor));
+        return leitos.filter(
+            (leito) => leito.cod_setor === Number(data.cod_setor),
+        );
     }, [data.cod_setor, leitos]);
 
     // O setor de pesquisa será vinculado automaticamente no backend baseado no cadastro de cada pergunta
@@ -138,7 +146,10 @@ export default function QuestionariosCreate({
         setData('telefone', maskedValue);
     };
 
-    const handleRespostaChange = (perguntaCod: number, satisfacaoCod: number) => {
+    const handleRespostaChange = (
+        perguntaCod: number,
+        satisfacaoCod: number,
+    ) => {
         setRespostas((prev) => ({
             ...prev,
             [perguntaCod]: satisfacaoCod,
@@ -168,7 +179,11 @@ export default function QuestionariosCreate({
         e.preventDefault();
 
         // Preparar array de respostas incluindo texto livre
-        const respostasArray: Array<{ cod_pergunta: number; resposta: number | null; resposta_texto: string | null }> = [];
+        const respostasArray: Array<{
+            cod_pergunta: number;
+            resposta: number | null;
+            resposta_texto: string | null;
+        }> = [];
 
         // Adicionar respostas de opções (tipos 1, 2, 3)
         Object.entries(respostas).forEach(([perguntaCod, satisfacaoCod]) => {
@@ -199,22 +214,25 @@ export default function QuestionariosCreate({
         const perguntasObrigatoriasNaoRespondidas: string[] = [];
 
         perguntas.forEach((pergunta) => {
-            const isObrigatoria = pergunta.obrigatoria === true || pergunta.obrigatoria === 1;
+            const isObrigatoria =
+                pergunta.obrigatoria === true || pergunta.obrigatoria === 1;
 
             if (isObrigatoria) {
                 const temResposta = respostasArray.some(
-                    (resposta) => resposta.cod_pergunta === pergunta.cod
+                    (resposta) => resposta.cod_pergunta === pergunta.cod,
                 );
 
                 if (!temResposta) {
-                    perguntasObrigatoriasNaoRespondidas.push(pergunta.descricao);
+                    perguntasObrigatoriasNaoRespondidas.push(
+                        pergunta.descricao,
+                    );
                 }
             }
         });
 
         if (perguntasObrigatoriasNaoRespondidas.length > 0) {
             setModalMessage(
-                `Por favor, responda as seguintes perguntas obrigatórias:\n\n${perguntasObrigatoriasNaoRespondidas.map((p, i) => `${i + 1}. ${p}`).join('\n')}`
+                `Por favor, responda as seguintes perguntas obrigatórias:\n\n${perguntasObrigatoriasNaoRespondidas.map((p, i) => `${i + 1}. ${p}`).join('\n')}`,
             );
             setShowModal(true);
             return;
@@ -234,7 +252,9 @@ export default function QuestionariosCreate({
             cod_setor: Number(data.cod_setor),
             leito: data.leito ? Number(data.leito) : null,
             renda: data.renda || null,
-            tp_cod_convenio: data.tp_cod_convenio ? Number(data.tp_cod_convenio) : null,
+            tp_cod_convenio: data.tp_cod_convenio
+                ? Number(data.tp_cod_convenio)
+                : null,
             data_isretroativa: data.data_isretroativa || false,
             data_retroativa: data.data_retroativa || null,
             respostas: respostasArray,
@@ -247,7 +267,10 @@ export default function QuestionariosCreate({
             preserveScroll: true,
             onError: (errors) => {
                 console.error('Erros de validação:', errors);
-                console.error('Detalhes dos erros:', JSON.stringify(errors, null, 2));
+                console.error(
+                    'Detalhes dos erros:',
+                    JSON.stringify(errors, null, 2),
+                );
             },
             onSuccess: (page) => {
                 console.log('Questionário salvo com sucesso!', page);
@@ -279,9 +302,12 @@ export default function QuestionariosCreate({
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-3xl font-bold">Novo Questionário</h1>
-                        <p className="text-muted-foreground mt-1">
-                            Preencha os dados do paciente e responda as perguntas
+                        <h1 className="text-3xl font-bold">
+                            Novo Questionário
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
+                            Preencha os dados do paciente e responda as
+                            perguntas
                         </p>
                     </div>
                 </div>
@@ -303,10 +329,11 @@ export default function QuestionariosCreate({
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="nome">
-                                        Nome <span className="text-red-500">*</span>
+                                        Nome{' '}
+                                        <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="nome"
@@ -314,14 +341,17 @@ export default function QuestionariosCreate({
                                         type="text"
                                         required
                                         value={data.nome}
-                                        onChange={(e) => setData('nome', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('nome', e.target.value)
+                                        }
                                     />
                                     <InputError message={errors.nome} />
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="email">
-                                        Email <span className="text-red-500">*</span>
+                                        Email{' '}
+                                        <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="email"
@@ -329,18 +359,19 @@ export default function QuestionariosCreate({
                                         type="email"
                                         required
                                         value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('email', e.target.value)
+                                        }
                                     />
                                     <InputError message={errors.email} />
                                 </div>
                             </div>
 
-
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="telefone">
-                                        Telefone <span className="text-red-500">*</span>
+                                        Telefone{' '}
+                                        <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="telefone"
@@ -357,7 +388,8 @@ export default function QuestionariosCreate({
 
                                 <div className="space-y-2">
                                     <Label htmlFor="idade">
-                                        Idade <span className="text-red-500">*</span>
+                                        Idade{' '}
+                                        <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="idade"
@@ -366,22 +398,27 @@ export default function QuestionariosCreate({
                                         required
                                         min="0"
                                         value={data.idade}
-                                        onChange={(e) => setData('idade', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('idade', e.target.value)
+                                        }
                                     />
                                     <InputError message={errors.idade} />
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="sexo">
-                                        Sexo <span className="text-red-500">*</span>
+                                        Sexo{' '}
+                                        <span className="text-red-500">*</span>
                                     </Label>
                                     <select
                                         id="sexo"
                                         name="sexo"
                                         required
                                         value={data.sexo}
-                                        onChange={(e) => setData('sexo', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        onChange={(e) =>
+                                            setData('sexo', e.target.value)
+                                        }
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
                                         <option value="M">Masculino</option>
@@ -391,45 +428,71 @@ export default function QuestionariosCreate({
                                     <InputError message={errors.sexo} />
                                 </div>
 
-
                                 <div className="space-y-2">
-                                    <Label htmlFor="tipo_paciente">Tipo de Paciente</Label>
+                                    <Label htmlFor="tipo_paciente">
+                                        Tipo de Paciente
+                                    </Label>
                                     <select
                                         id="tipo_paciente"
                                         name="tipo_paciente"
                                         value={data.tipo_paciente}
-                                        onChange={(e) => setData('tipo_paciente', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        onChange={(e) =>
+                                            setData(
+                                                'tipo_paciente',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
-                                        <option value="Paciente">Paciente</option>
-                                        <option value="Acompanhante">Acompanhante</option>
+                                        <option value="Paciente">
+                                            Paciente
+                                        </option>
+                                        <option value="Acompanhante">
+                                            Acompanhante
+                                        </option>
                                     </select>
-                                    <InputError message={errors.tipo_paciente} />
+                                    <InputError
+                                        message={errors.tipo_paciente}
+                                    />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="tp_cod_convenio">Tipo de Convênio</Label>
+                                    <Label htmlFor="tp_cod_convenio">
+                                        Tipo de Convênio
+                                    </Label>
                                     <select
                                         id="tp_cod_convenio"
                                         name="tp_cod_convenio"
                                         value={data.tp_cod_convenio}
-                                        onChange={(e) => setData('tp_cod_convenio', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        onChange={(e) =>
+                                            setData(
+                                                'tp_cod_convenio',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
                                         {tiposConvenio.map((tipo) => (
-                                            <option key={tipo.cod} value={tipo.cod}>
-                                                {tipo.tipo_descricao || `Convênio ${tipo.cod}`}
+                                            <option
+                                                key={tipo.cod}
+                                                value={tipo.cod}
+                                            >
+                                                {tipo.tipo_descricao ||
+                                                    `Convênio ${tipo.cod}`}
                                             </option>
                                         ))}
                                     </select>
-                                    <InputError message={errors.tp_cod_convenio} />
+                                    <InputError
+                                        message={errors.tp_cod_convenio}
+                                    />
                                 </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="cod_setor">
-                                        Setor <span className="text-red-500">*</span>
+                                        Setor{' '}
+                                        <span className="text-red-500">*</span>
                                     </Label>
                                     <select
                                         id="cod_setor"
@@ -437,15 +500,23 @@ export default function QuestionariosCreate({
                                         required
                                         value={data.cod_setor}
                                         onChange={(e) => {
-                                            setData('cod_setor', e.target.value);
+                                            setData(
+                                                'cod_setor',
+                                                e.target.value,
+                                            );
                                             // Limpar leito quando trocar setor
                                             setData('leito', '');
                                         }}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     >
-                                        <option value="">Selecione um setor</option>
+                                        <option value="">
+                                            Selecione um setor
+                                        </option>
                                         {setores.map((setor) => (
-                                            <option key={setor.cod} value={setor.cod}>
+                                            <option
+                                                key={setor.cod}
+                                                value={setor.cod}
+                                            >
                                                 {setor.descricao}
                                             </option>
                                         ))}
@@ -459,19 +530,27 @@ export default function QuestionariosCreate({
                                         id="leito"
                                         name="leito"
                                         value={data.leito}
-                                        onChange={(e) => setData('leito', e.target.value)}
-                                        disabled={!data.cod_setor || leitosFiltrados.length === 0}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        onChange={(e) =>
+                                            setData('leito', e.target.value)
+                                        }
+                                        disabled={
+                                            !data.cod_setor ||
+                                            leitosFiltrados.length === 0
+                                        }
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">
                                             {!data.cod_setor
                                                 ? 'Selecione um setor primeiro'
                                                 : leitosFiltrados.length === 0
-                                                ? 'Nenhum leito disponível'
-                                                : 'Selecione um leito'}
+                                                  ? 'Nenhum leito disponível'
+                                                  : 'Selecione um leito'}
                                         </option>
                                         {leitosFiltrados.map((leito) => (
-                                            <option key={leito.cod} value={leito.cod}>
+                                            <option
+                                                key={leito.cod}
+                                                value={leito.cod}
+                                            >
                                                 {leito.descricao}
                                             </option>
                                         ))}
@@ -485,12 +564,17 @@ export default function QuestionariosCreate({
                                         id="renda"
                                         name="renda"
                                         value={data.renda}
-                                        onChange={(e) => setData('renda', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        onChange={(e) =>
+                                            setData('renda', e.target.value)
+                                        }
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="">Selecione</option>
                                         {opcoesRenda.map((opcao) => (
-                                            <option key={opcao.value} value={opcao.value}>
+                                            <option
+                                                key={opcao.value}
+                                                value={opcao.value}
+                                            >
                                                 {opcao.label}
                                             </option>
                                         ))}
@@ -504,157 +588,245 @@ export default function QuestionariosCreate({
                     {/* Perguntas e Respostas */}
                     <Card>
                         <CardHeader className="px-4 sm:px-6">
-                            <CardTitle className="text-lg sm:text-xl">Perguntas</CardTitle>
+                            <CardTitle className="text-lg sm:text-xl">
+                                Perguntas
+                            </CardTitle>
                             <CardDescription className="text-sm sm:text-base">
                                 Responda as perguntas de pesquisa de satisfação
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-2 sm:space-y-2 px-2 sm:px-4">
+                        <CardContent className="space-y-2 px-2 sm:space-y-2 sm:px-4">
                             {perguntas.length === 0 ? (
-                                <p className="text-muted-foreground text-center py-4 text-sm sm:text-base">
-                                    Nenhuma pergunta cadastrada. Cadastre perguntas primeiro.
+                                <p className="py-4 text-center text-sm text-muted-foreground sm:text-base">
+                                    Nenhuma pergunta cadastrada. Cadastre
+                                    perguntas primeiro.
                                 </p>
                             ) : (
-                                [...perguntas].sort((a, b) => a.cod - b.cod).map((pergunta) => {
-                                    // Tipo 4 = texto livre
-                                    const isTipoLivre = pergunta.cod_tipo_pergunta === 4;
+                                [...perguntas]
+                                    .sort((a, b) => a.cod - b.cod)
+                                    .map((pergunta) => {
+                                        // Tipo 4 = texto livre
+                                        const isTipoLivre =
+                                            pergunta.cod_tipo_pergunta === 4;
 
-                                    if (isTipoLivre) {
-                                        // Renderizar textarea para perguntas tipo 4
-                                        return (
-                                            <div key={pergunta.cod} className="space-y-2">
-                                                <Label
-                                                    htmlFor={`pergunta-texto-${pergunta.cod}`}
-                                                    className="text-sm sm:text-base"
+                                        if (isTipoLivre) {
+                                            // Renderizar textarea para perguntas tipo 4
+                                            return (
+                                                <div
+                                                    key={pergunta.cod}
+                                                    className="space-y-2"
                                                 >
-                                                    {pergunta.descricao} {pergunta.obrigatoria === true || pergunta.obrigatoria === 1 ? <span className="text-red-500">*</span> : null}
-                                                </Label>
-                                                <textarea
-                                                    id={`pergunta-texto-${pergunta.cod}`}
-                                                    name={`pergunta-texto-${pergunta.cod}`}
-                                                    rows={4}
-                                                    value={respostasTexto[pergunta.cod] || ''}
-                                                    onChange={(e) =>
-                                                        setRespostasTexto((prev) => ({
-                                                            ...prev,
-                                                            [pergunta.cod]: e.target.value,
-                                                        }))
+                                                    <Label
+                                                        htmlFor={`pergunta-texto-${pergunta.cod}`}
+                                                        className="text-sm sm:text-base"
+                                                    >
+                                                        {pergunta.descricao}{' '}
+                                                        {pergunta.obrigatoria ===
+                                                            true ||
+                                                        pergunta.obrigatoria ===
+                                                            1 ? (
+                                                            <span className="text-red-500">
+                                                                *
+                                                            </span>
+                                                        ) : null}
+                                                    </Label>
+                                                    <textarea
+                                                        id={`pergunta-texto-${pergunta.cod}`}
+                                                        name={`pergunta-texto-${pergunta.cod}`}
+                                                        rows={4}
+                                                        value={
+                                                            respostasTexto[
+                                                                pergunta.cod
+                                                            ] || ''
+                                                        }
+                                                        onChange={(e) =>
+                                                            setRespostasTexto(
+                                                                (prev) => ({
+                                                                    ...prev,
+                                                                    [pergunta.cod]:
+                                                                        e.target
+                                                                            .value,
+                                                                }),
+                                                            )
+                                                        }
+                                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-base"
+                                                        maxLength={1000}
+                                                        required={
+                                                            pergunta.obrigatoria ===
+                                                                true ||
+                                                            pergunta.obrigatoria ===
+                                                                1
+                                                        }
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        // Filtrar satisfações baseado no cod_tipo_pergunta da pergunta
+                                        const satisfacoesFiltradas = satisfacoes
+                                            .filter((satisfacao) => {
+                                                // Se a pergunta não tem tipo, mostrar todas as satisfações sem tipo
+                                                if (
+                                                    !pergunta.cod_tipo_pergunta
+                                                ) {
+                                                    return !satisfacao.cod_tipo_pergunta;
+                                                }
+                                                // Se a pergunta tem tipo, mostrar apenas satisfações com o mesmo tipo
+                                                return (
+                                                    satisfacao.cod_tipo_pergunta ===
+                                                    pergunta.cod_tipo_pergunta
+                                                );
+                                            })
+                                            .sort((a, b) => {
+                                                // Para perguntas tipo 3 (escala 0-10), ordenar numericamente
+                                                if (
+                                                    pergunta.cod_tipo_pergunta ===
+                                                    3
+                                                ) {
+                                                    // Tentar converter descrição para número
+                                                    const numA = parseInt(
+                                                        a.descricao,
+                                                        10,
+                                                    );
+                                                    const numB = parseInt(
+                                                        b.descricao,
+                                                        10,
+                                                    );
+
+                                                    // Se ambas são números, ordenar numericamente
+                                                    if (
+                                                        !isNaN(numA) &&
+                                                        !isNaN(numB)
+                                                    ) {
+                                                        return numA - numB;
                                                     }
-                                                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm sm:text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                                                    maxLength={1000}
-                                                    required={pergunta.obrigatoria === true || pergunta.obrigatoria === 1}
-                                                />
-                                            </div>
-                                        );
-                                    }
 
-                                    // Filtrar satisfações baseado no cod_tipo_pergunta da pergunta
-                                    const satisfacoesFiltradas = satisfacoes
-                                        .filter((satisfacao) => {
-                                            // Se a pergunta não tem tipo, mostrar todas as satisfações sem tipo
-                                            if (!pergunta.cod_tipo_pergunta) {
-                                                return !satisfacao.cod_tipo_pergunta;
-                                            }
-                                            // Se a pergunta tem tipo, mostrar apenas satisfações com o mesmo tipo
-                                            return satisfacao.cod_tipo_pergunta === pergunta.cod_tipo_pergunta;
-                                        })
-                                        .sort((a, b) => {
-                                            // Para perguntas tipo 3 (escala 0-10), ordenar numericamente
-                                            if (pergunta.cod_tipo_pergunta === 3) {
-                                                // Tentar converter descrição para número
-                                                const numA = parseInt(a.descricao, 10);
-                                                const numB = parseInt(b.descricao, 10);
+                                                    // Se A é número e B não é (NA), A vem primeiro
+                                                    if (
+                                                        !isNaN(numA) &&
+                                                        isNaN(numB)
+                                                    ) {
+                                                        return -1;
+                                                    }
 
-                                                // Se ambas são números, ordenar numericamente
-                                                if (!isNaN(numA) && !isNaN(numB)) {
-                                                    return numA - numB;
+                                                    // Se B é número e A não é (NA), B vem primeiro
+                                                    if (
+                                                        isNaN(numA) &&
+                                                        !isNaN(numB)
+                                                    ) {
+                                                        return 1;
+                                                    }
+
+                                                    // Se nenhuma é número, manter ordem original
+                                                    return 0;
                                                 }
 
-                                                // Se A é número e B não é (NA), A vem primeiro
-                                                if (!isNaN(numA) && isNaN(numB)) {
-                                                    return -1;
-                                                }
+                                                // Para outros tipos, ordenar por código
+                                                return a.cod - b.cod;
+                                            });
 
-                                                // Se B é número e A não é (NA), B vem primeiro
-                                                if (isNaN(numA) && !isNaN(numB)) {
-                                                    return 1;
-                                                }
+                                        // Determinar se é escala 0-10 (tipo 3) para usar layout diferente em mobile
+                                        const isEscalaNumerica =
+                                            pergunta.cod_tipo_pergunta === 3;
 
-                                                // Se nenhuma é número, manter ordem original
-                                                return 0;
-                                            }
-
-                                            // Para outros tipos, ordenar por código
-                                            return a.cod - b.cod;
-                                        });
-
-                                    // Determinar se é escala 0-10 (tipo 3) para usar layout diferente em mobile
-                                    const isEscalaNumerica = pergunta.cod_tipo_pergunta === 3;
-
-                                    return (
-                                        <div key={pergunta.cod} className="space-y-2">
-                                            <Label
-                                                htmlFor={`pergunta-${pergunta.cod}`}
-                                                className="text-sm sm:text-base break-words"
+                                        return (
+                                            <div
+                                                key={pergunta.cod}
+                                                className="space-y-2"
                                             >
-                                                {pergunta.descricao} {pergunta.obrigatoria === true || pergunta.obrigatoria === 1 ? <span className="text-red-500">*</span> : null}
-                                            </Label>
-                                                {satisfacoesFiltradas.length === 0 ? (
+                                                <Label
+                                                    htmlFor={`pergunta-${pergunta.cod}`}
+                                                    className="text-sm break-words sm:text-base"
+                                                >
+                                                    {pergunta.descricao}{' '}
+                                                    {pergunta.obrigatoria ===
+                                                        true ||
+                                                    pergunta.obrigatoria ===
+                                                        1 ? (
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    ) : null}
+                                                </Label>
+                                                {satisfacoesFiltradas.length ===
+                                                0 ? (
                                                     <p className="text-sm text-muted-foreground">
                                                         Nenhuma opção disponível
                                                     </p>
                                                 ) : (
                                                     <div
-                                                    className={cn(
-                                                        // Layout horizontal com wrap para que todos fiquem na mesma linha
-                                                        'flex flex-wrap items-center gap-2'
-                                                    )}
+                                                        className={cn(
+                                                            // Layout horizontal com wrap para que todos fiquem na mesma linha
+                                                            'flex flex-wrap items-center gap-2',
+                                                        )}
                                                         role="group"
                                                         aria-label={`Opções de resposta para a pergunta ${pergunta.descricao}`}
                                                     >
-                                                        {satisfacoesFiltradas.map((satisfacao) => {
-                                                            const checked =
-                                                                respostas[pergunta.cod] === satisfacao.cod;
-                                                            const checkboxId = `pergunta-${pergunta.cod}-satisf-${satisfacao.cod}`;
-                                                            return (
-                                                                <label
-                                                                    key={satisfacao.cod}
-                                                                    htmlFor={checkboxId}
-                                                                    className={cn(
-                                                                    'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm hover:bg-muted/50 transition-colors cursor-pointer',
-                                                                    checked && 'bg-primary/10'
-                                                                    )}
-                                                                >
-                                                                    <Checkbox
-                                                                        id={checkboxId}
-                                                                        checked={checked}
-                                                                        onCheckedChange={(c) =>
-                                                                            handleRespostaCheckbox(
-                                                                                pergunta.cod,
-                                                                                satisfacao.cod,
-                                                                                c,
-                                                                            )
+                                                        {satisfacoesFiltradas.map(
+                                                            (satisfacao) => {
+                                                                const checked =
+                                                                    respostas[
+                                                                        pergunta
+                                                                            .cod
+                                                                    ] ===
+                                                                    satisfacao.cod;
+                                                                const checkboxId = `pergunta-${pergunta.cod}-satisf-${satisfacao.cod}`;
+                                                                return (
+                                                                    <label
+                                                                        key={
+                                                                            satisfacao.cod
                                                                         }
-                                                                        aria-label={`Selecionar resposta ${satisfacao.descricao}`}
-                                                                    className="h-4 w-4"
-                                                                    />
-                                                                    <span className="text-sm leading-none">
-                                                                        {satisfacao.descricao}
-                                                                    </span>
-                                                                </label>
-                                                            );
-                                                        })}
+                                                                        htmlFor={
+                                                                            checkboxId
+                                                                        }
+                                                                        className={cn(
+                                                                            'inline-flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-muted/50',
+                                                                            checked &&
+                                                                                'bg-primary/10',
+                                                                        )}
+                                                                    >
+                                                                        <Checkbox
+                                                                            id={
+                                                                                checkboxId
+                                                                            }
+                                                                            checked={
+                                                                                checked
+                                                                            }
+                                                                            onCheckedChange={(
+                                                                                c,
+                                                                            ) =>
+                                                                                handleRespostaCheckbox(
+                                                                                    pergunta.cod,
+                                                                                    satisfacao.cod,
+                                                                                    c,
+                                                                                )
+                                                                            }
+                                                                            aria-label={`Selecionar resposta ${satisfacao.descricao}`}
+                                                                            className="h-4 w-4"
+                                                                        />
+                                                                        <span className="text-sm leading-none">
+                                                                            {
+                                                                                satisfacao.descricao
+                                                                            }
+                                                                        </span>
+                                                                    </label>
+                                                                );
+                                                            },
+                                                        )}
                                                     </div>
                                                 )}
-                                        </div>
-                                    );
-                                })
+                                            </div>
+                                        );
+                                    })
                             )}
                         </CardContent>
                     </Card>
 
                     <div className="flex items-center gap-4">
-                        <Button type="submit" disabled={processing || perguntas.length === 0}>
+                        <Button
+                            type="submit"
+                            disabled={processing || perguntas.length === 0}
+                        >
                             {processing ? 'Salvando...' : 'Salvar Questionário'}
                         </Button>
                         <Link href="/questionarios">
@@ -669,7 +841,7 @@ export default function QuestionariosCreate({
                 <Dialog open={showModal} onOpenChange={setShowModal}>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                            <div className="flex items-center justify-center mb-4">
+                            <div className="mb-4 flex items-center justify-center">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
                                     <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
                                 </div>

@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { login, home } from '@/routes';
+import { useAppearance } from '@/hooks/use-appearance';
+import { home, login } from '@/routes';
 import { email } from '@/routes/password';
 import { Form, Head, Link } from '@inertiajs/react';
-import { useAppearance } from '@/hooks/use-appearance';
-import { Moon, Sun, Mail, Lock } from 'lucide-react';
+import { Lock, Mail, Moon, Sun } from 'lucide-react';
 
 interface ForgotPasswordProps {
     status?: string;
@@ -33,8 +33,8 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
             <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-teal-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-teal-950">
                 {/* Background Effects */}
                 <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-br from-teal-400/20 to-cyan-600/20 blur-3xl dark:from-teal-500/10 dark:to-cyan-500/10 animate-pulse" />
-                    <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-600/20 blur-3xl dark:from-emerald-500/10 dark:to-teal-500/10 animate-pulse delay-1000" />
+                    <div className="absolute -top-40 -right-40 h-80 w-80 animate-pulse rounded-full bg-gradient-to-br from-teal-400/20 to-cyan-600/20 blur-3xl dark:from-teal-500/10 dark:to-cyan-500/10" />
+                    <div className="absolute -bottom-40 -left-40 h-80 w-80 animate-pulse rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-600/20 blur-3xl delay-1000 dark:from-emerald-500/10 dark:to-teal-500/10" />
                 </div>
 
                 {/* Grid Pattern */}
@@ -42,7 +42,7 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
 
                 <div className="relative z-10 flex min-h-screen flex-col items-center justify-center p-6 sm:p-8">
                     {/* Header */}
-                    <div className="absolute top-6 left-6 right-6 flex items-center justify-between sm:left-8 sm:right-8">
+                    <div className="absolute top-6 right-6 left-6 flex items-center justify-between sm:right-8 sm:left-8">
                         <Link
                             href={home()}
                             className="transition-transform hover:scale-105"
@@ -60,7 +60,7 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
                         </Link>
                         <button
                             onClick={toggleTheme}
-                            className="group relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-sm transition-all hover:bg-white hover:shadow-md dark:bg-slate-800/80 dark:border-slate-700/50 dark:hover:bg-slate-800"
+                            className="group relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/50 bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/80 dark:hover:bg-slate-800"
                             aria-label="Alternar tema"
                         >
                             <Sun className="h-5 w-5 text-amber-500 transition-all group-hover:rotate-90 dark:hidden" />
@@ -70,7 +70,7 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
 
                     {/* Forgot Password Card */}
                     <div className="w-full max-w-md">
-                        <div className="rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/50 shadow-xl p-8 dark:bg-slate-800/60 dark:border-slate-700/50">
+                        <div className="rounded-2xl border border-slate-200/50 bg-white/60 p-8 shadow-xl backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
                             <div className="mb-8 text-center">
                                 <div className="mb-4 flex justify-center">
                                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 shadow-lg shadow-teal-500/25 dark:shadow-teal-500/10">
@@ -81,12 +81,13 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
                                     Recuperar Senha
                                 </h1>
                                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                                    Informe seu email para receber um link de redefinição de senha
+                                    Informe seu email para receber um link de
+                                    redefinição de senha
                                 </p>
                             </div>
 
                             {status && (
-                                <div className="mb-6 rounded-xl bg-green-50 border border-green-200 p-4 text-center text-sm font-medium text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                                <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-center text-sm font-medium text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
                                     {status}
                                 </div>
                             )}
@@ -106,7 +107,7 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
                                                     Email
                                                 </Label>
                                                 <div className="relative">
-                                                    <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                                                    <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
                                                     <Input
                                                         id="email"
                                                         type="email"
@@ -116,15 +117,17 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
                                                         tabIndex={1}
                                                         autoComplete="email"
                                                         placeholder="seu@email.com"
-                                                        className="pl-10 h-11 bg-white/80 backdrop-blur-sm border-slate-200 dark:bg-slate-900/80 dark:border-slate-700 focus:border-teal-500 focus:ring-teal-500/20 dark:focus:border-teal-400"
+                                                        className="h-11 border-slate-200 bg-white/80 pl-10 backdrop-blur-sm focus:border-teal-500 focus:ring-teal-500/20 dark:border-slate-700 dark:bg-slate-900/80 dark:focus:border-teal-400"
                                                     />
                                                 </div>
-                                                <InputError message={errors.email} />
+                                                <InputError
+                                                    message={errors.email}
+                                                />
                                             </div>
 
                                             <Button
                                                 type="submit"
-                                                className="mt-2 h-11 w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-500/25 transition-all hover:shadow-xl hover:shadow-teal-500/30 hover:scale-[1.02] dark:shadow-teal-500/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                                className="mt-2 h-11 w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-500/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 dark:shadow-teal-500/10"
                                                 tabIndex={2}
                                                 disabled={processing}
                                                 data-test="email-password-reset-link-button"
@@ -132,7 +135,9 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
                                                 {processing ? (
                                                     <Spinner className="mr-2" />
                                                 ) : null}
-                                                {processing ? 'Enviando...' : 'Enviar Link de Recuperação'}
+                                                {processing
+                                                    ? 'Enviando...'
+                                                    : 'Enviar Link de Recuperação'}
                                             </Button>
                                         </div>
 

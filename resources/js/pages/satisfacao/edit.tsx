@@ -1,12 +1,18 @@
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -47,20 +53,27 @@ export default function SatisfacaoEdit({ satisfacao }: SatisfacaoEditProps) {
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-3xl font-bold">Editar Satisfação</h1>
-                        <p className="text-muted-foreground mt-1">Edite os dados da satisfação {satisfacao.descricao}</p>
+                        <h1 className="text-3xl font-bold">
+                            Editar Satisfação
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
+                            Edite os dados da satisfação {satisfacao.descricao}
+                        </p>
                     </div>
                 </div>
                 <Card>
                     <CardHeader>
                         <CardTitle>Dados da Satisfação</CardTitle>
-                        <CardDescription>Atualize as informações da satisfação</CardDescription>
+                        <CardDescription>
+                            Atualize as informações da satisfação
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="descricao">
-                                    Descrição <span className="text-red-500">*</span>
+                                    Descrição{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="descricao"
@@ -68,34 +81,58 @@ export default function SatisfacaoEdit({ satisfacao }: SatisfacaoEditProps) {
                                     type="text"
                                     required
                                     value={data.descricao}
-                                    onChange={(e) => setData('descricao', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('descricao', e.target.value)
+                                    }
                                     placeholder="Ex: Muito Satisfeito"
                                 />
                                 <InputError message={errors.descricao} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="cod_tipo_pergunta">Tipo de Resposta</Label>
+                                <Label htmlFor="cod_tipo_pergunta">
+                                    Tipo de Resposta
+                                </Label>
                                 <select
                                     id="cod_tipo_pergunta"
                                     name="cod_tipo_pergunta"
                                     value={data.cod_tipo_pergunta}
-                                    onChange={(e) => setData('cod_tipo_pergunta', e.target.value)}
-                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    onChange={(e) =>
+                                        setData(
+                                            'cod_tipo_pergunta',
+                                            e.target.value,
+                                        )
+                                    }
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                 >
-                                    <option value="">Selecione o tipo de resposta</option>
-                                    <option value="1">Avaliativa (Ruim, Regular, Bom, Ótimo, Excelente)</option>
-                                    <option value="2">Objetiva (Sim/Não)</option>
-                                    <option value="3">Classificação (0-10)</option>
+                                    <option value="">
+                                        Selecione o tipo de resposta
+                                    </option>
+                                    <option value="1">
+                                        Avaliativa (Ruim, Regular, Bom, Ótimo,
+                                        Excelente)
+                                    </option>
+                                    <option value="2">
+                                        Objetiva (Sim/Não)
+                                    </option>
+                                    <option value="3">
+                                        Classificação (0-10)
+                                    </option>
                                     <option value="4">Livre (texto)</option>
                                 </select>
-                                <InputError message={errors.cod_tipo_pergunta} />
+                                <InputError
+                                    message={errors.cod_tipo_pergunta}
+                                />
                             </div>
                             <div className="flex items-center gap-4">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Salvando...' : 'Atualizar Satisfação'}
+                                    {processing
+                                        ? 'Salvando...'
+                                        : 'Atualizar Satisfação'}
                                 </Button>
                                 <Link href="/satisfacao">
-                                    <Button type="button" variant="outline">Cancelar</Button>
+                                    <Button type="button" variant="outline">
+                                        Cancelar
+                                    </Button>
                                 </Link>
                             </div>
                         </form>
@@ -105,4 +142,3 @@ export default function SatisfacaoEdit({ satisfacao }: SatisfacaoEditProps) {
         </AppLayout>
     );
 }
-

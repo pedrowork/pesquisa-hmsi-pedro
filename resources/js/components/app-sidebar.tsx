@@ -12,27 +12,25 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useHasPermission, useIsAdmin } from '@/hooks/usePermissions';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { useHasPermission, useIsAdmin } from '@/hooks/usePermissions';
 import { Link } from '@inertiajs/react';
 import {
-    BookOpen,
-    Folder,
-    LayoutGrid,
-    Users,
-    Shield,
-    Key,
+    BarChart3,
     BedDouble,
     Building,
-    CreditCard,
     ClipboardList,
-    Heart,
-    BarChart3,
-    HelpCircle,
+    CreditCard,
     FileText,
-    UserCheck,
+    Heart,
+    HelpCircle,
     Instagram,
+    Key,
+    LayoutGrid,
+    Shield,
+    UserCheck,
+    Users,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -59,11 +57,15 @@ export function AppSidebar() {
 
     const hasTiposConvenioView = useHasPermission('tipos-convenio.view');
     const hasTiposConvenioCreate = useHasPermission('tipos-convenio.create');
-    const hasTiposConvenioManage = hasTiposConvenioView || hasTiposConvenioCreate;
+    const hasTiposConvenioManage =
+        hasTiposConvenioView || hasTiposConvenioCreate;
 
     const hasSetoresPesquisaView = useHasPermission('setores-pesquisa.view');
-    const hasSetoresPesquisaCreate = useHasPermission('setores-pesquisa.create');
-    const hasSetoresPesquisaManage = hasSetoresPesquisaView || hasSetoresPesquisaCreate;
+    const hasSetoresPesquisaCreate = useHasPermission(
+        'setores-pesquisa.create',
+    );
+    const hasSetoresPesquisaManage =
+        hasSetoresPesquisaView || hasSetoresPesquisaCreate;
 
     const hasPerguntasView = useHasPermission('perguntas.view');
     const hasPerguntasCreate = useHasPermission('perguntas.create');
@@ -159,7 +161,8 @@ export function AppSidebar() {
     const managementNavItems = allManagementNavItems.filter((item) => {
         if (isAdmin) return true;
         if (item.href === '/users') return hasUsersView;
-        if (item.href === '/admin/users/pending-approval') return hasUsersApprove || hasUsersView; // Quem pode aprovar ou ver usuários
+        if (item.href === '/admin/users/pending-approval')
+            return hasUsersApprove || hasUsersView; // Quem pode aprovar ou ver usuários
         if (item.href === '/roles') return hasRolesView;
         if (item.href === '/permissions') return hasPermissionsView;
         return false;

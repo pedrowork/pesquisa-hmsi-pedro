@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -13,6 +7,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,8 +59,9 @@ export default function SetoresPesquisaCreate() {
                         <h1 className="text-3xl font-bold">
                             Novo Setor de Pesquisa
                         </h1>
-                        <p className="text-muted-foreground mt-1">
-                            Preencha os dados para criar um novo setor de pesquisa
+                        <p className="mt-1 text-muted-foreground">
+                            Preencha os dados para criar um novo setor de
+                            pesquisa
                         </p>
                     </div>
                 </div>
@@ -69,14 +70,16 @@ export default function SetoresPesquisaCreate() {
                     <CardHeader>
                         <CardTitle>Dados do Setor de Pesquisa</CardTitle>
                         <CardDescription>
-                            Informe os dados necessários para criar o setor de pesquisa
+                            Informe os dados necessários para criar o setor de
+                            pesquisa
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="descricao">
-                                    Descrição <span className="text-red-500">*</span>
+                                    Descrição{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="descricao"
@@ -112,4 +115,3 @@ export default function SetoresPesquisaCreate() {
         </AppLayout>
     );
 }
-

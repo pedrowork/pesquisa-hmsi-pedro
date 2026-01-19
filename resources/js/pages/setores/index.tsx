@@ -1,10 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -12,8 +7,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import Can from '@/components/Can';
-import { useState, FormEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -51,18 +51,19 @@ interface SetoresIndexProps {
     };
 }
 
-export default function SetoresIndex({
-    setores,
-    filters,
-}: SetoresIndexProps) {
+export default function SetoresIndex({ setores, filters }: SetoresIndexProps) {
     const [search, setSearch] = useState(filters.search || '');
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/setores', { search }, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            '/setores',
+            { search },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
     const handleDelete = (setorId: number) => {
@@ -79,8 +80,10 @@ export default function SetoresIndex({
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Gerenciamento de Setores</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-3xl font-bold">
+                            Gerenciamento de Setores
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
                             Cadastre e gerencie setores do sistema
                         </p>
                     </div>
@@ -187,7 +190,9 @@ export default function SetoresIndex({
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() =>
-                                                                    handleDelete(setor.cod)
+                                                                    handleDelete(
+                                                                        setor.cod,
+                                                                    )
                                                                 }
                                                                 className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                             >
@@ -228,7 +233,7 @@ export default function SetoresIndex({
                                             <Link
                                                 key={index}
                                                 href={link.url}
-                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                className={`rounded-md px-3 py-1 text-sm ${
                                                     link.active
                                                         ? 'bg-primary text-primary-foreground'
                                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -248,4 +253,3 @@ export default function SetoresIndex({
         </AppLayout>
     );
 }
-

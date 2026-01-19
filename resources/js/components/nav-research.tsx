@@ -21,8 +21,11 @@ export function NavResearch({ items = [] }: { items: NavItem[] }) {
     const currentUrl = page.url;
 
     // Verifica se algum item está ativo para deixar o grupo expandido por padrão
-    const hasActiveItem = items.some((item) =>
-        currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(resolveUrl(item.href)),
+    const hasActiveItem = items.some(
+        (item) =>
+            currentUrl &&
+            typeof currentUrl === 'string' &&
+            currentUrl.startsWith(resolveUrl(item.href)),
     );
 
     // Se houver itens, deixar aberto por padrão
@@ -30,13 +33,10 @@ export function NavResearch({ items = [] }: { items: NavItem[] }) {
     const shouldBeOpen = hasActiveItem || items.length > 0;
 
     return (
-        <Collapsible
-            defaultOpen={shouldBeOpen}
-            className="group/collapsible"
-        >
+        <Collapsible defaultOpen={shouldBeOpen} className="group/collapsible">
             <SidebarGroup>
                 <SidebarGroupLabel asChild>
-                    <CollapsibleTrigger className="flex w-full items-center justify-between cursor-pointer">
+                    <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between">
                         <span>Pesquisa</span>
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                     </CollapsibleTrigger>
@@ -45,9 +45,12 @@ export function NavResearch({ items = [] }: { items: NavItem[] }) {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {
-                                const isActive = currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(
-                                    resolveUrl(item.href),
-                                );
+                                const isActive =
+                                    currentUrl &&
+                                    typeof currentUrl === 'string' &&
+                                    currentUrl.startsWith(
+                                        resolveUrl(item.href),
+                                    );
                                 return (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton
@@ -70,4 +73,3 @@ export function NavResearch({ items = [] }: { items: NavItem[] }) {
         </Collapsible>
     );
 }
-

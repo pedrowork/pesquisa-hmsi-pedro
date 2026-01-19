@@ -1,5 +1,5 @@
-import { usePage } from '@inertiajs/react';
 import type { PermissionName } from '@/types/permissions';
+import { usePage } from '@inertiajs/react';
 
 interface SharedAuthData {
     auth: {
@@ -21,12 +21,13 @@ export const usePermissions = () => {
 
     // VALIDAÇÃO CRÍTICA: Garante que permissions seja sempre array
     let permissions: PermissionName[] = [];
-    
+
     if (auth?.permissions) {
         if (Array.isArray(auth.permissions)) {
             // Garantir que todos os valores sejam strings válidas
-            permissions = auth.permissions.filter((p): p is PermissionName => 
-                typeof p === 'string' && p.length > 0
+            permissions = auth.permissions.filter(
+                (p): p is PermissionName =>
+                    typeof p === 'string' && p.length > 0,
             );
         }
     }
@@ -70,20 +71,24 @@ export const useHasAnyPermission = (permissions: PermissionName[]): boolean => {
         return true;
     }
 
-    return permissions.some((permission) => userPermissions.includes(permission));
+    return permissions.some((permission) =>
+        userPermissions.includes(permission),
+    );
 };
 
 /**
  * Hook para verificar se o usuário tem todas as permissões fornecidas
  */
-export const useHasAllPermissions = (permissions: PermissionName[]): boolean => {
+export const useHasAllPermissions = (
+    permissions: PermissionName[],
+): boolean => {
     const { permissions: userPermissions, isAdmin } = usePermissions();
 
     if (isAdmin) {
         return true;
     }
 
-    return permissions.every((permission) => userPermissions.includes(permission));
+    return permissions.every((permission) =>
+        userPermissions.includes(permission),
+    );
 };
-
-

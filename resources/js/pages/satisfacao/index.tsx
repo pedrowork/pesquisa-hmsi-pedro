@@ -1,10 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -12,8 +7,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import Can from '@/components/Can';
-import { useState, FormEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -48,10 +48,14 @@ export default function SatisfacaoIndex({
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/satisfacao', { search }, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            '/satisfacao',
+            { search },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
     const handleDelete = (satisfacaoId: number) => {
@@ -68,8 +72,10 @@ export default function SatisfacaoIndex({
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Gerenciamento de Satisfação</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-3xl font-bold">
+                            Gerenciamento de Satisfação
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
                             Cadastre e gerencie níveis de satisfação do sistema
                         </p>
                     </div>
@@ -91,7 +97,9 @@ export default function SatisfacaoIndex({
                     <CardContent>
                         <form onSubmit={handleSearch} className="flex gap-4">
                             <div className="flex-1">
-                                <Label htmlFor="search" className="sr-only">Buscar</Label>
+                                <Label htmlFor="search" className="sr-only">
+                                    Buscar
+                                </Label>
                                 <Input
                                     id="search"
                                     type="text"
@@ -111,39 +119,65 @@ export default function SatisfacaoIndex({
                 <Card>
                     <CardHeader>
                         <CardTitle>Lista de Satisfações</CardTitle>
-                        <CardDescription>Total: {satisfacoes.total} satisfação(ões)</CardDescription>
+                        <CardDescription>
+                            Total: {satisfacoes.total} satisfação(ões)
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b">
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Código</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Descrição</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium">Tipo Pergunta</th>
-                                        <th className="px-4 py-3 text-right text-sm font-medium">Ações</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">
+                                            Código
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">
+                                            Descrição
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium">
+                                            Tipo Pergunta
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-sm font-medium">
+                                            Ações
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {satisfacoes.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                                            <td
+                                                colSpan={4}
+                                                className="px-4 py-8 text-center text-muted-foreground"
+                                            >
                                                 Nenhuma satisfação encontrada
                                             </td>
                                         </tr>
                                     ) : (
                                         satisfacoes.data.map((satisfacao) => (
-                                            <tr key={satisfacao.cod} className="border-b hover:bg-muted/50">
-                                                <td className="px-4 py-3 font-medium">#{satisfacao.cod}</td>
-                                                <td className="px-4 py-3">{satisfacao.descricao}</td>
+                                            <tr
+                                                key={satisfacao.cod}
+                                                className="border-b hover:bg-muted/50"
+                                            >
+                                                <td className="px-4 py-3 font-medium">
+                                                    #{satisfacao.cod}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {satisfacao.descricao}
+                                                </td>
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                    {satisfacao.cod_tipo_pergunta || '—'}
+                                                    {satisfacao.cod_tipo_pergunta ||
+                                                        '—'}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-end gap-2">
                                                         <Can permission="satisfacao.edit">
-                                                            <Link href={`/satisfacao/${satisfacao.cod}/edit`}>
-                                                                <Button variant="outline" size="sm">
+                                                            <Link
+                                                                href={`/satisfacao/${satisfacao.cod}/edit`}
+                                                            >
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                >
                                                                     <Edit className="h-4 w-4" />
                                                                 </Button>
                                                             </Link>
@@ -152,7 +186,11 @@ export default function SatisfacaoIndex({
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                onClick={() => handleDelete(satisfacao.cod)}
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        satisfacao.cod,
+                                                                    )
+                                                                }
                                                                 className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
@@ -169,7 +207,8 @@ export default function SatisfacaoIndex({
                         {satisfacoes.last_page > 1 && (
                             <div className="mt-4 flex items-center justify-between">
                                 <div className="text-sm text-muted-foreground">
-                                    Página {satisfacoes.current_page} de {satisfacoes.last_page}
+                                    Página {satisfacoes.current_page} de{' '}
+                                    {satisfacoes.last_page}
                                 </div>
                                 <div className="flex gap-2">
                                     {satisfacoes.links.map((link, index) => {
@@ -178,7 +217,9 @@ export default function SatisfacaoIndex({
                                                 <span
                                                     key={index}
                                                     className="px-3 py-1 text-sm text-muted-foreground"
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: link.label,
+                                                    }}
                                                 />
                                             );
                                         }
@@ -186,12 +227,14 @@ export default function SatisfacaoIndex({
                                             <Link
                                                 key={index}
                                                 href={link.url}
-                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                className={`rounded-md px-3 py-1 text-sm ${
                                                     link.active
                                                         ? 'bg-primary text-primary-foreground'
                                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                                 }`}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                                dangerouslySetInnerHTML={{
+                                                    __html: link.label,
+                                                }}
                                             />
                                         );
                                     })}
@@ -204,4 +247,3 @@ export default function SatisfacaoIndex({
         </AppLayout>
     );
 }
-

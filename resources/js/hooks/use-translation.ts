@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { useMemo } from 'react';
-import ptBR from '../locales/pt-BR.json';
 import en from '../locales/en.json';
+import ptBR from '../locales/pt-BR.json';
 
 type TranslationKey = string;
 type Translations = typeof ptBR;
@@ -23,9 +23,13 @@ export function useTranslation() {
     const locale = (page.props.locale as Locale) || 'pt-BR';
 
     const t = useMemo(() => {
-        const currentTranslations = translations[locale] || translations['pt-BR'];
+        const currentTranslations =
+            translations[locale] || translations['pt-BR'];
 
-        return (key: string, params?: Record<string, string | number>): string => {
+        return (
+            key: string,
+            params?: Record<string, string | number>,
+        ): string => {
             const keys = key.split('.');
             let value: unknown = currentTranslations;
 
@@ -36,8 +40,14 @@ export function useTranslation() {
                     // Fallback para pt-BR se não encontrar
                     let fallbackValue: unknown = translations['pt-BR'];
                     for (const fallbackKey of keys) {
-                        if (typeof fallbackValue === 'object' && fallbackValue !== null && fallbackKey in fallbackValue) {
-                            fallbackValue = (fallbackValue as Record<string, unknown>)[fallbackKey];
+                        if (
+                            typeof fallbackValue === 'object' &&
+                            fallbackValue !== null &&
+                            fallbackKey in fallbackValue
+                        ) {
+                            fallbackValue = (
+                                fallbackValue as Record<string, unknown>
+                            )[fallbackKey];
                         } else {
                             return key; // Retorna a chave se não encontrar tradução
                         }

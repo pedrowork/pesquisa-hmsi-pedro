@@ -1,10 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -12,8 +7,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import Can from '@/components/Can';
-import { useState, FormEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit, Plus, Search, Trash2 } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,10 +59,14 @@ export default function TiposConvenioIndex({
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/tipos-convenio', { search }, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            '/tipos-convenio',
+            { search },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
     const handleDelete = (tipoConvenioId: number) => {
@@ -82,7 +86,7 @@ export default function TiposConvenioIndex({
                         <h1 className="text-3xl font-bold">
                             Gerenciamento de Tipos de Convênio
                         </h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Cadastre e gerencie tipos de convênio do sistema
                         </p>
                     </div>
@@ -100,7 +104,9 @@ export default function TiposConvenioIndex({
                 <Card>
                     <CardHeader>
                         <CardTitle>Filtros</CardTitle>
-                        <CardDescription>Busque tipos de convênio</CardDescription>
+                        <CardDescription>
+                            Busque tipos de convênio
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSearch} className="flex gap-4">
@@ -155,53 +161,57 @@ export default function TiposConvenioIndex({
                                                 colSpan={3}
                                                 className="px-4 py-8 text-center text-muted-foreground"
                                             >
-                                                Nenhum tipo de convênio encontrado
+                                                Nenhum tipo de convênio
+                                                encontrado
                                             </td>
                                         </tr>
                                     ) : (
-                                        tiposConvenio.data.map((tipoConvenio) => (
-                                            <tr
-                                                key={tipoConvenio.cod}
-                                                className="border-b hover:bg-muted/50"
-                                            >
-                                                <td className="px-4 py-3 font-medium">
-                                                    #{tipoConvenio.cod}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {tipoConvenio.tipo_descricao || '—'}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="flex justify-end gap-2">
-                                                        <Can permission="tipos-convenio.edit">
-                                                            <Link
-                                                                href={`/tipos-convenio/${tipoConvenio.cod}/edit`}
-                                                            >
+                                        tiposConvenio.data.map(
+                                            (tipoConvenio) => (
+                                                <tr
+                                                    key={tipoConvenio.cod}
+                                                    className="border-b hover:bg-muted/50"
+                                                >
+                                                    <td className="px-4 py-3 font-medium">
+                                                        #{tipoConvenio.cod}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        {tipoConvenio.tipo_descricao ||
+                                                            '—'}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex justify-end gap-2">
+                                                            <Can permission="tipos-convenio.edit">
+                                                                <Link
+                                                                    href={`/tipos-convenio/${tipoConvenio.cod}/edit`}
+                                                                >
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                    >
+                                                                        <Edit className="h-4 w-4" />
+                                                                    </Button>
+                                                                </Link>
+                                                            </Can>
+                                                            <Can permission="tipos-convenio.delete">
                                                                 <Button
                                                                     variant="outline"
                                                                     size="sm"
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            tipoConvenio.cod,
+                                                                        )
+                                                                    }
+                                                                    className="text-red-600 hover:text-red-700 dark:text-red-400"
                                                                 >
-                                                                    <Edit className="h-4 w-4" />
+                                                                    <Trash2 className="h-4 w-4" />
                                                                 </Button>
-                                                            </Link>
-                                                        </Can>
-                                                        <Can permission="tipos-convenio.delete">
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                    handleDelete(
-                                                                        tipoConvenio.cod
-                                                                    )
-                                                                }
-                                                                className="text-red-600 hover:text-red-700 dark:text-red-400"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </Can>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
+                                                            </Can>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )
                                     )}
                                 </tbody>
                             </table>
@@ -232,7 +242,7 @@ export default function TiposConvenioIndex({
                                             <Link
                                                 key={index}
                                                 href={link.url}
-                                                className={`px-3 py-1 rounded-md text-sm ${
+                                                className={`rounded-md px-3 py-1 text-sm ${
                                                     link.active
                                                         ? 'bg-primary text-primary-foreground'
                                                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -252,4 +262,3 @@ export default function TiposConvenioIndex({
         </AppLayout>
     );
 }
-

@@ -1,3 +1,5 @@
+import Can from '@/components/Can';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -5,33 +7,30 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { useHasPermission, useIsAdmin } from '@/hooks/usePermissions';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import {
-    Users,
-    Shield,
-    Key,
-    UserPlus,
-    ShieldPlus,
-    KeyRound,
-    ArrowRight,
-    ClipboardList,
-    UserCheck,
-    TrendingUp,
-    Calendar,
-    FileText,
-    BarChart3,
-    Users2,
-    TrendingDown,
-    ArrowUp,
     ArrowDown,
+    ArrowRight,
+    ArrowUp,
+    BarChart3,
+    Calendar,
+    ClipboardList,
+    FileText,
+    Key,
+    KeyRound,
     Minus,
+    Shield,
+    ShieldPlus,
+    TrendingUp,
+    UserCheck,
+    UserPlus,
+    Users,
+    Users2,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Can from '@/components/Can';
-import { useHasPermission, useIsAdmin } from '@/hooks/usePermissions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -153,8 +152,10 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
                 {/* Header */}
                 <div>
-                    <h1 className="text-2xl font-bold sm:text-3xl">Dashboard</h1>
-                    <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                    <h1 className="text-2xl font-bold sm:text-3xl">
+                        Dashboard
+                    </h1>
+                    <p className="mt-1 text-sm text-muted-foreground sm:text-base">
                         Visão geral e estatísticas do sistema.
                     </p>
                 </div>
@@ -221,14 +222,16 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                 <Can permission="dashboard.quick-actions">
                     {quickActions.length > 0 && (
                         <div>
-                            <h2 className="text-lg font-semibold mb-4 sm:text-xl">Ações Rápidas</h2>
+                            <h2 className="mb-4 text-lg font-semibold sm:text-xl">
+                                Ações Rápidas
+                            </h2>
                             <div className="grid gap-4 md:grid-cols-3">
                                 {quickActions.map((action) => {
                                     const Icon = action.icon;
                                     return (
                                         <Card
                                             key={action.href}
-                                            className="hover:border-primary/50 transition-colors cursor-pointer"
+                                            className="cursor-pointer transition-colors hover:border-primary/50"
                                         >
                                             <Link href={action.href}>
                                                 <CardHeader>
@@ -258,7 +261,7 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                 <Can permission="dashboard.management-links">
                     {managementLinks.length > 0 && (
                         <div>
-                            <h2 className="text-lg font-semibold mb-4 sm:text-xl">
+                            <h2 className="mb-4 text-lg font-semibold sm:text-xl">
                                 Gerenciamento
                             </h2>
                             <div className="grid gap-4 md:grid-cols-3">
@@ -267,13 +270,15 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                     return (
                                         <Card
                                             key={link.href}
-                                            className="hover:border-primary/50 transition-colors"
+                                            className="transition-colors hover:border-primary/50"
                                         >
                                             <CardHeader>
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
                                                         <Icon className="h-5 w-5 text-muted-foreground" />
-                                                        <CardTitle>{link.title}</CardTitle>
+                                                        <CardTitle>
+                                                            {link.title}
+                                                        </CardTitle>
                                                     </div>
                                                     <span className="text-2xl font-bold text-muted-foreground">
                                                         {link.count}
@@ -283,8 +288,8 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                                     {link.title === 'Usuários'
                                                         ? 'Usuários cadastrados'
                                                         : link.title === 'Roles'
-                                                        ? 'Roles cadastradas'
-                                                        : 'Permissões cadastradas'}
+                                                          ? 'Roles cadastradas'
+                                                          : 'Permissões cadastradas'}
                                                 </CardDescription>
                                             </CardHeader>
                                             <CardContent>
@@ -309,210 +314,276 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
 
                 {/* Evolução de Questionários - Sempre visível para colaboradores */}
                 <div className="mb-6">
-                    <h2 className="text-xl font-semibold mb-2">
+                    <h2 className="mb-2 text-xl font-semibold">
                         Evolução de Questionários
                     </h2>
-                    <p className="text-muted-foreground mb-4 text-sm">
+                    <p className="mb-4 text-sm text-muted-foreground">
                         Acompanhe a evolução dos questionários respondidos
                     </p>
                     <div className="grid gap-4 md:grid-cols-3">
-                                {/* Questionários Hoje */}
-                                <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium">
-                                            Questionários Hoje
-                                        </CardTitle>
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {researchStats?.questionariosHoje ?? 0}
-                                        </div>
-                                        {researchStats?.questionariosMesmoDiaAnoPassado !== undefined && (
-                                            <div className="mt-2 flex items-center gap-1 text-xs">
-                                                {(() => {
-                                                    const atual = researchStats.questionariosHoje ?? 0;
-                                                    const anoPassado = researchStats.questionariosMesmoDiaAnoPassado ?? 0;
-                                                    const diferenca = atual - anoPassado;
-                                                    const percentual = anoPassado > 0
-                                                        ? Math.round((diferenca / anoPassado) * 100)
-                                                        : atual > 0 ? 100 : 0;
+                        {/* Questionários Hoje */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">
+                                    Questionários Hoje
+                                </CardTitle>
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">
+                                    {researchStats?.questionariosHoje ?? 0}
+                                </div>
+                                {researchStats?.questionariosMesmoDiaAnoPassado !==
+                                    undefined && (
+                                    <div className="mt-2 flex items-center gap-1 text-xs">
+                                        {(() => {
+                                            const atual =
+                                                researchStats.questionariosHoje ??
+                                                0;
+                                            const anoPassado =
+                                                researchStats.questionariosMesmoDiaAnoPassado ??
+                                                0;
+                                            const diferenca =
+                                                atual - anoPassado;
+                                            const percentual =
+                                                anoPassado > 0
+                                                    ? Math.round(
+                                                          (diferenca /
+                                                              anoPassado) *
+                                                              100,
+                                                      )
+                                                    : atual > 0
+                                                      ? 100
+                                                      : 0;
 
-                                                    if (diferenca > 0) {
-                                                        return (
-                                                            <>
-                                                                <ArrowUp className="h-3 w-3 text-green-500" />
-                                                                <span className="text-green-500 font-semibold">
-                                                                    +{diferenca} ({percentual}%)
-                                                                </span>
-                                                                <span className="text-muted-foreground">
-                                                                    vs mesmo dia ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    } else if (diferenca < 0) {
-                                                        return (
-                                                            <>
-                                                                <ArrowDown className="h-3 w-3 text-red-500" />
-                                                                <span className="text-red-500 font-semibold">
-                                                                    {diferenca} ({Math.abs(percentual)}%)
-                                                                </span>
-                                                                <span className="text-muted-foreground">
-                                                                    vs mesmo dia ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    } else {
-                                                        return (
-                                                            <>
-                                                                <Minus className="h-3 w-3 text-muted-foreground" />
-                                                                <span className="text-muted-foreground">
-                                                                    Sem alteração vs mesmo dia ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    }
-                                                })()}
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                            if (diferenca > 0) {
+                                                return (
+                                                    <>
+                                                        <ArrowUp className="h-3 w-3 text-green-500" />
+                                                        <span className="font-semibold text-green-500">
+                                                            +{diferenca} (
+                                                            {percentual}%)
+                                                        </span>
+                                                        <span className="text-muted-foreground">
+                                                            vs mesmo dia ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            } else if (diferenca < 0) {
+                                                return (
+                                                    <>
+                                                        <ArrowDown className="h-3 w-3 text-red-500" />
+                                                        <span className="font-semibold text-red-500">
+                                                            {diferenca} (
+                                                            {Math.abs(
+                                                                percentual,
+                                                            )}
+                                                            %)
+                                                        </span>
+                                                        <span className="text-muted-foreground">
+                                                            vs mesmo dia ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            } else {
+                                                return (
+                                                    <>
+                                                        <Minus className="h-3 w-3 text-muted-foreground" />
+                                                        <span className="text-muted-foreground">
+                                                            Sem alteração vs
+                                                            mesmo dia ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            }
+                                        })()}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                                {/* Questionários Esta Semana */}
-                                <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium">
-                                            Questionários Esta Semana
-                                        </CardTitle>
-                                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {researchStats?.questionariosSemana ?? 0}
-                                        </div>
-                                        {researchStats?.questionariosMesmaSemanaAnoPassado !== undefined && (
-                                            <div className="mt-2 flex items-center gap-1 text-xs">
-                                                {(() => {
-                                                    const atual = researchStats.questionariosSemana ?? 0;
-                                                    const anoPassado = researchStats.questionariosMesmaSemanaAnoPassado ?? 0;
-                                                    const diferenca = atual - anoPassado;
-                                                    const percentual = anoPassado > 0
-                                                        ? Math.round((diferenca / anoPassado) * 100)
-                                                        : atual > 0 ? 100 : 0;
+                        {/* Questionários Esta Semana */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">
+                                    Questionários Esta Semana
+                                </CardTitle>
+                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">
+                                    {researchStats?.questionariosSemana ?? 0}
+                                </div>
+                                {researchStats?.questionariosMesmaSemanaAnoPassado !==
+                                    undefined && (
+                                    <div className="mt-2 flex items-center gap-1 text-xs">
+                                        {(() => {
+                                            const atual =
+                                                researchStats.questionariosSemana ??
+                                                0;
+                                            const anoPassado =
+                                                researchStats.questionariosMesmaSemanaAnoPassado ??
+                                                0;
+                                            const diferenca =
+                                                atual - anoPassado;
+                                            const percentual =
+                                                anoPassado > 0
+                                                    ? Math.round(
+                                                          (diferenca /
+                                                              anoPassado) *
+                                                              100,
+                                                      )
+                                                    : atual > 0
+                                                      ? 100
+                                                      : 0;
 
-                                                    if (diferenca > 0) {
-                                                        return (
-                                                            <>
-                                                                <ArrowUp className="h-3 w-3 text-green-500" />
-                                                                <span className="text-green-500 font-semibold">
-                                                                    +{diferenca} ({percentual}%)
-                                                                </span>
-                                                                <span className="text-muted-foreground">
-                                                                    vs mesma semana ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    } else if (diferenca < 0) {
-                                                        return (
-                                                            <>
-                                                                <ArrowDown className="h-3 w-3 text-red-500" />
-                                                                <span className="text-red-500 font-semibold">
-                                                                    {diferenca} ({Math.abs(percentual)}%)
-                                                                </span>
-                                                                <span className="text-muted-foreground">
-                                                                    vs mesma semana ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    } else {
-                                                        return (
-                                                            <>
-                                                                <Minus className="h-3 w-3 text-muted-foreground" />
-                                                                <span className="text-muted-foreground">
-                                                                    Sem alteração vs mesma semana ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    }
-                                                })()}
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                            if (diferenca > 0) {
+                                                return (
+                                                    <>
+                                                        <ArrowUp className="h-3 w-3 text-green-500" />
+                                                        <span className="font-semibold text-green-500">
+                                                            +{diferenca} (
+                                                            {percentual}%)
+                                                        </span>
+                                                        <span className="text-muted-foreground">
+                                                            vs mesma semana ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            } else if (diferenca < 0) {
+                                                return (
+                                                    <>
+                                                        <ArrowDown className="h-3 w-3 text-red-500" />
+                                                        <span className="font-semibold text-red-500">
+                                                            {diferenca} (
+                                                            {Math.abs(
+                                                                percentual,
+                                                            )}
+                                                            %)
+                                                        </span>
+                                                        <span className="text-muted-foreground">
+                                                            vs mesma semana ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            } else {
+                                                return (
+                                                    <>
+                                                        <Minus className="h-3 w-3 text-muted-foreground" />
+                                                        <span className="text-muted-foreground">
+                                                            Sem alteração vs
+                                                            mesma semana ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            }
+                                        })()}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                                {/* Questionários Este Mês */}
-                                <Card>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium">
-                                            Questionários Este Mês
-                                        </CardTitle>
-                                        <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {researchStats?.questionariosMesAtual ?? 0}
-                                        </div>
-                                        {researchStats?.questionariosMesmoMesAnoPassado !== undefined && (
-                                            <div className="mt-2 flex items-center gap-1 text-xs">
-                                                {(() => {
-                                                    const atual = researchStats.questionariosMesAtual ?? 0;
-                                                    const anoPassado = researchStats.questionariosMesmoMesAnoPassado ?? 0;
-                                                    const diferenca = atual - anoPassado;
-                                                    const percentual = anoPassado > 0
-                                                        ? Math.round((diferenca / anoPassado) * 100)
-                                                        : atual > 0 ? 100 : 0;
+                        {/* Questionários Este Mês */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">
+                                    Questionários Este Mês
+                                </CardTitle>
+                                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">
+                                    {researchStats?.questionariosMesAtual ?? 0}
+                                </div>
+                                {researchStats?.questionariosMesmoMesAnoPassado !==
+                                    undefined && (
+                                    <div className="mt-2 flex items-center gap-1 text-xs">
+                                        {(() => {
+                                            const atual =
+                                                researchStats.questionariosMesAtual ??
+                                                0;
+                                            const anoPassado =
+                                                researchStats.questionariosMesmoMesAnoPassado ??
+                                                0;
+                                            const diferenca =
+                                                atual - anoPassado;
+                                            const percentual =
+                                                anoPassado > 0
+                                                    ? Math.round(
+                                                          (diferenca /
+                                                              anoPassado) *
+                                                              100,
+                                                      )
+                                                    : atual > 0
+                                                      ? 100
+                                                      : 0;
 
-                                                    if (diferenca > 0) {
-                                                        return (
-                                                            <>
-                                                                <ArrowUp className="h-3 w-3 text-green-500" />
-                                                                <span className="text-green-500 font-semibold">
-                                                                    +{diferenca} ({percentual}%)
-                                                                </span>
-                                                                <span className="text-muted-foreground">
-                                                                    vs mesmo mês ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    } else if (diferenca < 0) {
-                                                        return (
-                                                            <>
-                                                                <ArrowDown className="h-3 w-3 text-red-500" />
-                                                                <span className="text-red-500 font-semibold">
-                                                                    {diferenca} ({Math.abs(percentual)}%)
-                                                                </span>
-                                                                <span className="text-muted-foreground">
-                                                                    vs mesmo mês ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    } else {
-                                                        return (
-                                                            <>
-                                                                <Minus className="h-3 w-3 text-muted-foreground" />
-                                                                <span className="text-muted-foreground">
-                                                                    Sem alteração vs mesmo mês ano passado
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    }
-                                                })()}
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                            if (diferenca > 0) {
+                                                return (
+                                                    <>
+                                                        <ArrowUp className="h-3 w-3 text-green-500" />
+                                                        <span className="font-semibold text-green-500">
+                                                            +{diferenca} (
+                                                            {percentual}%)
+                                                        </span>
+                                                        <span className="text-muted-foreground">
+                                                            vs mesmo mês ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            } else if (diferenca < 0) {
+                                                return (
+                                                    <>
+                                                        <ArrowDown className="h-3 w-3 text-red-500" />
+                                                        <span className="font-semibold text-red-500">
+                                                            {diferenca} (
+                                                            {Math.abs(
+                                                                percentual,
+                                                            )}
+                                                            %)
+                                                        </span>
+                                                        <span className="text-muted-foreground">
+                                                            vs mesmo mês ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            } else {
+                                                return (
+                                                    <>
+                                                        <Minus className="h-3 w-3 text-muted-foreground" />
+                                                        <span className="text-muted-foreground">
+                                                            Sem alteração vs
+                                                            mesmo mês ano
+                                                            passado
+                                                        </span>
+                                                    </>
+                                                );
+                                            }
+                                        })()}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
 
                 {/* Métricas de Pesquisa */}
                 <Can permission="dashboard.research.metrics">
                     <div>
-                        <h2 className="text-xl font-semibold mb-4">
+                        <h2 className="mb-4 text-xl font-semibold">
                             Métricas de Pesquisa
                         </h2>
 
                         {/* Cards principais de métricas */}
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+                        <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium">
@@ -522,7 +593,8 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">
-                                        {researchStats?.totalQuestionarios ?? '—'}
+                                        {researchStats?.totalQuestionarios ??
+                                            '—'}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
                                         Questionários respondidos
@@ -559,7 +631,11 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                         {researchStats?.questionariosMes ?? '—'}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
-                                        Este mês ({new Date().toLocaleString('pt-BR', { month: 'long' })})
+                                        Este mês (
+                                        {new Date().toLocaleString('pt-BR', {
+                                            month: 'long',
+                                        })}
+                                        )
                                     </p>
                                 </CardContent>
                             </Card>
@@ -584,7 +660,7 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
 
                         {/* Cards secundários */}
                         <Can permission="dashboard.research.secondary">
-                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+                            <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium">
@@ -594,7 +670,8 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold">
-                                            {researchStats?.totalRespostas ?? '—'}
+                                            {researchStats?.totalRespostas ??
+                                                '—'}
                                         </div>
                                         <p className="text-xs text-muted-foreground">
                                             Respostas coletadas
@@ -628,7 +705,10 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                     </CardHeader>
                                     <CardContent>
                                         <Link href="/metricas">
-                                            <Button variant="outline" className="w-full">
+                                            <Button
+                                                variant="outline"
+                                                className="w-full"
+                                            >
                                                 Ver Métricas Detalhadas
                                                 <ArrowRight className="ml-2 h-4 w-4" />
                                             </Button>
@@ -644,9 +724,12 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                 {/* Top Setores */}
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Top 5 Setores Pesquisados</CardTitle>
+                                        <CardTitle>
+                                            Top 5 Setores Pesquisados
+                                        </CardTitle>
                                         <CardDescription>
-                                            Setores com mais questionários respondidos
+                                            Setores com mais questionários
+                                            respondidos
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
@@ -664,14 +747,16 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                                                     {index + 1}
                                                                 </span>
                                                                 <span className="text-sm font-medium">
-                                                                    {setor.setor}
+                                                                    {
+                                                                        setor.setor
+                                                                    }
                                                                 </span>
                                                             </div>
                                                             <span className="text-sm font-bold text-muted-foreground">
                                                                 {setor.total}
                                                             </span>
                                                         </div>
-                                                    )
+                                                    ),
                                                 )}
                                             </div>
                                         ) : (
@@ -685,14 +770,17 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                 {/* Distribuição por Tipo de Paciente */}
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Distribuição por Tipo</CardTitle>
+                                        <CardTitle>
+                                            Distribuição por Tipo
+                                        </CardTitle>
                                         <CardDescription>
                                             Pacientes vs Acompanhantes
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
                                         {researchStats?.tipoPaciente &&
-                                        researchStats.tipoPaciente.length > 0 ? (
+                                        researchStats.tipoPaciente.length >
+                                            0 ? (
                                             <div className="space-y-3">
                                                 {researchStats.tipoPaciente.map(
                                                     (tipo, index) => (
@@ -705,15 +793,15 @@ export default function Dashboard({ stats, researchStats }: DashboardProps) {
                                                                 'Paciente'
                                                                     ? '👤 Paciente'
                                                                     : tipo.tipo_paciente ===
-                                                                      'Acompanhante'
-                                                                    ? '👥 Acompanhante'
-                                                                    : tipo.tipo_paciente}
+                                                                        'Acompanhante'
+                                                                      ? '👥 Acompanhante'
+                                                                      : tipo.tipo_paciente}
                                                             </span>
                                                             <span className="text-sm font-bold text-muted-foreground">
                                                                 {tipo.total}
                                                             </span>
                                                         </div>
-                                                    )
+                                                    ),
                                                 )}
                                             </div>
                                         ) : (

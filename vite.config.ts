@@ -1,52 +1,26 @@
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import laravel from 'laravel-vite-plugin';
+import laravel, { refreshPaths } from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
-            ssr: 'resources/js/ssr.tsx',
-            refresh: true,
-        }),
-        react({
-            babel: {
-                // React Compiler desabilitado em produção (causa erro useMemoCache)
-                // plugins: ['babel-plugin-react-compiler'],
-            },
-        }),
-        tailwindcss(),
-        // wayfinder desabilitado - gerar manualmente antes do build
-        // wayfinder({
-        //     formVariants: true,
-        // }),
-    ],
-    esbuild: {
-        jsx: 'automatic',
-    },
-    build: {
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    'react-vendor': ['react', 'react-dom'],
-                },
-            },
-        },
-        commonjsOptions: {
-            transformMixedEsModules: true,
-        },
-    },
-    resolve: {
-        dedupe: ['react', 'react-dom'],
-    },
-    optimizeDeps: {
-        include: ['react', 'react-dom'],
-    },
-    server: {
-        host: '127.0.0.1', // Força IPv4 para evitar problemas com CSP e IPv6
-        port: 5173,
-        strictPort: false, // Permite usar próxima porta disponível se 5173 estiver ocupada
-    },
+    laravel({
+      input: ['resources/css/app.css', 'resources/js/app.tsx'],
+      ssr: 'resources/js/ssr.tsx',
+      refresh: [...refreshPaths, 'resources/js/**/**'],
+    }),
+    tailwindcss(),
+    wayfinder({
+      ...(process.env.SKIP_WAYFINDER === 'true' && {
+        command: 'echo "Skipping wayfinder generation"',
+      }),
+    }),
+    react({
+      babel: {
+        plugins: ['babel-plugin-react-compiler'],
+      },
+    }),
+  ],
 });

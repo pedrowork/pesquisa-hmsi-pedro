@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -14,6 +8,12 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -42,7 +42,10 @@ interface UsersCreateProps {
     isAdmin?: boolean;
 }
 
-export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps) {
+export default function UsersCreate({
+    roles,
+    isAdmin = false,
+}: UsersCreateProps) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -55,7 +58,10 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
     const handleRoleToggle = (roleId: number) => {
         const currentRoles = data.roles || [];
         if (currentRoles.includes(roleId)) {
-            setData('roles', currentRoles.filter((id) => id !== roleId));
+            setData(
+                'roles',
+                currentRoles.filter((id) => id !== roleId),
+            );
         } else {
             setData('roles', [...currentRoles, roleId]);
         }
@@ -80,7 +86,7 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold">Novo Usuário</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Preencha os dados para criar um novo usuário
                         </p>
                     </div>
@@ -105,7 +111,9 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
                                     type="text"
                                     required
                                     value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
                                     autoComplete="name"
                                     placeholder="Nome completo"
                                 />
@@ -114,7 +122,8 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
 
                             <div className="grid gap-2">
                                 <Label htmlFor="email">
-                                    Email <span className="text-red-500">*</span>
+                                    Email{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="email"
@@ -122,7 +131,9 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
                                     type="email"
                                     required
                                     value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('email', e.target.value)
+                                    }
                                     autoComplete="username"
                                     placeholder="email@exemplo.com"
                                 />
@@ -131,7 +142,8 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password">
-                                    Senha <span className="text-red-500">*</span>
+                                    Senha{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     id="password"
@@ -139,7 +151,9 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
                                     type="password"
                                     required
                                     value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('password', e.target.value)
+                                    }
                                     autoComplete="new-password"
                                     placeholder="Mínimo 8 caracteres"
                                 />
@@ -158,7 +172,10 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
                                     required
                                     value={data.password_confirmation}
                                     onChange={(e) =>
-                                        setData('password_confirmation', e.target.value)
+                                        setData(
+                                            'password_confirmation',
+                                            e.target.value,
+                                        )
                                     }
                                     autoComplete="new-password"
                                     placeholder="Digite a senha novamente"
@@ -170,15 +187,18 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
 
                             <div className="grid gap-2">
                                 <Label htmlFor="status">
-                                    Status <span className="text-red-500">*</span>
+                                    Status{' '}
+                                    <span className="text-red-500">*</span>
                                 </Label>
                                 <select
                                     id="status"
                                     name="status"
                                     required
                                     value={data.status}
-                                    onChange={(e) => setData('status', e.target.value)}
-                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    onChange={(e) =>
+                                        setData('status', e.target.value)
+                                    }
+                                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <option value="1">Ativo</option>
                                     <option value="0">Inativo</option>
@@ -189,19 +209,24 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
                             <div className="grid gap-2">
                                 <Label>Roles (Grupos)</Label>
                                 <p className="text-xs text-muted-foreground">
-                                    Selecione as roles que este usuário terá. As permissões das roles serão aplicadas automaticamente.
+                                    Selecione as roles que este usuário terá. As
+                                    permissões das roles serão aplicadas
+                                    automaticamente.
                                 </p>
-                                <div className="rounded-lg border border-input p-4 max-h-64 overflow-y-auto">
+                                <div className="max-h-64 overflow-y-auto rounded-lg border border-input p-4">
                                     {roles.length === 0 ? (
                                         <p className="text-sm text-muted-foreground">
-                                            Nenhuma role cadastrada. Crie roles primeiro.
+                                            Nenhuma role cadastrada. Crie roles
+                                            primeiro.
                                         </p>
                                     ) : (
                                         <div className="space-y-2">
                                             {roles.map((role) => {
-                                                const isAdminRole = role.slug === 'admin';
-                                                const canSelectAdmin = isAdmin || !isAdminRole;
-                                                
+                                                const isAdminRole =
+                                                    role.slug === 'admin';
+                                                const canSelectAdmin =
+                                                    isAdmin || !isAdminRole;
+
                                                 return (
                                                     <div
                                                         key={role.id}
@@ -209,27 +234,41 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
                                                     >
                                                         <Checkbox
                                                             id={`role-${role.id}`}
-                                                            checked={(data.roles || []).includes(role.id)}
+                                                            checked={(
+                                                                data.roles || []
+                                                            ).includes(role.id)}
                                                             onCheckedChange={() =>
-                                                                canSelectAdmin && handleRoleToggle(role.id)
+                                                                canSelectAdmin &&
+                                                                handleRoleToggle(
+                                                                    role.id,
+                                                                )
                                                             }
-                                                            disabled={!canSelectAdmin}
+                                                            disabled={
+                                                                !canSelectAdmin
+                                                            }
                                                         />
                                                         <label
                                                             htmlFor={`role-${role.id}`}
-                                                            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canSelectAdmin ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                                            className={`text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${canSelectAdmin ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                                                         >
                                                             {role.name}
                                                             {!canSelectAdmin && (
                                                                 <span className="block text-xs text-yellow-600 dark:text-yellow-400">
-                                                                    Apenas administradores podem criar usuários com este perfil
+                                                                    Apenas
+                                                                    administradores
+                                                                    podem criar
+                                                                    usuários com
+                                                                    este perfil
                                                                 </span>
                                                             )}
-                                                            {role.description && canSelectAdmin && (
-                                                                <span className="block text-xs text-muted-foreground">
-                                                                    {role.description}
-                                                                </span>
-                                                            )}
+                                                            {role.description &&
+                                                                canSelectAdmin && (
+                                                                    <span className="block text-xs text-muted-foreground">
+                                                                        {
+                                                                            role.description
+                                                                        }
+                                                                    </span>
+                                                                )}
                                                         </label>
                                                     </div>
                                                 );
@@ -242,7 +281,9 @@ export default function UsersCreate({ roles, isAdmin = false }: UsersCreateProps
 
                             <div className="flex items-center gap-4">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Salvando...' : 'Criar Usuário'}
+                                    {processing
+                                        ? 'Salvando...'
+                                        : 'Criar Usuário'}
                                 </Button>
                                 <Link href="/users">
                                     <Button type="button" variant="outline">

@@ -1,7 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, XCircle, UserCheck } from 'lucide-react';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -10,9 +7,12 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { ArrowLeft, CheckCircle, UserCheck, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -82,9 +82,10 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
         e.preventDefault();
         if (!selectedUser || !action) return;
 
-        const url = action === 'approve' 
-            ? `/admin/users/${selectedUser}/approve`
-            : `/admin/users/${selectedUser}/reject`;
+        const url =
+            action === 'approve'
+                ? `/admin/users/${selectedUser}/approve`
+                : `/admin/users/${selectedUser}/reject`;
 
         post(url, {
             preserveScroll: true,
@@ -114,8 +115,10 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-3xl font-bold">Aprovações Pendentes</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h1 className="text-3xl font-bold">
+                            Aprovações Pendentes
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
                             Aprove ou rejeite usuários aguardando aprovação
                         </p>
                     </div>
@@ -124,7 +127,7 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                 {users.total === 0 ? (
                     <Card>
                         <CardContent className="py-12 text-center">
-                            <UserCheck className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                            <UserCheck className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                             <p className="text-muted-foreground">
                                 Nenhum usuário aguardando aprovação
                             </p>
@@ -136,7 +139,8 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                             <CardHeader>
                                 <CardTitle>Usuários Pendentes</CardTitle>
                                 <CardDescription>
-                                    Total: {users.total} usuário(s) aguardando aprovação
+                                    Total: {users.total} usuário(s) aguardando
+                                    aprovação
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -144,30 +148,40 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                                     {users.data.map((user) => (
                                         <div
                                             key={user.id}
-                                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                                            className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
                                         >
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3">
                                                     <div>
-                                                        <h3 className="font-semibold">{user.name}</h3>
+                                                        <h3 className="font-semibold">
+                                                            {user.name}
+                                                        </h3>
                                                         <p className="text-sm text-muted-foreground">
                                                             {user.email}
                                                         </p>
                                                         {user.department && (
-                                                            <p className="text-xs text-muted-foreground mt-1">
-                                                                {user.department}
-                                                                {user.position && ` • ${user.position}`}
+                                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                                {
+                                                                    user.department
+                                                                }
+                                                                {user.position &&
+                                                                    ` • ${user.position}`}
                                                             </p>
                                                         )}
-                                                        <p className="text-xs text-muted-foreground mt-1">
+                                                        <p className="mt-1 text-xs text-muted-foreground">
                                                             Criado em:{' '}
-                                                            {new Date(user.created_at).toLocaleDateString('pt-BR', {
-                                                                day: '2-digit',
-                                                                month: '2-digit',
-                                                                year: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                            })}
+                                                            {new Date(
+                                                                user.created_at,
+                                                            ).toLocaleDateString(
+                                                                'pt-BR',
+                                                                {
+                                                                    day: '2-digit',
+                                                                    month: '2-digit',
+                                                                    year: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                },
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -176,8 +190,14 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                                                 <Button
                                                     variant="default"
                                                     size="sm"
-                                                    onClick={() => handleApprove(user.id)}
-                                                    disabled={selectedUser === user.id && action === 'approve'}
+                                                    onClick={() =>
+                                                        handleApprove(user.id)
+                                                    }
+                                                    disabled={
+                                                        selectedUser ===
+                                                            user.id &&
+                                                        action === 'approve'
+                                                    }
                                                 >
                                                     <CheckCircle className="mr-2 h-4 w-4" />
                                                     Aprovar
@@ -185,8 +205,14 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                                                 <Button
                                                     variant="destructive"
                                                     size="sm"
-                                                    onClick={() => handleReject(user.id)}
-                                                    disabled={selectedUser === user.id && action === 'reject'}
+                                                    onClick={() =>
+                                                        handleReject(user.id)
+                                                    }
+                                                    disabled={
+                                                        selectedUser ===
+                                                            user.id &&
+                                                        action === 'reject'
+                                                    }
                                                 >
                                                     <XCircle className="mr-2 h-4 w-4" />
                                                     Rejeitar
@@ -200,7 +226,8 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                                 {users.last_page > 1 && (
                                     <div className="mt-6 flex items-center justify-between">
                                         <div className="text-sm text-muted-foreground">
-                                            Mostrando {users.data.length} de {users.total} usuário(s)
+                                            Mostrando {users.data.length} de{' '}
+                                            {users.total} usuário(s)
                                         </div>
                                         <div className="flex gap-2">
                                             {users.links.map((link, index) => (
@@ -208,18 +235,24 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                                                     key={index}
                                                     onClick={() => {
                                                         if (link.url) {
-                                                            router.get(link.url);
+                                                            router.get(
+                                                                link.url,
+                                                            );
                                                         }
                                                     }}
-                                                    disabled={!link.url || link.active}
-                                                    className={`px-3 py-1 text-sm rounded-md ${
+                                                    disabled={
+                                                        !link.url || link.active
+                                                    }
+                                                    className={`rounded-md px-3 py-1 text-sm ${
                                                         link.active
                                                             ? 'bg-primary text-primary-foreground'
                                                             : link.url
-                                                            ? 'bg-background border hover:bg-muted'
-                                                            : 'bg-muted text-muted-foreground cursor-not-allowed'
+                                                              ? 'border bg-background hover:bg-muted'
+                                                              : 'cursor-not-allowed bg-muted text-muted-foreground'
                                                     }`}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: link.label,
+                                                    }}
                                                 />
                                             ))}
                                         </div>
@@ -233,7 +266,9 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>
-                                        {action === 'approve' ? 'Aprovar Usuário' : 'Rejeitar Usuário'}
+                                        {action === 'approve'
+                                            ? 'Aprovar Usuário'
+                                            : 'Rejeitar Usuário'}
                                     </CardTitle>
                                     <CardDescription>
                                         {action === 'approve'
@@ -242,15 +277,25 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                    <form
+                                        onSubmit={handleSubmit}
+                                        className="space-y-4"
+                                    >
                                         <div className="grid gap-2">
                                             <Label htmlFor="approval_notes">
-                                                {action === 'approve' ? 'Observações (opcional)' : 'Motivo da Rejeição *'}
+                                                {action === 'approve'
+                                                    ? 'Observações (opcional)'
+                                                    : 'Motivo da Rejeição *'}
                                             </Label>
                                             <Textarea
                                                 id="approval_notes"
                                                 value={data.approval_notes}
-                                                onChange={(e) => setData('approval_notes', e.target.value)}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'approval_notes',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 placeholder={
                                                     action === 'approve'
                                                         ? 'Adicione observações sobre a aprovação...'
@@ -259,19 +304,29 @@ export default function PendingApproval({ users }: PendingApprovalProps) {
                                                 rows={4}
                                                 required={action === 'reject'}
                                             />
-                                            <InputError message={errors.approval_notes} />
+                                            <InputError
+                                                message={errors.approval_notes}
+                                            />
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Button
                                                 type="submit"
-                                                variant={action === 'approve' ? 'default' : 'destructive'}
-                                                disabled={processing || (action === 'reject' && !data.approval_notes.trim())}
+                                                variant={
+                                                    action === 'approve'
+                                                        ? 'default'
+                                                        : 'destructive'
+                                                }
+                                                disabled={
+                                                    processing ||
+                                                    (action === 'reject' &&
+                                                        !data.approval_notes.trim())
+                                                }
                                             >
                                                 {processing
                                                     ? 'Processando...'
                                                     : action === 'approve'
-                                                    ? 'Confirmar Aprovação'
-                                                    : 'Confirmar Rejeição'}
+                                                      ? 'Confirmar Aprovação'
+                                                      : 'Confirmar Rejeição'}
                                             </Button>
                                             <Button
                                                 type="button"

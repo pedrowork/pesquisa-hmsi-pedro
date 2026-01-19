@@ -1,6 +1,10 @@
-import { ReactNode } from 'react';
-import { useHasPermission, useIsAdmin, useHasAnyPermission } from '@/hooks/usePermissions';
+import {
+    useHasAnyPermission,
+    useHasPermission,
+    useIsAdmin,
+} from '@/hooks/usePermissions';
 import type { PermissionName } from '@/types/permissions';
+import { ReactNode } from 'react';
 
 interface CanProps {
     permission?: PermissionName;
@@ -70,4 +74,3 @@ export default function Can({
     // Se passou todas as verificações, renderiza children
     return <>{children}</>;
 }
-

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 interface PermissionError {
     open: boolean;
@@ -27,7 +27,9 @@ export function usePermissionError() {
                         setError({
                             open: true,
                             permission: errors.permission,
-                            message: errors.message || 'Você não tem permissão para acessar esta página.',
+                            message:
+                                errors.message ||
+                                'Você não tem permissão para acessar esta página.',
                         });
                         return;
                     }
@@ -46,7 +48,9 @@ export function usePermissionError() {
                 setError({
                     open: true,
                     permission: errorData.permission,
-                    message: errorData.message || 'Você não tem permissão para acessar esta página.',
+                    message:
+                        errorData.message ||
+                        'Você não tem permissão para acessar esta página.',
                 });
             }
         };
@@ -63,4 +67,3 @@ export function usePermissionError() {
         setError,
     };
 }
-

@@ -1,7 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -10,7 +7,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import Can from '@/components/Can';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -75,7 +75,7 @@ export default function RolesShow({
                     </Link>
                     <div className="flex-1">
                         <h1 className="text-3xl font-bold">{role.name}</h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="mt-1 text-muted-foreground">
                             Detalhes da role
                         </p>
                     </div>
@@ -109,16 +109,16 @@ export default function RolesShow({
                                 <label className="text-sm font-medium text-muted-foreground">
                                     Slug
                                 </label>
-                                <p className="text-sm font-mono">
-                                    {role.slug}
-                                </p>
+                                <p className="font-mono text-sm">{role.slug}</p>
                             </div>
                             {role.description && (
                                 <div>
                                     <label className="text-sm font-medium text-muted-foreground">
                                         Descrição
                                     </label>
-                                    <p className="text-sm">{role.description}</p>
+                                    <p className="text-sm">
+                                        {role.description}
+                                    </p>
                                 </div>
                             )}
                             <div>
@@ -160,7 +160,7 @@ export default function RolesShow({
                                 </label>
                                 <p className="text-sm">
                                     {new Date(role.created_at).toLocaleString(
-                                        'pt-BR'
+                                        'pt-BR',
                                     )}
                                 </p>
                             </div>
@@ -170,7 +170,7 @@ export default function RolesShow({
                                 </label>
                                 <p className="text-sm">
                                     {new Date(role.updated_at).toLocaleString(
-                                        'pt-BR'
+                                        'pt-BR',
                                     )}
                                 </p>
                             </div>
@@ -201,11 +201,11 @@ export default function RolesShow({
                                             <p className="text-sm font-semibold">
                                                 {permission.name}
                                             </p>
-                                            <p className="text-xs text-muted-foreground font-mono">
+                                            <p className="font-mono text-xs text-muted-foreground">
                                                 {permission.slug}
                                             </p>
                                             {permission.description && (
-                                                <p className="text-xs text-muted-foreground mt-1">
+                                                <p className="mt-1 text-xs text-muted-foreground">
                                                     {permission.description}
                                                 </p>
                                             )}
@@ -246,7 +246,7 @@ export default function RolesShow({
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span
-                                                className={`text-xs px-2 py-1 rounded ${
+                                                className={`rounded px-2 py-1 text-xs ${
                                                     user.status === 1
                                                         ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                                         : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
@@ -257,7 +257,9 @@ export default function RolesShow({
                                                     : 'Inativo'}
                                             </span>
                                             <Can permission="users.view">
-                                                <Link href={`/users/${user.id}`}>
+                                                <Link
+                                                    href={`/users/${user.id}`}
+                                                >
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
@@ -277,4 +279,3 @@ export default function RolesShow({
         </AppLayout>
     );
 }
-

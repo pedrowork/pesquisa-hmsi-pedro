@@ -21,15 +21,15 @@ export function NavManagement({ items = [] }: { items: NavItem[] }) {
     const currentUrl = page.url;
 
     // Verifica se algum item está ativo para deixar o grupo expandido por padrão
-    const hasActiveItem = items.some((item) =>
-        currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(resolveUrl(item.href)),
+    const hasActiveItem = items.some(
+        (item) =>
+            currentUrl &&
+            typeof currentUrl === 'string' &&
+            currentUrl.startsWith(resolveUrl(item.href)),
     );
 
     return (
-        <Collapsible
-            defaultOpen={hasActiveItem}
-            className="group/collapsible"
-        >
+        <Collapsible defaultOpen={hasActiveItem} className="group/collapsible">
             <SidebarGroup>
                 <SidebarGroupLabel asChild>
                     <CollapsibleTrigger>
@@ -41,9 +41,12 @@ export function NavManagement({ items = [] }: { items: NavItem[] }) {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {
-                                const isActive = currentUrl && typeof currentUrl === 'string' && currentUrl.startsWith(
-                                    resolveUrl(item.href),
-                                );
+                                const isActive =
+                                    currentUrl &&
+                                    typeof currentUrl === 'string' &&
+                                    currentUrl.startsWith(
+                                        resolveUrl(item.href),
+                                    );
                                 return (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton

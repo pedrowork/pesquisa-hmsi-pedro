@@ -1,11 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -14,7 +8,12 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -55,7 +54,7 @@ export default function RolesCreate({ permissions }: RolesCreateProps) {
         if (currentPermissions.includes(permissionId)) {
             setData(
                 'permissions',
-                currentPermissions.filter((id) => id !== permissionId)
+                currentPermissions.filter((id) => id !== permissionId),
             );
         } else {
             setData('permissions', [...currentPermissions, permissionId]);
@@ -82,8 +81,9 @@ export default function RolesCreate({ permissions }: RolesCreateProps) {
                     </Link>
                     <div>
                         <h1 className="text-3xl font-bold">Nova Role</h1>
-                        <p className="text-muted-foreground mt-1">
-                            Preencha os dados para criar uma nova role (grupo de usuários)
+                        <p className="mt-1 text-muted-foreground">
+                            Preencha os dados para criar uma nova role (grupo de
+                            usuários)
                         </p>
                     </div>
                 </div>
@@ -107,7 +107,9 @@ export default function RolesCreate({ permissions }: RolesCreateProps) {
                                     type="text"
                                     required
                                     value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
+                                    }
                                     placeholder="Ex: Administrador"
                                 />
                                 <InputError message={errors.name} />
@@ -123,26 +125,29 @@ export default function RolesCreate({ permissions }: RolesCreateProps) {
                                     type="text"
                                     required
                                     value={data.slug}
-                                    onChange={(e) => setData('slug', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('slug', e.target.value)
+                                    }
                                     placeholder="Ex: admin"
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Identificador único (sem espaços, use hífens ou underscores)
+                                    Identificador único (sem espaços, use hífens
+                                    ou underscores)
                                 </p>
                                 <InputError message={errors.slug} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="description">
-                                    Descrição
-                                </Label>
+                                <Label htmlFor="description">Descrição</Label>
                                 <textarea
                                     id="description"
                                     name="description"
                                     rows={3}
                                     value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    onChange={(e) =>
+                                        setData('description', e.target.value)
+                                    }
+                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                     placeholder="Descrição da role..."
                                 />
                                 <InputError message={errors.description} />
@@ -150,10 +155,11 @@ export default function RolesCreate({ permissions }: RolesCreateProps) {
 
                             <div className="grid gap-2">
                                 <Label>Permissões</Label>
-                                <div className="rounded-lg border border-input p-4 max-h-64 overflow-y-auto">
+                                <div className="max-h-64 overflow-y-auto rounded-lg border border-input p-4">
                                     {permissions.length === 0 ? (
                                         <p className="text-sm text-muted-foreground">
-                                            Nenhuma permissão cadastrada. Crie permissões primeiro.
+                                            Nenhuma permissão cadastrada. Crie
+                                            permissões primeiro.
                                         </p>
                                     ) : (
                                         <div className="space-y-2">
@@ -164,19 +170,28 @@ export default function RolesCreate({ permissions }: RolesCreateProps) {
                                                 >
                                                     <Checkbox
                                                         id={`permission-${permission.id}`}
-                                                        checked={(data.permissions || []).includes(permission.id)}
+                                                        checked={(
+                                                            data.permissions ||
+                                                            []
+                                                        ).includes(
+                                                            permission.id,
+                                                        )}
                                                         onCheckedChange={() =>
-                                                            handlePermissionToggle(permission.id)
+                                                            handlePermissionToggle(
+                                                                permission.id,
+                                                            )
                                                         }
                                                     />
                                                     <label
                                                         htmlFor={`permission-${permission.id}`}
-                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                                        className="cursor-pointer text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                                     >
                                                         {permission.name}
                                                         {permission.description && (
                                                             <span className="block text-xs text-muted-foreground">
-                                                                {permission.description}
+                                                                {
+                                                                    permission.description
+                                                                }
                                                             </span>
                                                         )}
                                                     </label>

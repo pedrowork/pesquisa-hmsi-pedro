@@ -85,13 +85,19 @@ export function useAppearance() {
 
     console.log('[DEBUG] useAppearance: Antes de useEffect');
     useEffect(() => {
-        console.log('[DEBUG] useAppearance: useEffect executado (dentro do callback)');
+        console.log(
+            '[DEBUG] useAppearance: useEffect executado (dentro do callback)',
+        );
         // Apenas executar no cliente - ler do localStorage após hidratação
         if (typeof window === 'undefined') {
-            console.log('[DEBUG] useAppearance: useEffect - SSR detectado, saindo');
+            console.log(
+                '[DEBUG] useAppearance: useEffect - SSR detectado, saindo',
+            );
             return;
         }
-        console.log('[DEBUG] useAppearance: useEffect - Cliente detectado, continuando');
+        console.log(
+            '[DEBUG] useAppearance: useEffect - Cliente detectado, continuando',
+        );
 
         const savedAppearance = localStorage.getItem(
             'appearance',
@@ -104,12 +110,18 @@ export function useAppearance() {
         // Setup system theme change listener
         const mediaQueryInstance = mediaQuery();
         if (mediaQueryInstance) {
-            mediaQueryInstance.addEventListener('change', handleSystemThemeChange);
+            mediaQueryInstance.addEventListener(
+                'change',
+                handleSystemThemeChange,
+            );
         }
 
         return () => {
             if (mediaQueryInstance) {
-                mediaQueryInstance.removeEventListener('change', handleSystemThemeChange);
+                mediaQueryInstance.removeEventListener(
+                    'change',
+                    handleSystemThemeChange,
+                );
             }
         };
     }, []);

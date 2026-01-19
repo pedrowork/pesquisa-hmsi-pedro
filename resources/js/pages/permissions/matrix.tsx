@@ -1,10 +1,5 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
-import { Search, Grid3x3, Users, Shield, Check, X } from 'lucide-react';
+import Can from '@/components/Can';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -12,16 +7,16 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from '@/components/ui/tabs';
-import React, { useState, FormEvent, useMemo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import Can from '@/components/Can';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useHasPermission } from '@/hooks/usePermissions';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { Check, Search, Shield, Users, X } from 'lucide-react';
+import React, { FormEvent, useMemo, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -83,30 +78,45 @@ export default function PermissionsMatrix({
     filters,
 }: MatrixProps) {
     const [search, setSearch] = useState(filters.search || '');
-    const [viewType, setViewType] = useState<'roles' | 'users'>(initialViewType);
+    const [viewType, setViewType] = useState<'roles' | 'users'>(
+        initialViewType,
+    );
     const [loading, setLoading] = useState<Record<string, boolean>>({});
     const canEdit = useHasPermission('permissions.edit');
 
     const handleSearch = (e: FormEvent) => {
         e.preventDefault();
-        router.get('/permissions', { matrix: 'true', view: viewType, search }, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            '/permissions',
+            { matrix: 'true', view: viewType, search },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
-    const handleToggleRolePermission = async (roleId: number, permissionId: number) => {
+    const handleToggleRolePermission = async (
+        roleId: number,
+        permissionId: number,
+    ) => {
         const key = `role_${roleId}_${permissionId}`;
         setLoading({ ...loading, [key]: true });
 
         try {
-            const response = await fetch(`/permissions/roles/${roleId}/toggle/${permissionId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            const response = await fetch(
+                `/permissions/roles/${roleId}/toggle/${permissionId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN':
+                            document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute('content') || '',
+                    },
                 },
-            });
+            );
 
             if (response.ok) {
                 const data = await response.json();
@@ -124,18 +134,27 @@ export default function PermissionsMatrix({
         }
     };
 
-    const handleToggleUserPermission = async (userId: number, permissionId: number) => {
+    const handleToggleUserPermission = async (
+        userId: number,
+        permissionId: number,
+    ) => {
         const key = `user_${userId}_${permissionId}`;
         setLoading({ ...loading, [key]: true });
 
         try {
-            const response = await fetch(`/permissions/users/${userId}/toggle/${permissionId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            const response = await fetch(
+                `/permissions/users/${userId}/toggle/${permissionId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN':
+                            document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute('content') || '',
+                    },
                 },
-            });
+            );
 
             if (response.ok) {
                 const data = await response.json();
@@ -153,39 +172,49 @@ export default function PermissionsMatrix({
         }
     };
 
-    const hasRolePermission = (roleId: number, permissionId: number): boolean => {
+    const hasRolePermission = (
+        roleId: number,
+        permissionId: number,
+    ): boolean => {
         return rolePermissions[roleId]?.includes(permissionId) || false;
     };
 
-    const hasUserPermission = (userId: number, permissionId: number): boolean => {
+    const hasUserPermission = (
+        userId: number,
+        permissionId: number,
+    ): boolean => {
         return userPermissions[userId]?.includes(permissionId) || false;
     };
 
     const filteredPermissions = useMemo(() => {
         if (!search) return permissions;
         const lowerSearch = search.toLowerCase();
-        return permissions.filter(p => 
-            p.name.toLowerCase().includes(lowerSearch) ||
-            p.slug.toLowerCase().includes(lowerSearch) ||
-            (p.description && p.description.toLowerCase().includes(lowerSearch))
+        return permissions.filter(
+            (p) =>
+                p.name.toLowerCase().includes(lowerSearch) ||
+                p.slug.toLowerCase().includes(lowerSearch) ||
+                (p.description &&
+                    p.description.toLowerCase().includes(lowerSearch)),
         );
     }, [permissions, search]);
 
     const filteredRoles = useMemo(() => {
         if (!search) return roles;
         const lowerSearch = search.toLowerCase();
-        return roles.filter(r => 
-            r.name.toLowerCase().includes(lowerSearch) ||
-            r.slug.toLowerCase().includes(lowerSearch)
+        return roles.filter(
+            (r) =>
+                r.name.toLowerCase().includes(lowerSearch) ||
+                r.slug.toLowerCase().includes(lowerSearch),
         );
     }, [roles, search]);
 
     const filteredUsers = useMemo(() => {
         if (!search) return users;
         const lowerSearch = search.toLowerCase();
-        return users.filter(u => 
-            u.name.toLowerCase().includes(lowerSearch) ||
-            u.email.toLowerCase().includes(lowerSearch)
+        return users.filter(
+            (u) =>
+                u.name.toLowerCase().includes(lowerSearch) ||
+                u.email.toLowerCase().includes(lowerSearch),
         );
     }, [users, search]);
 
@@ -195,9 +224,12 @@ export default function PermissionsMatrix({
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Matriz de Permissões</h1>
-                        <p className="text-muted-foreground mt-1">
-                            Gerencie permissões por role ou por usuário de forma visual e dinâmica
+                        <h1 className="text-3xl font-bold">
+                            Matriz de Permissões
+                        </h1>
+                        <p className="mt-1 text-muted-foreground">
+                            Gerencie permissões por role ou por usuário de forma
+                            visual e dinâmica
                         </p>
                     </div>
                     <Button
@@ -212,7 +244,9 @@ export default function PermissionsMatrix({
                 <Card>
                     <CardHeader>
                         <CardTitle>Filtros</CardTitle>
-                        <CardDescription>Busque permissões, roles ou usuários</CardDescription>
+                        <CardDescription>
+                            Busque permissões, roles ou usuários
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSearch} className="flex gap-4">
@@ -241,20 +275,26 @@ export default function PermissionsMatrix({
                     <CardHeader>
                         <CardTitle>Matriz de Permissões</CardTitle>
                         <CardDescription>
-                            {viewType === 'roles' 
+                            {viewType === 'roles'
                                 ? `${filteredRoles.length} role(s) × ${filteredPermissions.length} permissão(ões)`
-                                : `${filteredUsers.length} usuário(s) × ${filteredPermissions.length} permissão(ões)`
-                            }
+                                : `${filteredUsers.length} usuário(s) × ${filteredPermissions.length} permissão(ões)`}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Tabs value={viewType} onValueChange={(value) => {
-                            setViewType(value as 'roles' | 'users');
-                            router.get('/permissions', { matrix: 'true', view: value, search }, {
-                                preserveState: true,
-                                replace: true,
-                            });
-                        }}>
+                        <Tabs
+                            value={viewType}
+                            onValueChange={(value) => {
+                                setViewType(value as 'roles' | 'users');
+                                router.get(
+                                    '/permissions',
+                                    { matrix: 'true', view: value, search },
+                                    {
+                                        preserveState: true,
+                                        replace: true,
+                                    },
+                                );
+                            }}
+                        >
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="roles">
                                     <Shield className="mr-2 h-4 w-4" />
@@ -270,103 +310,179 @@ export default function PermissionsMatrix({
                                 <Can permission="permissions.edit">
                                     <div className="overflow-x-auto">
                                         <div className="inline-block min-w-full align-middle">
-                                            <div className="overflow-hidden border rounded-lg">
+                                            <div className="overflow-hidden rounded-lg border">
                                                 <table className="min-w-full divide-y divide-border">
                                                     <thead className="bg-muted">
                                                         <tr>
-                                                            <th className="sticky left-0 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold min-w-[250px]">
+                                                            <th className="sticky left-0 z-10 min-w-[250px] bg-muted px-4 py-3 text-left text-sm font-semibold">
                                                                 Permissão
                                                             </th>
-                                                            {filteredRoles.map((role) => (
-                                                                <th
-                                                                    key={role.id}
-                                                                    className="px-4 py-3 text-center text-xs font-medium text-muted-foreground min-w-[120px]"
-                                                                >
-                                                                    <div className="flex flex-col items-center gap-1">
-                                                                        <span className="font-semibold">{role.name}</span>
-                                                                        <span className="text-xs text-muted-foreground">{role.slug}</span>
-                                                                    </div>
-                                                                </th>
-                                                            ))}
+                                                            {filteredRoles.map(
+                                                                (role) => (
+                                                                    <th
+                                                                        key={
+                                                                            role.id
+                                                                        }
+                                                                        className="min-w-[120px] px-4 py-3 text-center text-xs font-medium text-muted-foreground"
+                                                                    >
+                                                                        <div className="flex flex-col items-center gap-1">
+                                                                            <span className="font-semibold">
+                                                                                {
+                                                                                    role.name
+                                                                                }
+                                                                            </span>
+                                                                            <span className="text-xs text-muted-foreground">
+                                                                                {
+                                                                                    role.slug
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    </th>
+                                                                ),
+                                                            )}
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-border bg-background">
-                                                        {Object.entries(groupedPermissions).map(([context, contextPermissions]) => {
-                                                            const contextPerms = contextPermissions.filter(p => 
-                                                                filteredPermissions.some(fp => fp.id === p.id)
-                                                            );
-                                                            
-                                                            if (contextPerms.length === 0) return null;
+                                                        {Object.entries(
+                                                            groupedPermissions,
+                                                        ).map(
+                                                            ([
+                                                                context,
+                                                                contextPermissions,
+                                                            ]) => {
+                                                                const contextPerms =
+                                                                    contextPermissions.filter(
+                                                                        (p) =>
+                                                                            filteredPermissions.some(
+                                                                                (
+                                                                                    fp,
+                                                                                ) =>
+                                                                                    fp.id ===
+                                                                                    p.id,
+                                                                            ),
+                                                                    );
 
-                                                            return (
-                                                                <React.Fragment key={context}>
-                                                                    <tr className="bg-muted/50">
-                                                                        <td
-                                                                            colSpan={filteredRoles.length + 1}
-                                                                            className="px-4 py-2 text-sm font-semibold uppercase text-muted-foreground"
-                                                                        >
-                                                                            {context}
-                                                                        </td>
-                                                                    </tr>
-                                                                    {contextPerms.map((permission) => (
-                                                                        <tr
-                                                                            key={permission.id}
-                                                                            className="hover:bg-muted/30 transition-colors"
-                                                                        >
-                                                                            <td className="sticky left-0 z-10 bg-background px-4 py-3 text-sm">
-                                                                                <div className="flex flex-col">
-                                                                                    <span className="font-medium">{permission.name}</span>
-                                                                                    <span className="text-xs text-muted-foreground font-mono">
-                                                                                        {permission.slug}
-                                                                                    </span>
-                                                                                    {permission.description && (
-                                                                                        <span className="text-xs text-muted-foreground mt-1">
-                                                                                            {permission.description}
-                                                                                        </span>
-                                                                                    )}
-                                                                                </div>
+                                                                if (
+                                                                    contextPerms.length ===
+                                                                    0
+                                                                )
+                                                                    return null;
+
+                                                                return (
+                                                                    <React.Fragment
+                                                                        key={
+                                                                            context
+                                                                        }
+                                                                    >
+                                                                        <tr className="bg-muted/50">
+                                                                            <td
+                                                                                colSpan={
+                                                                                    filteredRoles.length +
+                                                                                    1
+                                                                                }
+                                                                                className="px-4 py-2 text-sm font-semibold text-muted-foreground uppercase"
+                                                                            >
+                                                                                {
+                                                                                    context
+                                                                                }
                                                                             </td>
-                                                                            {filteredRoles.map((role) => {
-                                                                                const hasPermission = hasRolePermission(role.id, permission.id);
-                                                                                const key = `role_${role.id}_${permission.id}`;
-                                                                                const isLoading = loading[key];
-
-                                                                                return (
-                                                                                    <td
-                                                                                        key={role.id}
-                                                                                        className="px-4 py-3 text-center"
-                                                                                    >
-                                                                                        <Can permission="permissions.edit">
-                                                                                            <div className="flex justify-center">
-                                                                                                <Checkbox
-                                                                                                    checked={hasPermission}
-                                                                                                    onCheckedChange={() => {
-                                                                                                        if (!isLoading) {
-                                                                                                            handleToggleRolePermission(role.id, permission.id);
-                                                                                                        }
-                                                                                                    }}
-                                                                                                    disabled={isLoading}
-                                                                                                    className="h-5 w-5"
-                                                                                                />
-                                                                                            </div>
-                                                                                        </Can>
-                                                                                        {!canEdit && (
-                                                                                            <div className="flex justify-center">
-                                                                                                {hasPermission ? (
-                                                                                                    <Check className="h-5 w-5 text-green-500" />
-                                                                                                ) : (
-                                                                                                    <X className="h-5 w-5 text-muted-foreground" />
-                                                                                                )}
-                                                                                            </div>
-                                                                                        )}
-                                                                                    </td>
-                                                                                );
-                                                                            })}
                                                                         </tr>
-                                                                    ))}
-                                                                </React.Fragment>
-                                                            );
-                                                        })}
+                                                                        {contextPerms.map(
+                                                                            (
+                                                                                permission,
+                                                                            ) => (
+                                                                                <tr
+                                                                                    key={
+                                                                                        permission.id
+                                                                                    }
+                                                                                    className="transition-colors hover:bg-muted/30"
+                                                                                >
+                                                                                    <td className="sticky left-0 z-10 bg-background px-4 py-3 text-sm">
+                                                                                        <div className="flex flex-col">
+                                                                                            <span className="font-medium">
+                                                                                                {
+                                                                                                    permission.name
+                                                                                                }
+                                                                                            </span>
+                                                                                            <span className="font-mono text-xs text-muted-foreground">
+                                                                                                {
+                                                                                                    permission.slug
+                                                                                                }
+                                                                                            </span>
+                                                                                            {permission.description && (
+                                                                                                <span className="mt-1 text-xs text-muted-foreground">
+                                                                                                    {
+                                                                                                        permission.description
+                                                                                                    }
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    {filteredRoles.map(
+                                                                                        (
+                                                                                            role,
+                                                                                        ) => {
+                                                                                            const hasPermission =
+                                                                                                hasRolePermission(
+                                                                                                    role.id,
+                                                                                                    permission.id,
+                                                                                                );
+                                                                                            const key = `role_${role.id}_${permission.id}`;
+                                                                                            const isLoading =
+                                                                                                loading[
+                                                                                                    key
+                                                                                                ];
+
+                                                                                            return (
+                                                                                                <td
+                                                                                                    key={
+                                                                                                        role.id
+                                                                                                    }
+                                                                                                    className="px-4 py-3 text-center"
+                                                                                                >
+                                                                                                    <Can permission="permissions.edit">
+                                                                                                        <div className="flex justify-center">
+                                                                                                            <Checkbox
+                                                                                                                checked={
+                                                                                                                    hasPermission
+                                                                                                                }
+                                                                                                                onCheckedChange={() => {
+                                                                                                                    if (
+                                                                                                                        !isLoading
+                                                                                                                    ) {
+                                                                                                                        handleToggleRolePermission(
+                                                                                                                            role.id,
+                                                                                                                            permission.id,
+                                                                                                                        );
+                                                                                                                    }
+                                                                                                                }}
+                                                                                                                disabled={
+                                                                                                                    isLoading
+                                                                                                                }
+                                                                                                                className="h-5 w-5"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                    </Can>
+                                                                                                    {!canEdit && (
+                                                                                                        <div className="flex justify-center">
+                                                                                                            {hasPermission ? (
+                                                                                                                <Check className="h-5 w-5 text-green-500" />
+                                                                                                            ) : (
+                                                                                                                <X className="h-5 w-5 text-muted-foreground" />
+                                                                                                            )}
+                                                                                                        </div>
+                                                                                                    )}
+                                                                                                </td>
+                                                                                            );
+                                                                                        },
+                                                                                    )}
+                                                                                </tr>
+                                                                            ),
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                );
+                                                            },
+                                                        )}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -374,8 +490,9 @@ export default function PermissionsMatrix({
                                     </div>
                                 </Can>
                                 {!canEdit && (
-                                    <div className="text-center py-8 text-muted-foreground">
-                                        Você não tem permissão para editar permissões
+                                    <div className="py-8 text-center text-muted-foreground">
+                                        Você não tem permissão para editar
+                                        permissões
                                     </div>
                                 )}
                             </TabsContent>
@@ -384,103 +501,179 @@ export default function PermissionsMatrix({
                                 <Can permission="permissions.edit">
                                     <div className="overflow-x-auto">
                                         <div className="inline-block min-w-full align-middle">
-                                            <div className="overflow-hidden border rounded-lg">
+                                            <div className="overflow-hidden rounded-lg border">
                                                 <table className="min-w-full divide-y divide-border">
                                                     <thead className="bg-muted">
                                                         <tr>
-                                                            <th className="sticky left-0 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold min-w-[250px]">
+                                                            <th className="sticky left-0 z-10 min-w-[250px] bg-muted px-4 py-3 text-left text-sm font-semibold">
                                                                 Permissão
                                                             </th>
-                                                            {filteredUsers.map((user) => (
-                                                                <th
-                                                                    key={user.id}
-                                                                    className="px-4 py-3 text-center text-xs font-medium text-muted-foreground min-w-[150px]"
-                                                                >
-                                                                    <div className="flex flex-col items-center gap-1">
-                                                                        <span className="font-semibold">{user.name}</span>
-                                                                        <span className="text-xs text-muted-foreground">{user.email}</span>
-                                                                    </div>
-                                                                </th>
-                                                            ))}
+                                                            {filteredUsers.map(
+                                                                (user) => (
+                                                                    <th
+                                                                        key={
+                                                                            user.id
+                                                                        }
+                                                                        className="min-w-[150px] px-4 py-3 text-center text-xs font-medium text-muted-foreground"
+                                                                    >
+                                                                        <div className="flex flex-col items-center gap-1">
+                                                                            <span className="font-semibold">
+                                                                                {
+                                                                                    user.name
+                                                                                }
+                                                                            </span>
+                                                                            <span className="text-xs text-muted-foreground">
+                                                                                {
+                                                                                    user.email
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    </th>
+                                                                ),
+                                                            )}
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-border bg-background">
-                                                        {Object.entries(groupedPermissions).map(([context, contextPermissions]) => {
-                                                            const contextPerms = contextPermissions.filter(p => 
-                                                                filteredPermissions.some(fp => fp.id === p.id)
-                                                            );
-                                                            
-                                                            if (contextPerms.length === 0) return null;
+                                                        {Object.entries(
+                                                            groupedPermissions,
+                                                        ).map(
+                                                            ([
+                                                                context,
+                                                                contextPermissions,
+                                                            ]) => {
+                                                                const contextPerms =
+                                                                    contextPermissions.filter(
+                                                                        (p) =>
+                                                                            filteredPermissions.some(
+                                                                                (
+                                                                                    fp,
+                                                                                ) =>
+                                                                                    fp.id ===
+                                                                                    p.id,
+                                                                            ),
+                                                                    );
 
-                                                            return (
-                                                                <React.Fragment key={context}>
-                                                                    <tr className="bg-muted/50">
-                                                                        <td
-                                                                            colSpan={filteredUsers.length + 1}
-                                                                            className="px-4 py-2 text-sm font-semibold uppercase text-muted-foreground"
-                                                                        >
-                                                                            {context}
-                                                                        </td>
-                                                                    </tr>
-                                                                    {contextPerms.map((permission) => (
-                                                                        <tr
-                                                                            key={permission.id}
-                                                                            className="hover:bg-muted/30 transition-colors"
-                                                                        >
-                                                                            <td className="sticky left-0 z-10 bg-background px-4 py-3 text-sm">
-                                                                                <div className="flex flex-col">
-                                                                                    <span className="font-medium">{permission.name}</span>
-                                                                                    <span className="text-xs text-muted-foreground font-mono">
-                                                                                        {permission.slug}
-                                                                                    </span>
-                                                                                    {permission.description && (
-                                                                                        <span className="text-xs text-muted-foreground mt-1">
-                                                                                            {permission.description}
-                                                                                        </span>
-                                                                                    )}
-                                                                                </div>
+                                                                if (
+                                                                    contextPerms.length ===
+                                                                    0
+                                                                )
+                                                                    return null;
+
+                                                                return (
+                                                                    <React.Fragment
+                                                                        key={
+                                                                            context
+                                                                        }
+                                                                    >
+                                                                        <tr className="bg-muted/50">
+                                                                            <td
+                                                                                colSpan={
+                                                                                    filteredUsers.length +
+                                                                                    1
+                                                                                }
+                                                                                className="px-4 py-2 text-sm font-semibold text-muted-foreground uppercase"
+                                                                            >
+                                                                                {
+                                                                                    context
+                                                                                }
                                                                             </td>
-                                                                            {filteredUsers.map((user) => {
-                                                                                const hasPermission = hasUserPermission(user.id, permission.id);
-                                                                                const key = `user_${user.id}_${permission.id}`;
-                                                                                const isLoading = loading[key];
-
-                                                                                return (
-                                                                                    <td
-                                                                                        key={user.id}
-                                                                                        className="px-4 py-3 text-center"
-                                                                                    >
-                                                                                        <Can permission="permissions.edit">
-                                                                                            <div className="flex justify-center">
-                                                                                                <Checkbox
-                                                                                                    checked={hasPermission}
-                                                                                                    onCheckedChange={() => {
-                                                                                                        if (!isLoading) {
-                                                                                                            handleToggleUserPermission(user.id, permission.id);
-                                                                                                        }
-                                                                                                    }}
-                                                                                                    disabled={isLoading}
-                                                                                                    className="h-5 w-5"
-                                                                                                />
-                                                                                            </div>
-                                                                                        </Can>
-                                                                                        {!canEdit && (
-                                                                                            <div className="flex justify-center">
-                                                                                                {hasPermission ? (
-                                                                                                    <Check className="h-5 w-5 text-green-500" />
-                                                                                                ) : (
-                                                                                                    <X className="h-5 w-5 text-muted-foreground" />
-                                                                                                )}
-                                                                                            </div>
-                                                                                        )}
-                                                                                    </td>
-                                                                                );
-                                                                            })}
                                                                         </tr>
-                                                                    ))}
-                                                                </React.Fragment>
-                                                            );
-                                                        })}
+                                                                        {contextPerms.map(
+                                                                            (
+                                                                                permission,
+                                                                            ) => (
+                                                                                <tr
+                                                                                    key={
+                                                                                        permission.id
+                                                                                    }
+                                                                                    className="transition-colors hover:bg-muted/30"
+                                                                                >
+                                                                                    <td className="sticky left-0 z-10 bg-background px-4 py-3 text-sm">
+                                                                                        <div className="flex flex-col">
+                                                                                            <span className="font-medium">
+                                                                                                {
+                                                                                                    permission.name
+                                                                                                }
+                                                                                            </span>
+                                                                                            <span className="font-mono text-xs text-muted-foreground">
+                                                                                                {
+                                                                                                    permission.slug
+                                                                                                }
+                                                                                            </span>
+                                                                                            {permission.description && (
+                                                                                                <span className="mt-1 text-xs text-muted-foreground">
+                                                                                                    {
+                                                                                                        permission.description
+                                                                                                    }
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    {filteredUsers.map(
+                                                                                        (
+                                                                                            user,
+                                                                                        ) => {
+                                                                                            const hasPermission =
+                                                                                                hasUserPermission(
+                                                                                                    user.id,
+                                                                                                    permission.id,
+                                                                                                );
+                                                                                            const key = `user_${user.id}_${permission.id}`;
+                                                                                            const isLoading =
+                                                                                                loading[
+                                                                                                    key
+                                                                                                ];
+
+                                                                                            return (
+                                                                                                <td
+                                                                                                    key={
+                                                                                                        user.id
+                                                                                                    }
+                                                                                                    className="px-4 py-3 text-center"
+                                                                                                >
+                                                                                                    <Can permission="permissions.edit">
+                                                                                                        <div className="flex justify-center">
+                                                                                                            <Checkbox
+                                                                                                                checked={
+                                                                                                                    hasPermission
+                                                                                                                }
+                                                                                                                onCheckedChange={() => {
+                                                                                                                    if (
+                                                                                                                        !isLoading
+                                                                                                                    ) {
+                                                                                                                        handleToggleUserPermission(
+                                                                                                                            user.id,
+                                                                                                                            permission.id,
+                                                                                                                        );
+                                                                                                                    }
+                                                                                                                }}
+                                                                                                                disabled={
+                                                                                                                    isLoading
+                                                                                                                }
+                                                                                                                className="h-5 w-5"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                    </Can>
+                                                                                                    {!canEdit && (
+                                                                                                        <div className="flex justify-center">
+                                                                                                            {hasPermission ? (
+                                                                                                                <Check className="h-5 w-5 text-green-500" />
+                                                                                                            ) : (
+                                                                                                                <X className="h-5 w-5 text-muted-foreground" />
+                                                                                                            )}
+                                                                                                        </div>
+                                                                                                    )}
+                                                                                                </td>
+                                                                                            );
+                                                                                        },
+                                                                                    )}
+                                                                                </tr>
+                                                                            ),
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                );
+                                                            },
+                                                        )}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -488,8 +681,9 @@ export default function PermissionsMatrix({
                                     </div>
                                 </Can>
                                 {!canEdit && (
-                                    <div className="text-center py-8 text-muted-foreground">
-                                        Você não tem permissão para editar permissões
+                                    <div className="py-8 text-center text-muted-foreground">
+                                        Você não tem permissão para editar
+                                        permissões
                                     </div>
                                 )}
                             </TabsContent>
@@ -500,4 +694,3 @@ export default function PermissionsMatrix({
         </AppLayout>
     );
 }
-
