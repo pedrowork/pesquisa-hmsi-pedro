@@ -38,7 +38,7 @@ class RoleController extends Controller
                 ->count();
         }
 
-        return Inertia::render('roles/index', [
+        return Inertia::render('app/roles/index', [
             'roles' => $roles,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -69,7 +69,7 @@ class RoleController extends Controller
             $groupedPermissions[$context][] = $permission;
         }
 
-        return Inertia::render('roles/create', [
+        return Inertia::render('app/roles/create', [
             'permissions' => $permissions,
             'groupedPermissions' => $groupedPermissions,
         ]);
@@ -148,7 +148,7 @@ class RoleController extends Controller
             ->get()
             ->toArray();
 
-        return Inertia::render('roles/show', [
+        return Inertia::render('app/roles/show', [
             'role' => $role,
             'permissions' => $rolePermissions,
             'users' => $users,
@@ -189,7 +189,7 @@ class RoleController extends Controller
             $groupedPermissions[$context][] = $permission;
         }
 
-        return Inertia::render('roles/edit', [
+        return Inertia::render('app/roles/edit', [
             'role' => $role,
             'permissions' => $permissions,
             'groupedPermissions' => $groupedPermissions,

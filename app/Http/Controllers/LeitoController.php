@@ -25,7 +25,7 @@ class LeitoController extends Controller
 
         $leitos = $query->orderBy('descricao')->paginate(10);
 
-        return Inertia::render('leitos/index', [
+        return Inertia::render('app/leitos/index', [
             'leitos' => $leitos,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -48,7 +48,7 @@ class LeitoController extends Controller
             abort(404);
         }
 
-        return Inertia::render('leitos/show', [
+        return Inertia::render('app/leitos/show', [
             'leito' => $leito,
         ]);
     }
@@ -60,7 +60,7 @@ class LeitoController extends Controller
     {
         $setores = DB::table('setor')->orderBy('descricao')->get();
 
-        return Inertia::render('leitos/create', [
+        return Inertia::render('app/leitos/create', [
             'setores' => $setores,
         ]);
     }
@@ -97,7 +97,7 @@ class LeitoController extends Controller
 
         $setores = DB::table('setor')->orderBy('descricao')->get();
 
-        return Inertia::render('leitos/edit', [
+        return Inertia::render('app/leitos/edit', [
             'leito' => $leito,
             'setores' => $setores,
         ]);

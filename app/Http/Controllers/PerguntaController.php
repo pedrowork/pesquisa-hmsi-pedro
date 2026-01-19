@@ -46,7 +46,7 @@ class PerguntaController extends Controller
             $canOrder = $user->hasPermission('perguntas.order');
         }
 
-        return Inertia::render('perguntas/index', [
+        return Inertia::render('app/perguntas/index', [
             'perguntas' => $perguntas,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -70,7 +70,7 @@ class PerguntaController extends Controller
             abort(404);
         }
 
-        return Inertia::render('perguntas/show', [
+        return Inertia::render('app/perguntas/show', [
             'pergunta' => $pergunta,
         ]);
     }
@@ -84,7 +84,7 @@ class PerguntaController extends Controller
             ->orderBy('descricao')
             ->get();
 
-        return Inertia::render('perguntas/create', [
+        return Inertia::render('app/perguntas/create', [
             'setoresPesquisa' => $setoresPesquisa,
         ]);
     }
@@ -131,7 +131,7 @@ class PerguntaController extends Controller
             ->orderBy('descricao')
             ->get();
 
-        return Inertia::render('perguntas/edit', [
+        return Inertia::render('app/perguntas/edit', [
             'pergunta' => $pergunta,
             'setoresPesquisa' => $setoresPesquisa,
         ]);

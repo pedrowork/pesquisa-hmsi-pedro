@@ -25,7 +25,7 @@ class TipoConvenioController extends Controller
 
         $tiposConvenio = $query->orderBy('tipo_descricao')->paginate(10);
 
-        return Inertia::render('tipos-convenio/index', [
+        return Inertia::render('app/tipos-convenio/index', [
             'tiposConvenio' => $tiposConvenio,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -44,7 +44,7 @@ class TipoConvenioController extends Controller
             abort(404);
         }
 
-        return Inertia::render('tipos-convenio/show', [
+        return Inertia::render('app/tipos-convenio/show', [
             'tipoConvenio' => $tipoConvenio,
         ]);
     }
@@ -54,7 +54,7 @@ class TipoConvenioController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('tipos-convenio/create');
+        return Inertia::render('app/tipos-convenio/create');
     }
 
     /**
@@ -85,7 +85,7 @@ class TipoConvenioController extends Controller
             abort(404);
         }
 
-        return Inertia::render('tipos-convenio/edit', [
+        return Inertia::render('app/tipos-convenio/edit', [
             'tipoConvenio' => $tipoConvenio,
         ]);
     }

@@ -25,7 +25,7 @@ class SetorPesquisaController extends Controller
 
         $setoresPesquisa = $query->orderBy('descricao')->paginate(10);
 
-        return Inertia::render('setores-pesquisa/index', [
+        return Inertia::render('app/setores-pesquisa/index', [
             'setoresPesquisa' => $setoresPesquisa,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -44,7 +44,7 @@ class SetorPesquisaController extends Controller
             abort(404);
         }
 
-        return Inertia::render('setores-pesquisa/show', [
+        return Inertia::render('app/setores-pesquisa/show', [
             'setorPesquisa' => $setorPesquisa,
         ]);
     }
@@ -54,7 +54,7 @@ class SetorPesquisaController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('setores-pesquisa/create');
+        return Inertia::render('app/setores-pesquisa/create');
     }
 
     /**
@@ -87,7 +87,7 @@ class SetorPesquisaController extends Controller
             abort(404);
         }
 
-        return Inertia::render('setores-pesquisa/edit', [
+        return Inertia::render('app/setores-pesquisa/edit', [
             'setorPesquisa' => $setorPesquisa,
         ]);
     }

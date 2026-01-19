@@ -25,7 +25,7 @@ class SatisfacaoController extends Controller
 
         $satisfacoes = $query->orderBy('descricao')->paginate(10);
 
-        return Inertia::render('satisfacao/index', [
+        return Inertia::render('app/satisfacao/index', [
             'satisfacoes' => $satisfacoes,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -44,7 +44,7 @@ class SatisfacaoController extends Controller
             abort(404);
         }
 
-        return Inertia::render('satisfacao/show', [
+        return Inertia::render('app/satisfacao/show', [
             'satisfacao' => $satisfacao,
         ]);
     }
@@ -54,7 +54,7 @@ class SatisfacaoController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('satisfacao/create');
+        return Inertia::render('app/satisfacao/create');
     }
 
     /**
@@ -87,7 +87,7 @@ class SatisfacaoController extends Controller
             abort(404);
         }
 
-        return Inertia::render('satisfacao/edit', [
+        return Inertia::render('app/satisfacao/edit', [
             'satisfacao' => $satisfacao,
         ]);
     }

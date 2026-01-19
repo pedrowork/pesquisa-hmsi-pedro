@@ -344,7 +344,7 @@ class MetricaController extends Controller
             $payload['temporal'] = $serie;
         }
 
-        return Inertia::render('metricas/index', $payload);
+        return Inertia::render('app/metricas/index', $payload);
     }
 }
 

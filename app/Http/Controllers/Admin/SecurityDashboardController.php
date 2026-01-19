@@ -32,7 +32,7 @@ class SecurityDashboardController extends Controller
             ->limit(20)
             ->get();
 
-        return Inertia::render('admin/security/dashboard', [
+        return Inertia::render('app/admin/security/dashboard', [
             'metrics' => $metrics,
             'recentAlerts' => $alerts,
             'days' => $days,
@@ -66,7 +66,7 @@ class SecurityDashboardController extends Controller
 
         $alerts = $query->paginate(50);
 
-        return Inertia::render('admin/security/alerts', [
+        return Inertia::render('app/admin/security/alerts', [
             'alerts' => $alerts,
             'filters' => $request->only(['severity', 'alert_type', 'resolved', 'user_id']),
         ]);

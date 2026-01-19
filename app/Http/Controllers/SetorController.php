@@ -25,7 +25,7 @@ class SetorController extends Controller
 
         $setores = $query->orderBy('descricao')->paginate(10);
 
-        return Inertia::render('setores/index', [
+        return Inertia::render('app/setores/index', [
             'setores' => $setores,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -44,7 +44,7 @@ class SetorController extends Controller
             abort(404);
         }
 
-        return Inertia::render('setores/show', [
+        return Inertia::render('app/setores/show', [
             'setor' => $setor,
         ]);
     }
@@ -54,7 +54,7 @@ class SetorController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('setores/create');
+        return Inertia::render('app/setores/create');
     }
 
     /**
@@ -85,7 +85,7 @@ class SetorController extends Controller
             abort(404);
         }
 
-        return Inertia::render('setores/edit', [
+        return Inertia::render('app/setores/edit', [
             'setor' => $setor,
         ]);
     }

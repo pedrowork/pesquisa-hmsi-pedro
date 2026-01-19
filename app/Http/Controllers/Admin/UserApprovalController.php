@@ -47,7 +47,7 @@ class UserApprovalController extends Controller
 
         $users = $query->paginate(20);
 
-        return Inertia::render('admin/users/pending-approval', [
+        return Inertia::render('app/admin/users/pending-approval', [
             'users' => $users,
         ]);
     }

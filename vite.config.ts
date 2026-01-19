@@ -16,6 +16,7 @@ export default defineConfig({
       ...(process.env.SKIP_WAYFINDER === 'true' && {
         command: 'echo "Skipping wayfinder generation"',
       }),
+      formVariants: true
     }),
     react({
       babel: {

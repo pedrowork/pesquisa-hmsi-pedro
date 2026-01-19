@@ -51,7 +51,7 @@ class QuestionarioController extends Controller
             ->orderBy('dados_do_paciente.nome')
             ->paginate(10);
 
-        return Inertia::render('questionarios/index', [
+        return Inertia::render('app/questionarios/index', [
             'questionarios' => $questionarios,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -113,7 +113,7 @@ class QuestionarioController extends Controller
             ->orderBy('descricao')
             ->get();
 
-        return Inertia::render('questionarios/create', [
+        return Inertia::render('app/questionarios/create', [
             'perguntas' => $perguntas->map(function ($pergunta) {
                 return [
                     'cod' => $pergunta->cod,
@@ -351,7 +351,7 @@ class QuestionarioController extends Controller
             ->orderBy('perguntas_descricao.descricao')
             ->get();
 
-        return Inertia::render('questionarios/show', [
+        return Inertia::render('app/questionarios/show', [
             'paciente' => $paciente,
             'respostas' => $respostas,
         ]);

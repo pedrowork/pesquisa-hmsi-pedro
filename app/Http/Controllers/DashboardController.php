@@ -41,7 +41,7 @@ class DashboardController extends Controller
             }
         }
 
-        return Inertia::render('Dashboard', [
+        return Inertia::render('app/dashboard', [
             // Dados ESSENCIAIS para o hook usePermissions
             'auth' => [
                 'user' => $user ? [

@@ -175,7 +175,7 @@ class UserController extends Controller
         $currentUser = $request->user();
         $canModifyFirstMaster = $firstMasterId && $currentUser && $currentUser->id === $firstMasterId;
 
-        return Inertia::render('users/index', [
+        return Inertia::render('app/users/index', [
             'users' => $users,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -200,7 +200,7 @@ class UserController extends Controller
         $currentUser = auth()->user();
         $isAdmin = $currentUser && $currentUser->isAdmin();
 
-        return Inertia::render('users/create', [
+        return Inertia::render('app/users/create', [
             'roles' => $roles,
             'isAdmin' => $isAdmin,
         ]);
@@ -319,7 +319,7 @@ class UserController extends Controller
             ->get()
             ->toArray();
 
-        return Inertia::render('users/show', [
+        return Inertia::render('app/users/show', [
             'user' => $user,
             'roles' => $userRoles,
             'directPermissions' => $userPermissions,
@@ -409,7 +409,7 @@ class UserController extends Controller
             $canModifyRoles = false;
         }
 
-        return Inertia::render('users/edit', [
+        return Inertia::render('app/users/edit', [
             'user' => $user,
             'permissions' => $allPermissions,
             'userPermissions' => $userPermissions,

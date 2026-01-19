@@ -43,7 +43,7 @@ class PermissionController extends Controller
                 ->count();
         }
 
-        return Inertia::render('permissions/index', [
+        return Inertia::render('app/permissions/index', [
             'permissions' => $permissions,
             'filters' => [
                 'search' => $request->search ?? '',
@@ -120,7 +120,7 @@ class PermissionController extends Controller
             $groupedPermissions[$context][] = $permission;
         }
 
-        return Inertia::render('permissions/matrix', [
+        return Inertia::render('app/permissions/matrix', [
             'permissions' => $permissions,
             'roles' => $roles,
             'users' => $users,
@@ -162,7 +162,7 @@ class PermissionController extends Controller
             ->get()
             ->toArray();
 
-        return Inertia::render('permissions/show', [
+        return Inertia::render('app/permissions/show', [
             'permission' => $permission,
             'roles' => $roles,
             'users' => $users,
@@ -174,7 +174,7 @@ class PermissionController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('permissions/create');
+        return Inertia::render('app/permissions/create');
     }
 
     /**
@@ -216,7 +216,7 @@ class PermissionController extends Controller
             abort(404);
         }
 
-        return Inertia::render('permissions/edit', [
+        return Inertia::render('app/permissions/edit', [
             'permission' => $permission,
         ]);
     }
