@@ -31,7 +31,7 @@ COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
 RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
 RUN (pnpm install --frozen-lockfile) || pnpm install
 COPY resources ./resources
-COPY vite.config.ts tsconfig.json postcss.config.js tailwind.config.js components.json ./
+COPY vite.config.ts tsconfig.json components.json ./
 COPY public ./public
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=wayfinder /app/resources/js/actions ./resources/js/actions
