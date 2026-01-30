@@ -15,6 +15,8 @@ FROM php:8.4-cli-bookworm AS wayfinder
 WORKDIR /app
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
+ARG APP_KEY=base64:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=
+ENV APP_KEY=${APP_KEY}
 RUN php artisan wayfinder:generate
 
 FROM node:20 AS assets
@@ -28,7 +30,7 @@ ENV VITE_REVERB_APP_KEY=${VITE_REVERB_APP_KEY} \
     VITE_REVERB_SCHEME=${VITE_REVERB_SCHEME}
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
-RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN (pnpm install --frozen-lockfile) || pnpm install
 COPY resources ./resources
 COPY vite.config.ts tsconfig.json components.json ./
