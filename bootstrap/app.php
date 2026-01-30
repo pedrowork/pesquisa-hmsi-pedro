@@ -1,5 +1,9 @@
 <?php
 
+// Suppress deprecation warnings for PHP 8.5 compatibility
+error_reporting(E_ALL & ~E_DEPRECATED);
+
+
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckSessionSecurity;
 use App\Http\Middleware\ForceHttps;

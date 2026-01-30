@@ -168,7 +168,7 @@ jobs:
         needs: build-and-push
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
-            DEPLOY_PATH: docker
+            DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/var/www/pesquisa' }}
 
         steps:
             - name: Tailscale
@@ -188,7 +188,9 @@ jobs:
                   port: ${{ secrets.SSH_PORT || 22 }}
                   script: |
                       cd ${{ env.DEPLOY_PATH }}
-                      make deploy folder=pesquisa
+                      docker compose pull
+                      docker compose up -d --remove-orphans
+                      docker image prune -f
 
     health-check:
         runs-on: ubuntu-latest

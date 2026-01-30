@@ -10,7 +10,7 @@ import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
 // Função para obter URL da rota de password (compatível com wayfinder)
-const editPassword = () => ({ url: '/settings/password' });
+const editPassword = () => ({ url: '/settings/password', method: 'get' as const });
 
 const sidebarNavItems: NavItem[] = [
     {
@@ -66,7 +66,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                     ),
                                 })}
                             >
-                                <Link href={item.href}>
+                                <Link href={resolveUrl(item.href)}>
                                     {item.icon && (
                                         <item.icon className="h-4 w-4" />
                                     )}

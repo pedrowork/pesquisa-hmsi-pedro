@@ -237,6 +237,8 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-pesquisa}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       TZ: America/Sao_Paulo
+    ports:
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -263,6 +265,8 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       TZ: America/Sao_Paulo
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped

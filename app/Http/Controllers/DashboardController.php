@@ -1,4 +1,3 @@
-<!-- app/Http/Controllers/DashboardController.php -->
 <?php
 
 namespace App\Http\Controllers;
@@ -28,7 +27,7 @@ class DashboardController extends Controller
             // $isAdmin = $user->hasRole('admin');
 
             // Método 2: Se usar seu próprio sistema (com o trait HasPermissions)
-            $permissions = $user->getAllPermissions(); // Verifique se retorna array de strings
+            $permissions = $user->getUserPermissions(); // Verifique se retorna array de strings
             $isAdmin = $user->hasRole('admin') || $user->isAdmin(); // Ajuste conforme sua lógica
 
             // Método 3: Fallback - carregar via query se necessário

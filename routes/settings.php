@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
         ->name('settings.password.update');
 
     Route::get('settings/appearance', function () {
-        return Inertia::render('settings/appearance');
+        return Inertia::render('app/settings/appearance');
     })->name('appearance.edit');
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
