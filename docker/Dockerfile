@@ -40,7 +40,7 @@ COPY --from=wayfinder /app/resources/js/actions ./resources/js/actions
 COPY --from=wayfinder /app/resources/js/routes ./resources/js/routes
 COPY --from=wayfinder /app/resources/js/wayfinder ./resources/js/wayfinder
 ENV SKIP_WAYFINDER=true
-RUN pnpm build
+RUN pnpm run build:ssr
 
 FROM php:8.4-fpm-bookworm AS app
 RUN apt-get update && apt-get install -y --no-install-recommends \
