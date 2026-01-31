@@ -75,7 +75,6 @@ services:
         condition: service_healthy
     networks:
       - default
-      - infra-network
     healthcheck:
       test: ["CMD-SHELL", "pidof php-fpm > /dev/null || exit 1"]
       interval: 30s
@@ -97,11 +96,8 @@ services:
     depends_on:
       - app
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8081:80"
     networks:
       - default
-      - infra-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000", "||", "exit", "1"]
       interval: 30s
@@ -151,7 +147,6 @@ services:
         condition: service_healthy
     networks:
       - default
-      - infra-network
     healthcheck:
       test: ["CMD", "ps", "aux", "|", "grep", "-q", "horizon"]
       interval: 30s
@@ -177,7 +172,6 @@ services:
         condition: service_healthy
     networks:
       - default
-      - infra-network
     healthcheck:
       test: ["CMD", "ps", "aux", "|", "grep", "-q", "schedule:work"]
       interval: 30s
@@ -204,7 +198,6 @@ services:
         condition: service_healthy
     networks:
       - default
-      - infra-network
     healthcheck:
       test:
         ["CMD-SHELL", 'php -r "exit((int)!@fsockopen(''localhost'', 8080));"']
@@ -290,7 +283,4 @@ volumes:
     name: pesquisa_postgres_data
   redis_data: {}
 
-networks:
-  infra-network:
-    external: true
-    name: infra-network
+
