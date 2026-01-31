@@ -97,6 +97,8 @@ services:
     depends_on:
       - app
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:80"
     networks:
       - default
       - infra-network
