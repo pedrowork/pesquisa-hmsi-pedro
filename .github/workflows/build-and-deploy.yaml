@@ -168,7 +168,7 @@ jobs:
         needs: build-and-push
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
-            DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/var/www/pesquisa' }}
+            DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home/deploy/projetos/pesquisa-hmsi-pedro' }}
 
         steps:
 
