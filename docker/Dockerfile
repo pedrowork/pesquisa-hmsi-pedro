@@ -16,7 +16,8 @@ WORKDIR /app
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
 ARG APP_KEY=base64:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=
-ENV APP_KEY=${APP_KEY}
+RUN echo "APP_ENV=production" > .env \
+    && echo "APP_KEY=$APP_KEY" >> .env
 RUN php artisan wayfinder:generate
 
 FROM node:20 AS assets
